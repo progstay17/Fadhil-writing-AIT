@@ -14,7 +14,8 @@ import {
   PlusCircle,
   Cpu,
   Edit3,
-  Wand2
+  Wand2,
+  Hash
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -31,6 +32,8 @@ export default function Home() {
   // Create Content States
   const [contentLang, setContentLang] = useState("ID");
   const [model, setModel] = useState("gemini-2.5-flash");
+  const [minWords, setMinWords] = useState(600);
+  const [maxWords, setMaxWords] = useState(1200);
   const [fungsi, setFungsi] = useState("");
   const [kataKunci, setKataKunci] = useState("");
   const [lokasi, setLokasi] = useState("");
@@ -137,7 +140,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
 
     try {
       const body = activeTab === "create"
-        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, contentLang, model }
+        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, minWords, maxWords }
         : { type: "fix", sentence: sentenceInput, rewriteType, model };
 
       const res = await fetch("/api/generate", {
@@ -179,7 +182,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType]);
+  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType, minWords, maxWords]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -313,6 +316,31 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             <div className="space-y-4">
               {activeTab === "create" ? (
                 <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center">
+                        <Hash size={10} className="mr-1" /> {t("fields.min_words")}
+                      </label>
+                      <input
+                        type="number"
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={minWords}
+                        onChange={(e) => setMinWords(parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center">
+                        <Hash size={10} className="mr-1" /> {t("fields.max_words")}
+                      </label>
+                      <input
+                        type="number"
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={maxWords}
+                        onChange={(e) => setMaxWords(parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.functions")}</label>
                     <textarea
@@ -478,7 +506,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                   <div className="flex items-center">
                     <div className={cn(
                       "w-2.5 h-2.5 rounded-full mr-1.5",
-                      articleOutput.split(/\s+/).filter(w => w.length > 0).length >= 800 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
+                      articleOutput.split(/\s+/).filter(w => w.length > 0).length >= minWords ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
                     )} />
                     <span className="text-[10px] text-gray-500 font-medium">{t("output.word_count")}</span>
                   </div>

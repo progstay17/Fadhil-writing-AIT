@@ -22,7 +22,9 @@
     "red_label": "红色",
     "red_desc": "高等: 大幅简化，6-7 级水平。",
     "content_lang": "内容语言:",
-    "model_label": "模型:"
+    "model_label": "模型:",
+    "min_words": "最小字数",
+    "max_words": "最大字数"
   },
   "buttons": {
     "generate": "生成",

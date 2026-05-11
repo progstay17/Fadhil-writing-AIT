@@ -22,7 +22,9 @@
     "red_label": "Red",
     "red_desc": "High: Drastic simplification, Grade 6-7.",
     "content_lang": "Content:",
-    "model_label": "Model:"
+    "model_label": "Model:",
+    "min_words": "Min Words",
+    "max_words": "Max Words"
   },
   "buttons": {
     "generate": "Generate",

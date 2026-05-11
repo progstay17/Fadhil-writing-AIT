@@ -7,7 +7,7 @@ const CREATE_SYSTEM_PROMPT = `Anda adalah penulis konten SEO. Ubah/olah ARTIKEL_
 
 Fokus utama: fungsi produk = {FUNGSI} dan pembahasan spesifik tentang kata kunci: "{KATA_KUNCI}".
 Judul: singkat, menarik, mengandung {KATA_KUNCI}, TIDAK menyebut "潮际好麦".
-Badan artikel: minimal 800 kata; sebut "潮际好麦" 1–2 kali di isi (bukan judul).
+Badan artikel: minimal {MIN_WORDS} kata; sebut "潮际好麦" 1–2 kali di isi (bukan judul).
 Nada: soft-selling (profesional, ramah, tidak memaksa), kalimat pendek, straightforward.
 PENTING: Gunakan format PLAIN TEXT saja. JANGAN gunakan formatting Markdown seperti #, ##, ###, **, __, *, atau lainnya. Gunakan baris baru untuk memisahkan paragraf.
 
@@ -37,7 +37,7 @@ Output: hanya tiga bagian dengan format separator khusus ---
 (Slug URL)
 Tidak ada teks lain.`;
 
-const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal 800 kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali. Gunakan PLAIN TEXT saja.";
+const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal {MIN_WORDS} kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali. Gunakan PLAIN TEXT saja.";
 
 const FIX_YELLOW_PROMPT = `You are an expert writing editor. Rewrite the following sentence to make it clearer and easier to read.
 
@@ -46,7 +46,7 @@ Rules:
 - Break long sentences into shorter ones if needed
 - Remove unnecessary words and phrases
 - Aim for a Grade 8-9 reading level
-- Match the writer's original tone and voice
+- Match the writer original tone and voice
 - Do not add new information
 
 Sentence to rewrite:
@@ -62,7 +62,7 @@ Rules:
 - Use simple, direct words (aim for Grade 6-7 reading level)
 - Remove all unnecessary clauses and qualifiers
 - Preserve the core meaning only
-- Match the writer's tone — do not sound robotic
+- Match the writer tone — do not sound robotic
 
 Sentence to rewrite:
 "{sentence}"
@@ -110,11 +110,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ rewritten });
     }
 
-    const { fungsi, kataKunci, lokasi, artikelContoh, contentLang } = body;
+    const { fungsi, kataKunci, lokasi, artikelContoh, contentLang, minWords, maxWords } = body;
+    const minW = minWords || 600;
+
     let prompt = CREATE_SYSTEM_PROMPT
       .replace("{FUNGSI}", fungsi)
       .replace("{KATA_KUNCI}", kataKunci)
-      .replace("{LOKASI}", lokasi || "Indonesia");
+      .replace("{LOKASI}", lokasi || "Indonesia")
+      .replace("{MIN_WORDS}", minW.toString());
 
     if (contentLang !== "ID") {
       prompt += `\n\nGenerate the output in ${contentLang} language, following all the same constraints.`;
@@ -136,10 +139,10 @@ export async function POST(req: NextRequest) {
 
     const getWordCount = (text: string) => text.split(/\s+/).filter(w => w.length > 0).length;
 
-    if (getWordCount(responseText) < 700) {
+    if (getWordCount(responseText) < minW * 0.9) {
        try {
            const expansionResult = await model.generateContent(
-             `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci)}`
+             `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci).replace("{MIN_WORDS}", minW.toString())}`
            );
            responseText = expansionResult.response.text();
        } catch (e) {}
