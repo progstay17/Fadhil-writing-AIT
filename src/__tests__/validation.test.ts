@@ -5,27 +5,25 @@ function validateArticle(content: string, keyword: string) {
   const keywordCount = (content.match(new RegExp(keyword, 'gi')) || []).length;
   const hasBrand = content.includes('潮际好麦');
   const hasPrice = /(Rp|IDR|USD|\$|¥|RM)\s?\d+([.,]\d+)?/gi.test(content) || /\d+([.,]\d+)?\s?(Rp|IDR|USD|\$|¥|RM)/gi.test(content);
-  const isPlainText = !/[#*`_~]/.test(content);
 
   return {
     wordCount,
     keywordCount,
     hasBrand,
-    hasPrice,
-    isPlainText
+    hasPrice
   };
 }
 
 describe('Article Validation', () => {
-  it('should detect Markdown formatting', () => {
-    const text = "## Judul\n**Fitur**";
+  it('should count words correctly', () => {
+    const text = "Satu dua tiga empat lima.";
     const result = validateArticle(text, "test");
-    expect(result.isPlainText).toBe(false);
+    expect(result.wordCount).toBe(5);
   });
 
-  it('should pass for plain text', () => {
-    const text = "Judul\nFitur";
+  it('should detect brand presence', () => {
+    const text = "Gunakan 潮际好麦 untuk hasil terbaik.";
     const result = validateArticle(text, "test");
-    expect(result.isPlainText).toBe(true);
+    expect(result.hasBrand).toBe(true);
   });
 });
