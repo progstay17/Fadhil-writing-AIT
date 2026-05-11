@@ -32,7 +32,7 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
-    "use_sample": "Pakai Contoh Listicle"
+    "use_sample": "Contoh Default"
   },
   "output": {
     "article": "Artikel Lengkap",
@@ -57,6 +57,14 @@
     "fixing": "Sedang memperbaiki...",
     "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
     "copied": "Berhasil disalin!"
+  },
+  "image_gen": {
+    "title": "Generate Gambar",
+    "prompt_label": "Prompt Gambar (Bisa diedit)",
+    "generate_button": "Generate",
+    "download_button": "Download JPG",
+    "error": "Gagal memuat gambar.",
+    "retry": "Coba Lagi"
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪"
 }
