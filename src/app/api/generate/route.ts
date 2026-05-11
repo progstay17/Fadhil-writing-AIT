@@ -9,12 +9,12 @@ Fokus utama: fungsi produk = {FUNGSI} dan pembahasan spesifik tentang kata kunci
 Judul: singkat, menarik, mengandung {KATA_KUNCI}, TIDAK menyebut "潮际好麦".
 Badan artikel: minimal {MIN_WORDS} kata; sebut "潮际好麦" 1–2 kali di isi (bukan judul).
 Nada: soft-selling (profesional, ramah, tidak memaksa), kalimat pendek, straightforward.
-PENTING: Gunakan format PLAIN TEXT saja. JANGAN gunakan formatting Markdown seperti #, ##, ###, **, __, *, atau lainnya. Gunakan baris baru untuk memisahkan paragraf.
+FORMATTING: Gunakan Markdown (seperti # untuk heading, ** untuk bold) untuk struktur artikel yang menarik.
 
 Struktur wajib:
-Judul
+Judul (H1)
 Intro (hook, 1 paragraf)
-3–5 fitur utama (masing-masing 1 paragraf — jelaskan fungsi + manfaat langsung)
+3–5 fitur utama (masing-masing 1 paragraf — jelaskan fungsi + manfaat langsung, gunakan H2/H3)
 Manfaat/keuntungan bagi pengguna/penjual (2–3 paragraf)
 Contoh penggunaan/implementasi (1–2 paragraf; sisipkan GEO: {LOKASI})
 Testimoni atau bukti sosial singkat (1 paragraf, generik)
@@ -37,7 +37,7 @@ Output: hanya tiga bagian dengan format separator khusus ---
 (Slug URL)
 Tidak ada teks lain.`;
 
-const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal {MIN_WORDS} kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali. Gunakan PLAIN TEXT saja.";
+const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal {MIN_WORDS} kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali. Pertahankan formatting Markdown.";
 
 const FIX_YELLOW_PROMPT = `You are an expert writing editor. Rewrite the following sentence to make it clearer and easier to read.
 
@@ -69,12 +69,8 @@ Sentence to rewrite:
 
 Return only the rewritten sentence, nothing else.`;
 
-function stripMarkdown(text: string): string {
-  return text
-    .replace(/[#*`_~]/g, "")
-    .replace(/\n\s*[-*+]\s+/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+function cleanOutput(text: string): string {
+  return text.trim();
 }
 
 export async function POST(req: NextRequest) {
@@ -101,11 +97,11 @@ export async function POST(req: NextRequest) {
       let rewritten = "";
       try {
         const result = await model.generateContent(prompt);
-        rewritten = stripMarkdown(result.response.text());
+        rewritten = cleanOutput(result.response.text());
       } catch (err) {
         const fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
         const result = await fallbackModel.generateContent(prompt);
-        rewritten = stripMarkdown(result.response.text());
+        rewritten = cleanOutput(result.response.text());
       }
       return NextResponse.json({ rewritten });
     }
@@ -161,9 +157,6 @@ export async function POST(req: NextRequest) {
 
     if (!article) article = responseText;
 
-    article = stripMarkdown(article);
-    meta = stripMarkdown(meta);
-
     const lines = article.split("\n");
     if (lines[0].includes("潮际好麦")) {
       lines[0] = lines[0].replace(/潮际好麦/g, "").trim();
@@ -174,9 +167,9 @@ export async function POST(req: NextRequest) {
     article = article.replace(/\d+([.,]\d+)?\s?(Rp|IDR|USD|\$|¥|RM)/gi, "[REDACTED]");
 
     return NextResponse.json({
-      article,
-      meta: meta.substring(0, 160) || "Generated meta description",
-      slug: (slug || "generated-slug").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+      article: cleanOutput(article),
+      meta: cleanOutput(meta).substring(0, 160) || "Generated meta description",
+      slug: cleanOutput(slug).toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
     });
 
   } catch (error: any) {
