@@ -1,0 +1,38 @@
+{
+  "title": "AIT Writing for 潮际好麦",
+  "subtitle": "Hasilkan artikel produk otomatis via LLM",
+  "fields": {
+    "functions": "功能 (Fungsi)",
+    "keywords": "关键词/标题 (Kata Kunci/Titel)",
+    "location": "地点 / Lokasi (Opsional)",
+    "sample": "ARTIKEL_CONTOH (Opsional)",
+    "functions_placeholder": "Masukkan fungsi produk...",
+    "keywords_placeholder": "Masukkan kata kunci atau judul...",
+    "location_placeholder": "Masukkan lokasi (misal: Jakarta)...",
+    "sample_placeholder": "Tempel artikel contoh di sini..."
+  },
+  "buttons": {
+    "generate": "Generate",
+    "clear_input": "Clear Input",
+    "paste": "Paste",
+    "copy": "Copy",
+    "use_sample": "Pakai Contoh Listicle"
+  },
+  "output": {
+    "article": "Artikel Lengkap",
+    "meta": "Meta Description",
+    "slug": "Slug URL"
+  },
+  "seo": {
+    "word_count": "Word Count",
+    "keyword_density": "Keyword Density",
+    "meta_length": "Meta Length"
+  },
+  "messages": {
+    "required": "Fungsi dan Kata Kunci harus terisi!",
+    "generating": "Sedang menghasilkan...",
+    "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
+    "copied": "Berhasil disalin!"
+  },
+  "footer": "for AIT from Fadhil Ghifarion 法迪"
+}

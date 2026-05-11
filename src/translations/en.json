@@ -1,0 +1,38 @@
+{
+  "title": "AIT Writing for 潮际好麦",
+  "subtitle": "Automatically generate product articles via LLM",
+  "fields": {
+    "functions": "功能 (Functions)",
+    "keywords": "关键词/标题 (Keywords/Title)",
+    "location": "地点 / Lokasi (Optional)",
+    "sample": "ARTIKEL_CONTOH (Optional)",
+    "functions_placeholder": "Enter product functions...",
+    "keywords_placeholder": "Enter keywords or title...",
+    "location_placeholder": "Enter location (e.g., London)...",
+    "sample_placeholder": "Paste sample article here..."
+  },
+  "buttons": {
+    "generate": "Generate",
+    "clear_input": "Clear Input",
+    "paste": "Paste",
+    "copy": "Copy",
+    "use_sample": "Use Listicle Example"
+  },
+  "output": {
+    "article": "Full Article",
+    "meta": "Meta Description",
+    "slug": "Slug URL"
+  },
+  "seo": {
+    "word_count": "Word Count",
+    "keyword_density": "Keyword Density",
+    "meta_length": "Meta Length"
+  },
+  "messages": {
+    "required": "Functions and Keywords are required!",
+    "generating": "Generating...",
+    "refining": "Output doesn't meet requirements, refining...",
+    "copied": "Copied!"
+  },
+  "footer": "for AIT from Fadhil Ghifarion 法迪"
+}
