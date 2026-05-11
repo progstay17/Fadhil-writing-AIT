@@ -56,13 +56,15 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Mapping requested names to available Gemini models
-    let modelName = requestedModel === "gemini-3-flash-preview" ? "gemini-2.0-flash-exp" : "gemini-1.5-flash";
+    // Using the requested model string directly as per user request
+    // The previous mapping to gemini-2.0-flash-exp caused a 404
+    let modelName = requestedModel || "gemini-1.5-flash";
 
     let model;
     try {
         model = genAI.getGenerativeModel({ model: modelName });
     } catch (e) {
+        // Fallback if the requested model name is not supported by the current SDK/API
         model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     }
 
@@ -79,16 +81,32 @@ export async function POST(req: NextRequest) {
       prompt += `\n\nARTIKEL_CONTOH:\n${artikelContoh}`;
     }
 
-    let result = await model.generateContent(prompt);
-    let responseText = result.response.text();
+    let responseText = "";
+    try {
+        let result = await model.generateContent(prompt);
+        responseText = result.response.text();
+    } catch (err: any) {
+        // Double fallback if the generation itself fails due to model name
+        if (err.message.includes("not found") || err.message.includes("not supported")) {
+            const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            let result = await fallbackModel.generateContent(prompt);
+            responseText = result.response.text();
+        } else {
+            throw err;
+        }
+    }
 
     const getWordCount = (text: string) => text.split(/\s+/).filter(w => w.length > 0).length;
 
     if (getWordCount(responseText) < 700) {
-       const expansionResult = await model.generateContent(
-         `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci)}`
-       );
-       responseText = expansionResult.response.text();
+       try {
+           const expansionResult = await model.generateContent(
+             `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci)}`
+           );
+           responseText = expansionResult.response.text();
+       } catch (e) {
+           // Ignore expansion error and return what we have
+       }
     }
 
     // Parse
