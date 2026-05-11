@@ -56,14 +56,14 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Mapping requested names to available Gemini models
-    let modelName = requestedModel === "gemini-3-flash-preview" ? "gemini-2.0-flash-exp" : "gemini-1.5-flash";
+    const FALLBACK_MODEL = "gemini-flash-latest";
+    let modelName = requestedModel || FALLBACK_MODEL;
 
     let model;
     try {
         model = genAI.getGenerativeModel({ model: modelName });
     } catch (e) {
-        model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        model = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
     }
 
     let prompt = SYSTEM_PROMPT
@@ -79,16 +79,31 @@ export async function POST(req: NextRequest) {
       prompt += `\n\nARTIKEL_CONTOH:\n${artikelContoh}`;
     }
 
-    let result = await model.generateContent(prompt);
-    let responseText = result.response.text();
+    let responseText = "";
+    try {
+        let result = await model.generateContent(prompt);
+        responseText = result.response.text();
+    } catch (err: any) {
+        if (err.message.includes("not found") || err.message.includes("not supported")) {
+            const fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
+            let result = await fallbackModel.generateContent(prompt);
+            responseText = result.response.text();
+        } else {
+            throw err;
+        }
+    }
 
     const getWordCount = (text: string) => text.split(/\s+/).filter(w => w.length > 0).length;
 
     if (getWordCount(responseText) < 700) {
-       const expansionResult = await model.generateContent(
-         `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci)}`
-       );
-       responseText = expansionResult.response.text();
+       try {
+           const expansionResult = await model.generateContent(
+             `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci)}`
+           );
+           responseText = expansionResult.response.text();
+       } catch (e) {
+           // Ignore expansion error and return what we have
+       }
     }
 
     // Parse
