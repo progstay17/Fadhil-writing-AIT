@@ -1,0 +1,62 @@
+{
+  "title": "潮际好麦 AIT 写作",
+  "subtitle": "通过 LLM 自动生成产品文章",
+  "tabs": {
+    "create": "创建内容",
+    "fix": "修改句子"
+  },
+  "fields": {
+    "functions": "功能 (Functions)",
+    "keywords": "关键词/标题 (Keywords/Title)",
+    "location": "地点 / Lokasi (可选)",
+    "sample": "ARTIKEL_CONTOH (可选)",
+    "functions_placeholder": "输入产品功能...",
+    "keywords_placeholder": "输入关键词或标题...",
+    "location_placeholder": "输入地点 (例如: 上海)...",
+    "sample_placeholder": "在此粘贴示例文章...",
+    "original_sentence": "原句:",
+    "sentence_placeholder": "在此输入难以阅读的句子...",
+    "edit_level": "修改积极程度:",
+    "yellow_label": "黄色",
+    "yellow_desc": "中等: 降低复杂度，8-9 级水平。",
+    "red_label": "红色",
+    "red_desc": "高等: 大幅简化，6-7 级水平。",
+    "content_lang": "内容语言:",
+    "model_label": "模型:",
+    "min_words": "最小字数",
+    "max_words": "最大字数"
+  },
+  "buttons": {
+    "generate": "生成",
+    "fix_now": "立即修改",
+    "clear_input": "清除输入",
+    "paste": "粘贴",
+    "copy": "复制",
+    "use_sample": "使用列表示例"
+  },
+  "output": {
+    "article": "完整文章",
+    "meta": "元描述",
+    "slug": "URL 别名",
+    "fix_result": "修改结果",
+    "rewritten_label": "修改后的句子:",
+    "rewritten_placeholder": "修改后的句子将在此显示...",
+    "generation_output": "生成结果",
+    "word_count": "字数",
+    "seo_keywords": "SEO 关键词"
+  },
+  "seo": {
+    "word_count": "字数",
+    "keyword_density": "关键词密度",
+    "meta_length": "元描述长度"
+  },
+  "messages": {
+    "required": "功能和关键词必填！",
+    "sentence_required": "请输入要修改的句子！",
+    "generating": "正在生成...",
+    "fixing": "正在修改...",
+    "refining": "输出不符合要求，正在优化...",
+    "copied": "已复制！"
+  },
+  "footer": "for AIT from Fadhil Ghifarion 法迪"
+}
