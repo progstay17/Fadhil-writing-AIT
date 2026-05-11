@@ -32,7 +32,7 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
-    "use_sample": "Pakai Contoh Listicle"
+    "use_sample": "Contoh Default"
   },
   "output": {
     "article": "Artikel Lengkap",

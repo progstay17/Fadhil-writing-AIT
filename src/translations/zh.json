@@ -32,7 +32,7 @@
     "clear_input": "清除输入",
     "paste": "粘贴",
     "copy": "复制",
-    "use_sample": "使用列表示例"
+    "use_sample": "默认示例"
   },
   "output": {
     "article": "完整文章",
