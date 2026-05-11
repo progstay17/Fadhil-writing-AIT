@@ -7,6 +7,8 @@ Fokus utama: fungsi produk = {FUNGSI} dan pembahasan spesifik tentang kata kunci
 Judul: singkat, menarik, mengandung {KATA_KUNCI}, TIDAK menyebut "潮际好麦".
 Badan artikel: minimal 800 kata; sebut "潮际好麦" 1–2 kali di isi (bukan judul).
 Nada: soft-selling (profesional, ramah, tidak memaksa), kalimat pendek, straightforward.
+PENTING: Gunakan format PLAIN TEXT saja. JANGAN gunakan formatting Markdown seperti #, ##, ###, **, __, *, atau lainnya. Gunakan baris baru untuk memisahkan paragraf.
+
 Struktur wajib:
 Judul
 Intro (hook, 1 paragraf)
@@ -33,7 +35,15 @@ Output: hanya tiga bagian dengan format separator khusus ---
 (Slug URL)
 Tidak ada teks lain.`;
 
-const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal 800 kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali.";
+const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal 800 kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali. Gunakan PLAIN TEXT saja.";
+
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/[#*`_~]/g, "")
+    .replace(/\n\s*[-*+]\s+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,14 +56,9 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Attempt to use requested model, fallback to 1.5-flash if it looks like a gemini model but name might be wrong
-    let modelName = requestedModel || "gemini-1.5-flash";
-    if (modelName === "local") {
-        return NextResponse.json({ error: "Local LLM support is not fully implemented in this demo." }, { status: 501 });
-    }
+    // Mapping requested names to available Gemini models
+    let modelName = requestedModel === "gemini-3-flash-preview" ? "gemini-2.0-flash-exp" : "gemini-1.5-flash";
 
-    // Note: The SDK might throw if model name is totally unknown.
-    // We'll wrap in a try-catch to fallback.
     let model;
     try {
         model = genAI.getGenerativeModel({ model: modelName });
@@ -77,7 +82,6 @@ export async function POST(req: NextRequest) {
     let result = await model.generateContent(prompt);
     let responseText = result.response.text();
 
-    // Expansion logic
     const getWordCount = (text: string) => text.split(/\s+/).filter(w => w.length > 0).length;
 
     if (getWordCount(responseText) < 700) {
@@ -102,14 +106,15 @@ export async function POST(req: NextRequest) {
     if (!article) article = responseText;
 
     // Post-processing
-    // 1. No brand in title
+    article = stripMarkdown(article);
+    meta = stripMarkdown(meta);
+
     const lines = article.split("\n");
     if (lines[0].includes("潮际好麦")) {
       lines[0] = lines[0].replace(/潮际好麦/g, "").trim();
       article = lines.join("\n");
     }
 
-    // 2. No prices
     article = article.replace(/(Rp|IDR|USD|\$|¥|RM)\s?\d+([.,]\d+)?/gi, "[REDACTED]");
     article = article.replace(/\d+([.,]\d+)?\s?(Rp|IDR|USD|\$|¥|RM)/gi, "[REDACTED]");
 

@@ -7,7 +7,6 @@ import {
   Trash2,
   Sparkles,
   FileText,
-  Settings,
   Globe,
   CheckCircle2,
   AlertCircle,
@@ -27,7 +26,7 @@ export default function Home() {
   const [lang, setLang] = useState(i18n.language);
   const [contentLang, setContentLang] = useState("ID");
   const [provider, setProvider] = useState("gemini");
-  const [model, setModel] = useState("gemini-1.5-flash");
+  const [model, setModel] = useState("gemini-2.5-flash");
 
   const [fungsi, setFungsi] = useState("");
   const [kataKunci, setKataKunci] = useState("");
@@ -194,9 +193,6 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                 </button>
               ))}
             </div>
-            <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-              <Settings size={20} />
-            </button>
           </div>
         </div>
       </header>
@@ -232,10 +228,8 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                     onChange={(e) => setModel(e.target.value)}
                     className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                     <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                     <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                    <option value="local">Local LLM (REST)</option>
                   </select>
                 </div>
               </div>
