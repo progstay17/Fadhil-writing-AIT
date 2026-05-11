@@ -7,15 +7,14 @@ import {
   Trash2,
   Sparkles,
   FileText,
-  Globe,
-  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
   AlertCircle,
   Copy,
   PlusCircle,
   Cpu,
   Edit3,
-  Wand2,
-  Hash,
   Download,
   History,
   RotateCcw
@@ -55,6 +54,12 @@ export default function Home() {
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
   const [slugOutput, setSlugOutput] = useState("");
+  // Image Generation States
+  const [isImageSectionExpanded, setIsImageSectionExpanded] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Fix Sentence States
   const [sentenceInput, setSentenceInput] = useState("");
@@ -87,6 +92,9 @@ export default function Home() {
       setArticleOutput("");
       setMetaOutput("");
       setSlugOutput("");
+      setImagePrompt("");
+      setGeneratedImageUrl("");
+      setImageError(false);
     } else {
       setSentenceInput("");
       setSentenceOutput("");
@@ -269,6 +277,42 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
       setMessage(err.message || "Error generating content.");
     } finally {
       stopLoadingAnimation();
+    }
+  };
+
+
+  const handleGenerateImage = () => {
+    let promptToUse = imagePrompt;
+    if (!promptToUse && kataKunci) {
+      promptToUse = `Professional product photo of ${kataKunci}, clean background, e-commerce style, high quality`;
+      setImagePrompt(promptToUse);
+    }
+    if (!promptToUse) return;
+
+    setIsImageLoading(true);
+    setImageError(false);
+
+    const encodedPrompt = encodeURIComponent(promptToUse);
+    const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
+
+    setGeneratedImageUrl(url);
+  };
+
+  const handleDownloadImage = async () => {
+    if (!generatedImageUrl) return;
+    try {
+      const response = await fetch(generatedImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slugOutput || "generated-image"}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Failed to download image", err);
     }
   };
 
@@ -544,6 +588,89 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       </div>
                       <div className="w-full border rounded-lg p-3 text-xs bg-gray-50 font-mono text-blue-600">{slugOutput}</div>
                     </div>
+                  </div>
+                  <div className="mt-8 border-t pt-6">
+                    <button
+                      onClick={() => {
+                        const nextState = !isImageSectionExpanded;
+                        setIsImageSectionExpanded(nextState);
+                        if (nextState && !imagePrompt && kataKunci) {
+                          setImagePrompt(`Professional product photo of ${kataKunci}, clean background, e-commerce style, high quality`);
+                        }
+                      }}
+                      className="flex items-center justify-between w-full text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                      <div className="flex items-center font-bold text-sm">
+                        <ImageIcon size={18} className="mr-2" />
+                        {t("image_gen.title")}
+                      </div>
+                      {isImageSectionExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {isImageSectionExpanded && (
+                      <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{t("image_gen.prompt_label")}</label>
+                          <div className="flex space-x-2">
+                            <input
+                              type="text"
+                              className="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                              value={imagePrompt}
+                              onChange={(e) => setImagePrompt(e.target.value)}
+                            />
+                            <button
+                              onClick={handleGenerateImage}
+                              disabled={isImageLoading || !imagePrompt}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+                            >
+                              {isImageLoading ? <RotateCcw size={14} className="animate-spin mr-2" /> : <Sparkles size={14} className="mr-2" />}
+                              {t("image_gen.generate_button")}
+                            </button>
+                          </div>
+                        </div>
+
+                        {generatedImageUrl && (
+                          <div className="space-y-4">
+                            <div className="relative rounded-lg overflow-hidden border bg-gray-50 aspect-video flex items-center justify-center">
+                              {isImageLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                                  <RotateCcw size={32} className="animate-spin text-blue-600" />
+                                </div>
+                              )}
+                              {imageError ? (
+                                <div className="text-center p-6">
+                                  <AlertCircle size={32} className="mx-auto text-red-500 mb-2" />
+                                  <p className="text-sm text-gray-600 mb-4">{t("image_gen.error")}</p>
+                                  <button
+                                    onClick={handleGenerateImage}
+                                    className="text-blue-600 text-sm font-bold hover:underline flex items-center mx-auto"
+                                  >
+                                    <RotateCcw size={14} className="mr-1" /> {t("image_gen.retry")}
+                                  </button>
+                                </div>
+                              ) : (
+                                <img
+                                  src={generatedImageUrl}
+                                  alt="Generated"
+                                  className={cn("w-full h-full object-cover transition-opacity duration-300", isImageLoading ? "opacity-0" : "opacity-100")}
+                                  onLoad={() => setIsImageLoading(false)}
+                                  onError={() => {
+                                    setIsImageLoading(false);
+                                    setImageError(true);
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <button
+                              onClick={handleDownloadImage}
+                              className="w-full border-2 border-gray-100 hover:border-gray-200 py-2 rounded-lg text-sm font-bold text-gray-600 flex items-center justify-center transition-colors"
+                            >
+                              <Download size={16} className="mr-2" /> {t("image_gen.download_button")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (

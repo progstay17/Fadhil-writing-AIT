@@ -58,5 +58,13 @@
     "refining": "Output doesn't meet requirements, refining...",
     "copied": "Copied!"
   },
+  "image_gen": {
+    "title": "Generate Image",
+    "prompt_label": "Image Prompt (Editable)",
+    "generate_button": "Generate",
+    "download_button": "Download JPG",
+    "error": "Failed to load image.",
+    "retry": "Retry"
+  },
   "footer": "for AIT from Fadhil Ghifarion 法迪"
 }
