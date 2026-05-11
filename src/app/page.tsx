@@ -12,7 +12,9 @@ import {
   AlertCircle,
   Copy,
   PlusCircle,
-  Cpu
+  Cpu,
+  Edit3,
+  Wand2
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -24,18 +26,23 @@ function cn(...inputs: ClassValue[]) {
 export default function Home() {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
-  const [contentLang, setContentLang] = useState("ID");
-  const [provider, setProvider] = useState("gemini");
-  const [model, setModel] = useState("gemini-2.5-flash");
+  const [activeTab, setActiveTab] = useState("create"); // "create" or "fix"
 
+  // Create Content States
+  const [contentLang, setContentLang] = useState("ID");
+  const [model, setModel] = useState("gemini-2.5-flash");
   const [fungsi, setFungsi] = useState("");
   const [kataKunci, setKataKunci] = useState("");
   const [lokasi, setLokasi] = useState("");
   const [artikelContoh, setArtikelContoh] = useState("");
-
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
   const [slugOutput, setSlugOutput] = useState("");
+
+  // Fix Sentence States
+  const [sentenceInput, setSentenceInput] = useState("");
+  const [sentenceOutput, setSentenceOutput] = useState("");
+  const [rewriteType, setRewriteType] = useState<"yellow" | "red">("yellow");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -46,17 +53,26 @@ export default function Home() {
   };
 
   const handleClear = () => {
-    setFungsi("");
-    setKataKunci("");
-    setLokasi("");
-    setArtikelContoh("");
+    if (activeTab === "create") {
+      setFungsi("");
+      setKataKunci("");
+      setLokasi("");
+      setArtikelContoh("");
+    } else {
+      setSentenceInput("");
+      setSentenceOutput("");
+    }
     setMessage("");
   };
 
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setArtikelContoh(text);
+      if (activeTab === "create") {
+        setArtikelContoh(text);
+      } else {
+        setSentenceInput(text);
+      }
     } catch (err) {
       console.error("Failed to read clipboard", err);
     }
@@ -104,40 +120,47 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
   };
 
   const handleGenerate = async () => {
-    if (!fungsi || !kataKunci) {
-      setMessage(t("messages.required"));
-      return;
+    if (activeTab === "create") {
+      if (!fungsi || !kataKunci) {
+        setMessage(t("messages.required"));
+        return;
+      }
+    } else {
+      if (!sentenceInput) {
+        setMessage("Masukkan kalimat yang ingin diperbaiki!");
+        return;
+      }
     }
 
     setLoading(true);
-    setMessage(t("messages.generating"));
+    setMessage(activeTab === "create" ? t("messages.generating") : "Sedang memperbaiki...");
 
     try {
+      const body = activeTab === "create"
+        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, contentLang, model }
+        : { type: "fix", sentence: sentenceInput, rewriteType, model };
+
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fungsi,
-          kataKunci,
-          lokasi,
-          artikelContoh,
-          contentLang,
-          provider,
-          model
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
       if (data.error) {
         setMessage(data.error);
       } else {
-        setArticleOutput(data.article);
-        setMetaOutput(data.meta);
-        setSlugOutput(data.slug);
+        if (activeTab === "create") {
+          setArticleOutput(data.article);
+          setMetaOutput(data.meta);
+          setSlugOutput(data.slug);
+        } else {
+          setSentenceOutput(data.rewritten);
+        }
         setMessage("");
       }
     } catch (err) {
-      setMessage("Error generating article.");
+      setMessage("Error generating content.");
     } finally {
       setLoading(false);
     }
@@ -156,7 +179,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, provider, model]);
+  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -178,7 +201,30 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             <h1 className="text-xl font-bold ml-2 hidden sm:block">{t("title")}</h1>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
+            <nav className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setActiveTab("create")}
+                className={cn(
+                  "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",
+                  activeTab === "create" ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700"
+                )}
+              >
+                <PlusCircle size={16} className="mr-2" />
+                Create Content
+              </button>
+              <button
+                onClick={() => setActiveTab("fix")}
+                className={cn(
+                  "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",
+                  activeTab === "fix" ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700"
+                )}
+              >
+                <Edit3 size={16} className="mr-2" />
+                Perbaiki Kalimat
+              </button>
+            </nav>
+
             <div className="flex bg-gray-100 rounded-lg p-1">
               {["zh", "en", "id"].map((l) => (
                 <button
@@ -197,28 +243,57 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
         </div>
       </header>
 
+      {/* Mobile Tab Switcher */}
+      <div className="md:hidden max-w-5xl mx-auto px-4 mt-4">
+        <div className="flex bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab("create")}
+            className={cn(
+              "flex-1 py-2 rounded-md text-sm font-medium transition-all",
+              activeTab === "create" ? "bg-white shadow-sm text-blue-600" : "text-gray-500"
+            )}
+          >
+            Create
+          </button>
+          <button
+            onClick={() => setActiveTab("fix")}
+            className={cn(
+              "flex-1 py-2 rounded-md text-sm font-medium transition-all",
+              activeTab === "fix" ? "bg-white shadow-sm text-blue-600" : "text-gray-500"
+            )}
+          >
+            Fix
+          </button>
+        </div>
+      </div>
+
       <div className="max-w-5xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column - Input */}
         <div className="lg:col-span-5 space-y-6">
           <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
             <div className="flex justify-between items-start mb-2">
               <h2 className="font-semibold text-gray-800 flex items-center mt-1">
-                <PlusCircle size={18} className="mr-2 text-blue-500" />
-                Input Details
+                {activeTab === "create" ? (
+                  <><PlusCircle size={18} className="mr-2 text-blue-500" /> Create Details</>
+                ) : (
+                  <><Edit3 size={18} className="mr-2 text-orange-500" /> Sentence Fixer</>
+                )}
               </h2>
               <div className="flex flex-col items-end space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Content:</span>
-                  <select
-                    value={contentLang}
-                    onChange={(e) => setContentLang(e.target.value)}
-                    className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="ID">ID (Default)</option>
-                    <option value="EN">EN</option>
-                    <option value="ZH">ZH</option>
-                  </select>
-                </div>
+                {activeTab === "create" && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Content:</span>
+                    <select
+                      value={contentLang}
+                      onChange={(e) => setContentLang(e.target.value)}
+                      className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="ID">ID (Default)</option>
+                      <option value="EN">EN</option>
+                      <option value="ZH">ZH</option>
+                    </select>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center">
                     <Cpu size={10} className="mr-1" /> Model:
@@ -236,59 +311,107 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.functions")}</label>
-                <textarea
-                  id="input-fungsi"
-                  className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-24 transition-all"
-                  placeholder={t("fields.functions_placeholder")}
-                  value={fungsi}
-                  onChange={(e) => setFungsi(e.target.value)}
-                />
-              </div>
+              {activeTab === "create" ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.functions")}</label>
+                    <textarea
+                      id="input-fungsi"
+                      className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-24 transition-all"
+                      placeholder={t("fields.functions_placeholder")}
+                      value={fungsi}
+                      onChange={(e) => setFungsi(e.target.value)}
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.keywords")}</label>
-                <input
-                  id="input-kata-kunci"
-                  type="text"
-                  className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  placeholder={t("fields.keywords_placeholder")}
-                  value={kataKunci}
-                  onChange={(e) => setKataKunci(e.target.value)}
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.keywords")}</label>
+                    <input
+                      id="input-kata-kunci"
+                      type="text"
+                      className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      placeholder={t("fields.keywords_placeholder")}
+                      value={kataKunci}
+                      onChange={(e) => setKataKunci(e.target.value)}
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.location")}</label>
-                <input
-                  id="input-lokasi"
-                  type="text"
-                  className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  placeholder={t("fields.location_placeholder")}
-                  value={lokasi}
-                  onChange={(e) => setLokasi(e.target.value)}
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t("fields.location")}</label>
+                    <input
+                      id="input-lokasi"
+                      type="text"
+                      className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      placeholder={t("fields.location_placeholder")}
+                      value={lokasi}
+                      onChange={(e) => setLokasi(e.target.value)}
+                    />
+                  </div>
 
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block text-sm font-medium text-gray-700">{t("fields.sample")}</label>
-                  <button
-                    onClick={useSampleListicle}
-                    className="text-[10px] text-blue-600 hover:underline font-medium"
-                  >
-                    {t("buttons.use_sample")}
-                  </button>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-sm font-medium text-gray-700">{t("fields.sample")}</label>
+                      <button
+                        onClick={useSampleListicle}
+                        className="text-[10px] text-blue-600 hover:underline font-medium"
+                      >
+                        {t("buttons.use_sample")}
+                      </button>
+                    </div>
+                    <textarea
+                      id="input-artikel-contoh"
+                      className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-32 transition-all"
+                      placeholder={t("fields.sample_placeholder")}
+                      value={artikelContoh}
+                      onChange={(e) => setArtikelContoh(e.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Kalimat asli:</label>
+                    <textarea
+                      className="w-full border rounded-lg p-4 text-sm focus:ring-2 focus:ring-orange-500 outline-none h-48 transition-all"
+                      placeholder="Masukkan kalimat yang sulit dibaca di sini..."
+                      value={sentenceInput}
+                      onChange={(e) => setSentenceInput(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Tingkat agresivitas edit:</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setRewriteType("yellow")}
+                        className={cn(
+                          "p-3 rounded-xl border-2 transition-all text-left group",
+                          rewriteType === "yellow" ? "border-yellow-400 bg-yellow-50" : "border-gray-100 hover:border-yellow-200"
+                        )}
+                      >
+                        <div className="flex items-center mb-1">
+                          <div className="w-3 h-3 rounded-full bg-yellow-400 mr-2" />
+                          <span className="font-bold text-sm">Kuning</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 leading-tight">Sedang: Kurangi kerumitan, Grade 8-9.</p>
+                      </button>
+                      <button
+                        onClick={() => setRewriteType("red")}
+                        className={cn(
+                          "p-3 rounded-xl border-2 transition-all text-left group",
+                          rewriteType === "red" ? "border-red-400 bg-red-50" : "border-gray-100 hover:border-red-200"
+                        )}
+                      >
+                        <div className="flex items-center mb-1">
+                          <div className="w-3 h-3 rounded-full bg-red-500 mr-2" />
+                          <span className="font-bold text-sm">Merah</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 leading-tight">Tinggi: Sederhanakan drastis, Grade 6-7.</p>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <textarea
-                  id="input-artikel-contoh"
-                  className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-32 transition-all"
-                  placeholder={t("fields.sample_placeholder")}
-                  value={artikelContoh}
-                  onChange={(e) => setArtikelContoh(e.target.value)}
-                />
-              </div>
+              )}
             </div>
 
             <div className="flex space-x-2 pt-2">
@@ -296,14 +419,17 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                 id="btn-generate"
                 disabled={loading}
                 onClick={handleGenerate}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all shadow-md active:scale-[0.98]"
+                className={cn(
+                  "flex-1 text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all shadow-md active:scale-[0.98]",
+                  activeTab === "create" ? "bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400" : "bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300"
+                )}
               >
                 {loading ? (
                   <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                 ) : (
-                  <Sparkles size={18} className="mr-2" />
+                  activeTab === "create" ? <Sparkles size={18} className="mr-2" /> : <Wand2 size={18} className="mr-2" />
                 )}
-                {t("buttons.generate")}
+                {activeTab === "create" ? t("buttons.generate") : "Perbaiki Sekarang"}
               </button>
             </div>
 
@@ -329,9 +455,9 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             {message && (
               <div className={cn(
                 "p-3 rounded-lg text-xs flex items-center",
-                message.includes("Error") || message.includes("required") ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
+                message.includes("Error") || message.includes("required") || message.includes("Masukkan") ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
               )}>
-                {message.includes("Error") ? <AlertCircle size={14} className="mr-2" /> : <Sparkles size={14} className="mr-2 animate-pulse" />}
+                {message.includes("Error") || message.includes("Masukkan") ? <AlertCircle size={14} className="mr-2" /> : <Sparkles size={14} className="mr-2 animate-pulse" />}
                 {message}
               </div>
             )}
@@ -344,95 +470,113 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             <div className="flex justify-between items-center">
               <h2 className="font-semibold text-gray-800 flex items-center">
                 <FileText size={18} className="mr-2 text-green-500" />
-                Generation Output
+                {activeTab === "create" ? "Generation Output" : "Hasil Perbaikan"}
               </h2>
 
-              {/* SEO Indicators */}
-              <div className="flex space-x-4">
-                <div className="flex items-center">
-                  <div className={cn(
-                    "w-2.5 h-2.5 rounded-full mr-1.5",
-                    articleOutput.split(/\s+/).filter(w => w.length > 0).length >= 800 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
-                  )} />
-                  <span className="text-[10px] text-gray-500 font-medium">Word Count</span>
+              {activeTab === "create" && (
+                <div className="flex space-x-4">
+                  <div className="flex items-center">
+                    <div className={cn(
+                      "w-2.5 h-2.5 rounded-full mr-1.5",
+                      articleOutput.split(/\s+/).filter(w => w.length > 0).length >= 800 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
+                    )} />
+                    <span className="text-[10px] text-gray-500 font-medium">Word Count</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className={cn(
+                      "w-2.5 h-2.5 rounded-full mr-1.5",
+                      (articleOutput.match(new RegExp(kataKunci, "gi"))?.length || 0) >= 3 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
+                    )} />
+                    <span className="text-[10px] text-gray-500 font-medium">SEO Keywords</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <div className={cn(
-                    "w-2.5 h-2.5 rounded-full mr-1.5",
-                    (articleOutput.match(new RegExp(kataKunci, "gi"))?.length || 0) >= 3 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
-                  )} />
-                  <span className="text-[10px] text-gray-500 font-medium">SEO Keywords</span>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="space-y-6 flex-1">
-              {/* Article Panel */}
-              <div className="relative group">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-semibold text-gray-600">{t("output.article")}</h3>
-                  <button
-                    data-copy-for="output-article"
-                    onClick={() => copyToClipboard(articleOutput)}
-                    className="text-gray-400 hover:text-blue-600 transition-colors"
-                  >
-                    <Copy size={16} />
-                  </button>
-                </div>
-                <div
-                  id="output-article"
-                  className="w-full border rounded-lg p-4 text-sm bg-gray-50 min-h-[300px] overflow-auto whitespace-pre-wrap leading-relaxed text-gray-800"
-                >
-                  {articleOutput || <span className="text-gray-300 italic">Generated article will appear here...</span>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Meta Description Panel */}
-                <div className="relative">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-gray-600">{t("output.meta")}</h3>
-                    <button
-                      data-copy-for="output-meta"
-                      onClick={() => copyToClipboard(metaOutput)}
-                      className="text-gray-400 hover:text-blue-600 transition-colors"
+              {activeTab === "create" ? (
+                <>
+                  {/* Article Panel */}
+                  <div className="relative group">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-sm font-semibold text-gray-600">{t("output.article")}</h3>
+                      <button
+                        data-copy-for="output-article"
+                        onClick={() => copyToClipboard(articleOutput)}
+                        className="text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    </div>
+                    <div
+                      id="output-article"
+                      className="w-full border rounded-lg p-4 text-sm bg-gray-50 min-h-[300px] overflow-auto whitespace-pre-wrap leading-relaxed text-gray-800"
                     >
-                      <Copy size={14} />
+                      {articleOutput || <span className="text-gray-300 italic">Generated article will appear here...</span>}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-sm font-semibold text-gray-600">{t("output.meta")}</h3>
+                        <button
+                          data-copy-for="output-meta"
+                          onClick={() => copyToClipboard(metaOutput)}
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                          <Copy size={14} />
+                        </button>
+                      </div>
+                      <div
+                        id="output-meta"
+                        className="w-full border rounded-lg p-3 text-xs bg-gray-50 min-h-[80px] text-gray-800"
+                      >
+                        {metaOutput}
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-sm font-semibold text-gray-600">{t("output.slug")}</h3>
+                        <button
+                          data-copy-for="output-slug"
+                          onClick={() => copyToClipboard(slugOutput)}
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                          <Copy size={14} />
+                        </button>
+                      </div>
+                      <div
+                        id="output-slug"
+                        className="w-full border rounded-lg p-3 text-xs bg-gray-50 font-mono text-blue-600"
+                      >
+                        {slugOutput}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="relative group flex-1 flex flex-col">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-sm font-semibold text-gray-600">Kalimat hasil perbaikan:</h3>
+                    <button
+                      onClick={() => copyToClipboard(sentenceOutput)}
+                      className="text-gray-400 hover:text-orange-600 transition-colors"
+                    >
+                      <Copy size={18} />
                     </button>
                   </div>
                   <div
-                    id="output-meta"
-                    className="w-full border rounded-lg p-3 text-xs bg-gray-50 min-h-[80px] text-gray-800"
+                    className={cn(
+                      "w-full border rounded-xl p-6 text-lg font-medium bg-gray-50 flex-1 min-h-[400px] leading-relaxed text-gray-800 transition-all",
+                      rewriteType === "yellow" ? "focus-within:ring-2 focus-within:ring-yellow-400" : "focus-within:ring-2 focus-within:ring-red-400"
+                    )}
                   >
-                    {metaOutput}
-                  </div>
-                  <div className="mt-1 flex justify-end">
-                    <span className={cn("text-[10px]", metaOutput.length > 160 ? "text-red-500" : "text-gray-400")}>
-                      {metaOutput.length}/160
-                    </span>
+                    {sentenceOutput || <span className="text-gray-300 italic">Kalimat hasil perbaikan akan muncul di sini...</span>}
                   </div>
                 </div>
-
-                {/* Slug Panel */}
-                <div className="relative">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-gray-600">{t("output.slug")}</h3>
-                    <button
-                      data-copy-for="output-slug"
-                      onClick={() => copyToClipboard(slugOutput)}
-                      className="text-gray-400 hover:text-blue-600 transition-colors"
-                    >
-                      <Copy size={14} />
-                    </button>
-                  </div>
-                  <div
-                    id="output-slug"
-                    className="w-full border rounded-lg p-3 text-xs bg-gray-50 font-mono text-blue-600"
-                  >
-                    {slugOutput}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </section>
         </div>

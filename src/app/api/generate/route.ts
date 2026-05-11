@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const SYSTEM_PROMPT = `Anda adalah penulis konten SEO. Ubah/olah ARTIKEL_CONTOH (jika ada) atau tulis baru menjadi artikel produk Bahasa Indonesia dengan ketentuan berikut:
+const FALLBACK_MODEL = "gemini-flash-latest";
+
+const CREATE_SYSTEM_PROMPT = `Anda adalah penulis konten SEO. Ubah/olah ARTIKEL_CONTOH (jika ada) atau tulis baru menjadi artikel produk Bahasa Indonesia dengan ketentuan berikut:
 
 Fokus utama: fungsi produk = {FUNGSI} dan pembahasan spesifik tentang kata kunci: "{KATA_KUNCI}".
 Judul: singkat, menarik, mengandung {KATA_KUNCI}, TIDAK menyebut "潮际好麦".
@@ -37,6 +39,36 @@ Tidak ada teks lain.`;
 
 const EXPANSION_PROMPT = "Perpanjang artikel menjadi minimal 800 kata, pertahankan struktur dan {KATA_KUNCI} muncul minimal 3 kali. Gunakan PLAIN TEXT saja.";
 
+const FIX_YELLOW_PROMPT = `You are an expert writing editor. Rewrite the following sentence to make it clearer and easier to read.
+
+Rules:
+- Keep the original meaning intact
+- Break long sentences into shorter ones if needed
+- Remove unnecessary words and phrases
+- Aim for a Grade 8-9 reading level
+- Match the writer's original tone and voice
+- Do not add new information
+
+Sentence to rewrite:
+"{sentence}"
+
+Return only the rewritten sentence, nothing else.`;
+
+const FIX_RED_PROMPT = `You are an expert writing editor. The following sentence is very difficult to read. Rewrite it to be bold and clear.
+
+Rules:
+- Significantly simplify the sentence structure
+- Split into multiple short sentences if necessary
+- Use simple, direct words (aim for Grade 6-7 reading level)
+- Remove all unnecessary clauses and qualifiers
+- Preserve the core meaning only
+- Match the writer's tone — do not sound robotic
+
+Sentence to rewrite:
+"{sentence}"
+
+Return only the rewritten sentence, nothing else.`;
+
 function stripMarkdown(text: string): string {
   return text
     .replace(/[#*`_~]/g, "")
@@ -47,26 +79,39 @@ function stripMarkdown(text: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { fungsi, kataKunci, lokasi, artikelContoh, contentLang, model: requestedModel } = await req.json();
-
+    const body = await req.json();
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: "API Key not configured on server." }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-
-    const FALLBACK_MODEL = "gemini-flash-latest";
-    let modelName = requestedModel || FALLBACK_MODEL;
-
+    let modelName = body.model || FALLBACK_MODEL;
     let model;
     try {
-        model = genAI.getGenerativeModel({ model: modelName });
+      model = genAI.getGenerativeModel({ model: modelName });
     } catch (e) {
-        model = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
+      model = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
     }
 
-    let prompt = SYSTEM_PROMPT
+    if (body.type === "fix") {
+      const prompt = (body.rewriteType === "red" ? FIX_RED_PROMPT : FIX_YELLOW_PROMPT)
+        .replace("{sentence}", body.sentence);
+
+      let rewritten = "";
+      try {
+        const result = await model.generateContent(prompt);
+        rewritten = stripMarkdown(result.response.text());
+      } catch (err) {
+        const fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
+        const result = await fallbackModel.generateContent(prompt);
+        rewritten = stripMarkdown(result.response.text());
+      }
+      return NextResponse.json({ rewritten });
+    }
+
+    const { fungsi, kataKunci, lokasi, artikelContoh, contentLang } = body;
+    let prompt = CREATE_SYSTEM_PROMPT
       .replace("{FUNGSI}", fungsi)
       .replace("{KATA_KUNCI}", kataKunci)
       .replace("{LOKASI}", lokasi || "Indonesia");
@@ -84,13 +129,9 @@ export async function POST(req: NextRequest) {
         let result = await model.generateContent(prompt);
         responseText = result.response.text();
     } catch (err: any) {
-        if (err.message.includes("not found") || err.message.includes("not supported")) {
-            const fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
-            let result = await fallbackModel.generateContent(prompt);
-            responseText = result.response.text();
-        } else {
-            throw err;
-        }
+        const fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
+        let result = await fallbackModel.generateContent(prompt);
+        responseText = result.response.text();
     }
 
     const getWordCount = (text: string) => text.split(/\s+/).filter(w => w.length > 0).length;
@@ -101,12 +142,9 @@ export async function POST(req: NextRequest) {
              `${responseText}\n\n${EXPANSION_PROMPT.replace("{KATA_KUNCI}", kataKunci)}`
            );
            responseText = expansionResult.response.text();
-       } catch (e) {
-           // Ignore expansion error and return what we have
-       }
+       } catch (e) {}
     }
 
-    // Parse
     const sections = responseText.split("---");
     let article = "";
     let meta = "";
@@ -120,7 +158,6 @@ export async function POST(req: NextRequest) {
 
     if (!article) article = responseText;
 
-    // Post-processing
     article = stripMarkdown(article);
     meta = stripMarkdown(meta);
 
