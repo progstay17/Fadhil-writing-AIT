@@ -58,5 +58,13 @@
     "refining": "输出不符合要求，正在优化...",
     "copied": "已复制！"
   },
+  "image_gen": {
+    "title": "生成图片",
+    "prompt_label": "图片提示词 (可编辑)",
+    "generate_button": "生成",
+    "download_button": "下载 JPG",
+    "error": "图片加载失败。",
+    "retry": "重试"
+  },
   "footer": "for AIT from Fadhil Ghifarion 法迪"
 }
