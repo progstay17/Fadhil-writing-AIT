@@ -56,16 +56,14 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Using the requested model string directly as per user request
-    // The previous mapping to gemini-2.0-flash-exp caused a 404
-    let modelName = requestedModel || "gemini-1.5-flash";
+    const FALLBACK_MODEL = "gemini-flash-latest";
+    let modelName = requestedModel || FALLBACK_MODEL;
 
     let model;
     try {
         model = genAI.getGenerativeModel({ model: modelName });
     } catch (e) {
-        // Fallback if the requested model name is not supported by the current SDK/API
-        model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        model = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
     }
 
     let prompt = SYSTEM_PROMPT
@@ -86,9 +84,8 @@ export async function POST(req: NextRequest) {
         let result = await model.generateContent(prompt);
         responseText = result.response.text();
     } catch (err: any) {
-        // Double fallback if the generation itself fails due to model name
         if (err.message.includes("not found") || err.message.includes("not supported")) {
-            const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const fallbackModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
             let result = await fallbackModel.generateContent(prompt);
             responseText = result.response.text();
         } else {
