@@ -1,6 +1,10 @@
 {
   "title": "AIT Writing for 潮际好麦",
   "subtitle": "Hasilkan artikel produk otomatis via LLM",
+  "tabs": {
+    "create": "Create Content",
+    "fix": "Perbaiki Kalimat"
+  },
   "fields": {
     "functions": "功能 (Fungsi)",
     "keywords": "关键词/标题 (Kata Kunci/Titel)",
@@ -9,10 +13,20 @@
     "functions_placeholder": "Masukkan fungsi produk...",
     "keywords_placeholder": "Masukkan kata kunci atau judul...",
     "location_placeholder": "Masukkan lokasi (misal: Jakarta)...",
-    "sample_placeholder": "Tempel artikel contoh di sini..."
+    "sample_placeholder": "Tempel artikel contoh di sini...",
+    "original_sentence": "Kalimat asli:",
+    "sentence_placeholder": "Masukkan kalimat yang sulit dibaca di sini...",
+    "edit_level": "Tingkat agresivitas edit:",
+    "yellow_label": "Kuning",
+    "yellow_desc": "Sedang: Kurangi kerumitan, Grade 8-9.",
+    "red_label": "Merah",
+    "red_desc": "Tinggi: Sederhanakan drastis, Grade 6-7.",
+    "content_lang": "Content:",
+    "model_label": "Model:"
   },
   "buttons": {
     "generate": "Generate",
+    "fix_now": "Perbaiki Sekarang",
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
@@ -21,7 +35,13 @@
   "output": {
     "article": "Artikel Lengkap",
     "meta": "Meta Description",
-    "slug": "Slug URL"
+    "slug": "Slug URL",
+    "fix_result": "Hasil Perbaikan",
+    "rewritten_label": "Kalimat hasil perbaikan:",
+    "rewritten_placeholder": "Kalimat hasil perbaikan akan muncul di sini...",
+    "generation_output": "Generation Output",
+    "word_count": "Word Count",
+    "seo_keywords": "SEO Keywords"
   },
   "seo": {
     "word_count": "Word Count",
@@ -30,7 +50,9 @@
   },
   "messages": {
     "required": "Fungsi dan Kata Kunci harus terisi!",
+    "sentence_required": "Masukkan kalimat yang ingin diperbaiki!",
     "generating": "Sedang menghasilkan...",
+    "fixing": "Sedang memperbaiki...",
     "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
     "copied": "Berhasil disalin!"
   },

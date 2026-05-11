@@ -1,6 +1,10 @@
 {
   "title": "AIT Writing for 潮际好麦",
   "subtitle": "Automatically generate product articles via LLM",
+  "tabs": {
+    "create": "Create Content",
+    "fix": "Fix Sentence"
+  },
   "fields": {
     "functions": "功能 (Functions)",
     "keywords": "关键词/标题 (Keywords/Title)",
@@ -9,10 +13,20 @@
     "functions_placeholder": "Enter product functions...",
     "keywords_placeholder": "Enter keywords or title...",
     "location_placeholder": "Enter location (e.g., London)...",
-    "sample_placeholder": "Paste sample article here..."
+    "sample_placeholder": "Paste sample article here...",
+    "original_sentence": "Original sentence:",
+    "sentence_placeholder": "Enter hard-to-read sentence here...",
+    "edit_level": "Edit aggressiveness level:",
+    "yellow_label": "Yellow",
+    "yellow_desc": "Medium: Reduce complexity, Grade 8-9.",
+    "red_label": "Red",
+    "red_desc": "High: Drastic simplification, Grade 6-7.",
+    "content_lang": "Content:",
+    "model_label": "Model:"
   },
   "buttons": {
     "generate": "Generate",
+    "fix_now": "Fix Now",
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
@@ -21,7 +35,13 @@
   "output": {
     "article": "Full Article",
     "meta": "Meta Description",
-    "slug": "Slug URL"
+    "slug": "Slug URL",
+    "fix_result": "Fix Result",
+    "rewritten_label": "Rewritten sentence:",
+    "rewritten_placeholder": "Rewritten sentence will appear here...",
+    "generation_output": "Generation Output",
+    "word_count": "Word Count",
+    "seo_keywords": "SEO Keywords"
   },
   "seo": {
     "word_count": "Word Count",
@@ -30,7 +50,9 @@
   },
   "messages": {
     "required": "Functions and Keywords are required!",
+    "sentence_required": "Please enter a sentence to fix!",
     "generating": "Generating...",
+    "fixing": "Fixing...",
     "refining": "Output doesn't meet requirements, refining...",
     "copied": "Copied!"
   },

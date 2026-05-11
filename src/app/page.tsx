@@ -114,7 +114,7 @@ Q: Pemula pertama kali jualan di Amazon, pilih yang mana?
 A: Budget terbatas: Zaotang + Gaoding. Mau hemat waktu: langsung 潮际好麦, satu tool cukup.
 
 Q: Untuk cross-border pakaian, rekomendasi apa?
-A: 潮际好麦. Foto model AI dan scene bisa otomatis, hemat biaya model.
+A: 潮际好麦. Foto model AI and scene bisa otomatis, hemat biaya model.
 Penutup
 Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau harus memilih satu yang "mata tertutup pun layak coba", di 2026 saya pilih 潮际好麦 — karena dia benar-benar membuat foto utama dan halaman detail jadi sepenuhnya AI.`);
   };
@@ -127,13 +127,13 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
       }
     } else {
       if (!sentenceInput) {
-        setMessage("Masukkan kalimat yang ingin diperbaiki!");
+        setMessage(t("messages.sentence_required"));
         return;
       }
     }
 
     setLoading(true);
-    setMessage(activeTab === "create" ? t("messages.generating") : "Sedang memperbaiki...");
+    setMessage(activeTab === "create" ? t("messages.generating") : t("messages.fixing"));
 
     try {
       const body = activeTab === "create"
@@ -211,7 +211,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                 )}
               >
                 <PlusCircle size={16} className="mr-2" />
-                Create Content
+                {t("tabs.create")}
               </button>
               <button
                 onClick={() => setActiveTab("fix")}
@@ -221,7 +221,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                 )}
               >
                 <Edit3 size={16} className="mr-2" />
-                Perbaiki Kalimat
+                {t("tabs.fix")}
               </button>
             </nav>
 
@@ -253,7 +253,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
               activeTab === "create" ? "bg-white shadow-sm text-blue-600" : "text-gray-500"
             )}
           >
-            Create
+            {t("tabs.create")}
           </button>
           <button
             onClick={() => setActiveTab("fix")}
@@ -262,7 +262,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
               activeTab === "fix" ? "bg-white shadow-sm text-blue-600" : "text-gray-500"
             )}
           >
-            Fix
+            {t("tabs.fix")}
           </button>
         </div>
       </div>
@@ -274,15 +274,15 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             <div className="flex justify-between items-start mb-2">
               <h2 className="font-semibold text-gray-800 flex items-center mt-1">
                 {activeTab === "create" ? (
-                  <><PlusCircle size={18} className="mr-2 text-blue-500" /> Create Details</>
+                  <><PlusCircle size={18} className="mr-2 text-blue-500" /> {t("tabs.create")}</>
                 ) : (
-                  <><Edit3 size={18} className="mr-2 text-orange-500" /> Sentence Fixer</>
+                  <><Edit3 size={18} className="mr-2 text-orange-500" /> {t("tabs.fix")}</>
                 )}
               </h2>
               <div className="flex flex-col items-end space-y-2">
                 {activeTab === "create" && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Content:</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t("fields.content_lang")}</span>
                     <select
                       value={contentLang}
                       onChange={(e) => setContentLang(e.target.value)}
@@ -296,7 +296,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                 )}
                 <div className="flex items-center space-x-2">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center">
-                    <Cpu size={10} className="mr-1" /> Model:
+                    <Cpu size={10} className="mr-1" /> {t("fields.model_label")}
                   </span>
                   <select
                     value={model}
@@ -370,17 +370,17 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Kalimat asli:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t("fields.original_sentence")}</label>
                     <textarea
                       className="w-full border rounded-lg p-4 text-sm focus:ring-2 focus:ring-orange-500 outline-none h-48 transition-all"
-                      placeholder="Masukkan kalimat yang sulit dibaca di sini..."
+                      placeholder={t("fields.sentence_placeholder")}
                       value={sentenceInput}
                       onChange={(e) => setSentenceInput(e.target.value)}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Tingkat agresivitas edit:</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">{t("fields.edit_level")}</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setRewriteType("yellow")}
@@ -391,9 +391,9 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       >
                         <div className="flex items-center mb-1">
                           <div className="w-3 h-3 rounded-full bg-yellow-400 mr-2" />
-                          <span className="font-bold text-sm">Kuning</span>
+                          <span className="font-bold text-sm">{t("fields.yellow_label")}</span>
                         </div>
-                        <p className="text-[10px] text-gray-500 leading-tight">Sedang: Kurangi kerumitan, Grade 8-9.</p>
+                        <p className="text-[10px] text-gray-500 leading-tight">{t("fields.yellow_desc")}</p>
                       </button>
                       <button
                         onClick={() => setRewriteType("red")}
@@ -404,9 +404,9 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       >
                         <div className="flex items-center mb-1">
                           <div className="w-3 h-3 rounded-full bg-red-500 mr-2" />
-                          <span className="font-bold text-sm">Merah</span>
+                          <span className="font-bold text-sm">{t("fields.red_label")}</span>
                         </div>
-                        <p className="text-[10px] text-gray-500 leading-tight">Tinggi: Sederhanakan drastis, Grade 6-7.</p>
+                        <p className="text-[10px] text-gray-500 leading-tight">{t("fields.red_desc")}</p>
                       </button>
                     </div>
                   </div>
@@ -429,7 +429,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                 ) : (
                   activeTab === "create" ? <Sparkles size={18} className="mr-2" /> : <Wand2 size={18} className="mr-2" />
                 )}
-                {activeTab === "create" ? t("buttons.generate") : "Perbaiki Sekarang"}
+                {activeTab === "create" ? t("buttons.generate") : t("buttons.fix_now")}
               </button>
             </div>
 
@@ -455,9 +455,9 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             {message && (
               <div className={cn(
                 "p-3 rounded-lg text-xs flex items-center",
-                message.includes("Error") || message.includes("required") || message.includes("Masukkan") ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
+                message.includes("Error") || message.includes("required") || message.includes("Masukkan") || message.includes("enter") || message.includes("请输入") ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
               )}>
-                {message.includes("Error") || message.includes("Masukkan") ? <AlertCircle size={14} className="mr-2" /> : <Sparkles size={14} className="mr-2 animate-pulse" />}
+                {message.includes("Error") || message.includes("required") || message.includes("Masukkan") || message.includes("enter") || message.includes("请输入") ? <AlertCircle size={14} className="mr-2" /> : <Sparkles size={14} className="mr-2 animate-pulse" />}
                 {message}
               </div>
             )}
@@ -470,7 +470,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
             <div className="flex justify-between items-center">
               <h2 className="font-semibold text-gray-800 flex items-center">
                 <FileText size={18} className="mr-2 text-green-500" />
-                {activeTab === "create" ? "Generation Output" : "Hasil Perbaikan"}
+                {activeTab === "create" ? t("output.generation_output") : t("output.fix_result")}
               </h2>
 
               {activeTab === "create" && (
@@ -480,14 +480,14 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       "w-2.5 h-2.5 rounded-full mr-1.5",
                       articleOutput.split(/\s+/).filter(w => w.length > 0).length >= 800 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
                     )} />
-                    <span className="text-[10px] text-gray-500 font-medium">Word Count</span>
+                    <span className="text-[10px] text-gray-500 font-medium">{t("output.word_count")}</span>
                   </div>
                   <div className="flex items-center">
                     <div className={cn(
                       "w-2.5 h-2.5 rounded-full mr-1.5",
                       (articleOutput.match(new RegExp(kataKunci, "gi"))?.length || 0) >= 3 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-yellow-400"
                     )} />
-                    <span className="text-[10px] text-gray-500 font-medium">SEO Keywords</span>
+                    <span className="text-[10px] text-gray-500 font-medium">{t("output.seo_keywords")}</span>
                   </div>
                 </div>
               )}
@@ -512,7 +512,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       id="output-article"
                       className="w-full border rounded-lg p-4 text-sm bg-gray-50 min-h-[300px] overflow-auto whitespace-pre-wrap leading-relaxed text-gray-800"
                     >
-                      {articleOutput || <span className="text-gray-300 italic">Generated article will appear here...</span>}
+                      {articleOutput || <span className="text-gray-300 italic">{t("output.rewritten_placeholder")}</span>}
                     </div>
                   </div>
 
@@ -559,7 +559,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
               ) : (
                 <div className="relative group flex-1 flex flex-col">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-gray-600">Kalimat hasil perbaikan:</h3>
+                    <h3 className="text-sm font-semibold text-gray-600">{t("output.rewritten_label")}</h3>
                     <button
                       onClick={() => copyToClipboard(sentenceOutput)}
                       className="text-gray-400 hover:text-orange-600 transition-colors"
@@ -573,7 +573,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       rewriteType === "yellow" ? "focus-within:ring-2 focus-within:ring-yellow-400" : "focus-within:ring-2 focus-within:ring-red-400"
                     )}
                   >
-                    {sentenceOutput || <span className="text-gray-300 italic">Kalimat hasil perbaikan akan muncul di sini...</span>}
+                    {sentenceOutput || <span className="text-gray-300 italic">{t("output.rewritten_placeholder")}</span>}
                   </div>
                 </div>
               )}
