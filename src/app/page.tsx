@@ -234,7 +234,8 @@ export default function Home() {
                   params: { fungsi, kataKunci }
               };
               setHistory(prev => [result, ...prev].slice(0, 5));
-              handleAutoGenerateImagePrompt(kataKunci, kataKunci, article.trim());
+              const firstLine = article.trim().split("\n")[0].replace(/^#+\s*/, "").trim();
+              handleAutoGenerateImagePrompt(firstLine || kataKunci, kataKunci, article.trim());
           }
       } else {
           const data = await res.json();
@@ -289,11 +290,7 @@ export default function Home() {
   };
 
   const handleGenerateImage = () => {
-    let promptToUse = imagePrompt;
-    if (!promptToUse && kataKunci) {
-      promptToUse = `Professional product photo of ${kataKunci}, clean background, e-commerce style, high quality`;
-      setImagePrompt(promptToUse);
-    }
+    const promptToUse = imagePrompt;
     if (!promptToUse) return;
 
     setIsImageLoading(true);
@@ -466,8 +463,8 @@ export default function Home() {
                     className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none"
                   >
                     <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                    <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                   </select>
                 </div>
               </div>
