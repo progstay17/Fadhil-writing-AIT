@@ -326,8 +326,8 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
           };
           setHistory(prev => [result, ...prev].slice(0, 5));
       }
-    } catch (err: Error) {
-      setMessage(err.message || "Error generating content.");
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : "Error generating content.");
     } finally {
       stopLoadingAnimation();
     }
