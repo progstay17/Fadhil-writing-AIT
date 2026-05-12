@@ -60,6 +60,7 @@ export default function Home() {
   const [generatedImageUrl, setGeneratedImageUrl] = useState("");
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isPromptLoading, setIsPromptLoading] = useState(false);
 
   // Fix Sentence States
   const [sentenceInput, setSentenceInput] = useState("");
@@ -233,6 +234,7 @@ export default function Home() {
                   params: { fungsi, kataKunci }
               };
               setHistory(prev => [result, ...prev].slice(0, 5));
+              handleAutoGenerateImagePrompt(kataKunci, kataKunci, article.trim());
           }
       } else {
           const data = await res.json();
@@ -255,6 +257,36 @@ export default function Home() {
     }
   };
 
+
+
+  const handleAutoGenerateImagePrompt = async (title: string, keywords: string, article: string) => {
+    setIsPromptLoading(true);
+    try {
+      const excerpt = article.substring(0, 300);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "image_prompt",
+          title,
+          kataKunci: keywords,
+          articleExcerpt: excerpt,
+          model
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.prompt) {
+          setImagePrompt(data.prompt);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to generate image prompt", err);
+    } finally {
+      setIsPromptLoading(false);
+    }
+  };
 
   const handleGenerateImage = () => {
     let promptToUse = imagePrompt;
@@ -566,13 +598,7 @@ export default function Home() {
                   </div>
                   <div className="mt-8 border-t pt-6">
                     <button
-                      onClick={() => {
-                        const nextState = !isImageSectionExpanded;
-                        setIsImageSectionExpanded(nextState);
-                        if (nextState && !imagePrompt && kataKunci) {
-                          setImagePrompt(`Professional product photo of ${kataKunci}, clean background, e-commerce style, high quality`);
-                        }
-                      }}
+                      onClick={() => setIsImageSectionExpanded(!isImageSectionExpanded)}
                       className="flex items-center justify-between w-full text-gray-700 hover:text-blue-600 transition-colors"
                     >
                       <div className="flex items-center font-bold text-sm">
@@ -587,12 +613,19 @@ export default function Home() {
                         <div>
                           <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{t("image_gen.prompt_label")}</label>
                           <div className="flex space-x-2">
-                            <input
-                              type="text"
-                              className="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                              value={imagePrompt}
-                              onChange={(e) => setImagePrompt(e.target.value)}
-                            />
+                            <div className="flex-1 relative">
+                              <textarea
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                                value={imagePrompt}
+                                onChange={(e) => setImagePrompt(e.target.value)}
+                                placeholder={isPromptLoading ? "Generating prompt..." : ""}
+                              />
+                              {isPromptLoading && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-lg">
+                                  <RotateCcw size={16} className="animate-spin text-blue-600" />
+                                </div>
+                              )}
+                            </div>
                             <button
                               onClick={handleGenerateImage}
                               disabled={isImageLoading || !imagePrompt}
