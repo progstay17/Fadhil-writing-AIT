@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const FALLBACK_MODEL = "gemini-flash-latest";
-const ALLOWED_MODELS = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-flash-latest"];
+const FALLBACK_MODEL = "gemini-2.0-flash";
+const ALLOWED_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
 
 function sanitize(text: string): string {
   if (!text) return "";
@@ -10,15 +10,33 @@ function sanitize(text: string): string {
   return text.replace(/[{}]/g, "").trim();
 }
 
-function getErrorMessage(error: any): string {
-  const message = error?.message || "";
+function getErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
   if (message.includes("API_KEY_INVALID")) return "Invalid API Key. Please check your configuration.";
   if (message.includes("RATE_LIMIT_EXCEEDED") || message.includes("429")) return "Rate limit exceeded. Please try again in a few minutes.";
   if (message.includes("model not found") || message.includes("404")) return "Model not found or not supported in this region.";
   return "An unexpected error occurred during generation.";
 }
 
-const CREATE_SYSTEM_PROMPT = `Language: {LANG_INSTRUCTION}
+const CREATE_SYSTEM_PROMPT = `ARTICLE STYLE — if the user provides an ARTIKEL_CONTOH, mirror its structure and tone closely. If no ARTIKEL_CONTOH is provided, automatically choose one of these three styles based on the fungsi and kataKunci input. Do not tell the user which style you chose. Just write in that style.
+
+Style 1: REVIEW / LISTICLE
+Use when: topic is about comparing tools, ranking software, or evaluating multiple options.
+Structure: personal experience opener → quick conclusion summary → ranked breakdown → FAQ.
+Tone: first-person, casual, direct.
+
+Style 2: NEW FEATURE / ANNOUNCEMENT
+Use when: topic is about a product update, new feature, version upgrade, or capability launch.
+Structure: industry context → feature breakdown → step-by-step usage → merchant result data → forward-looking close.
+Tone: formal, informative, data-driven.
+
+Style 3: PROBLEM / SOLUTION
+Use when: topic is about solving a seller pain point, helping merchants decide, or addressing a common struggle.
+Structure: third-party observer angle → problem in current market → why common tools fail → how 潮际好麦 solves it → conclusion.
+Tone: objective, analytical, trust-building.
+
+
+Language: {LANG_INSTRUCTION}
 
 Tone and Persona Guide:
 Write from a real experience or story angle. Structure the article around a clear problem then a logical solution. Be persuasive and logical without feeling promotional or pushy. You are a trusted advisor sharing valuable insights.
@@ -41,7 +59,7 @@ Writing Style Rules:
 - Struktur: Judul (H1) -> Intro (masalah) -> Fitur & Manfaat (solusi) -> Implementasi (GEO: {LOKASI}) -> FAQ -> CTA halus.
 
 Sample Reference Instruction:
-Use the provided ARTIKEL_CONTOH only as a reference for tone and structure. DO NOT copy any sentences or phrases directly from it.
+ARTIKEL_CONTOH is a reference for tone and structure only. Do not copy any sentences from it. Use it to understand the writing style, then apply that style to the new topic.
 
 Output Format (STRICT):
 You must output exactly three parts using the unique delimiters as shown in the example below. Do not include any introductory or concluding text outside these tags.
@@ -86,7 +104,7 @@ export async function POST(req: NextRequest) {
       modelName = FALLBACK_MODEL;
     }
 
-    let model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     if (body.type === "fix") {
       const isRed = body.rewriteType === "red";
@@ -100,6 +118,27 @@ export async function POST(req: NextRequest) {
 
       const result = await model.generateContent(prompt);
       return NextResponse.json({ rewritten: result.response.text().trim() });
+    }
+
+
+    if (body.type === "image_prompt") {
+      const title = sanitize(body.title || "");
+      const keywords = sanitize(body.kataKunci || "");
+      const excerpt = sanitize(body.articleExcerpt || "");
+
+      const imagePromptInstruction = `You are an expert at writing image generation prompts for AI image tools.
+
+Based on the article content below, write a single image generation prompt in English that visually represents the topic. The image should look like a professional e-commerce or tech marketing photo — realistic, modern, clean. Think scenes like: a seller at a desk with product photos on screen, AI workflow on a laptop, product displayed with multiple generated angles around it, professional studio setup. Match the scene specifically to what the article is actually about.
+
+Output only the prompt text. No explanation, no quotes, no labels, no extra text.
+
+Article title: ${title}
+Keywords: ${keywords}
+Article excerpt: ${excerpt}`;
+
+      const result = await model.generateContent(imagePromptInstruction);
+      const prompt = result.response.text().trim();
+      return NextResponse.json({ prompt });
     }
 
     // CREATE CONTENT with streaming support
@@ -134,11 +173,9 @@ export async function POST(req: NextRequest) {
 
     const stream = new ReadableStream({
       async start(controller) {
-        let fullText = "";
         try {
           for await (const chunk of result.stream) {
             const chunkText = chunk.text();
-            fullText += chunkText;
             controller.enqueue(new TextEncoder().encode(chunkText));
           }
 
@@ -159,7 +196,7 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Generate Error:", error);
     const userMessage = getErrorMessage(error);
     return NextResponse.json({ error: userMessage }, { status: 500 });
