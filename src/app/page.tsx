@@ -210,6 +210,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
         const data = await res.json();
         if (data.prompt) {
           setImagePrompt(data.prompt);
+          setIsImageSectionExpanded(true);
         }
       }
     } catch (err) {

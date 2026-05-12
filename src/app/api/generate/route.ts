@@ -18,7 +18,9 @@ function getErrorMessage(error: unknown): string {
   return "An unexpected error occurred during generation.";
 }
 
-const CREATE_SYSTEM_PROMPT = `ARTICLE STYLE — if the user provides an ARTIKEL_CONTOH, mirror its structure and tone closely. If no ARTIKEL_CONTOH is provided, automatically choose one of these three styles based on the fungsi and kataKunci input. Do not tell the user which style you chose. Just write in that style.
+const CREATE_SYSTEM_PROMPT = `Language: {LANG_INSTRUCTION}
+
+ARTICLE STYLE — if the user provides an ARTIKEL_CONTOH, mirror its structure and tone closely. If no ARTIKEL_CONTOH is provided, automatically choose one of these three styles based on the fungsi and kataKunci input. Do not tell the user which style you chose. Just write in that style.
 
 Style 1: REVIEW / LISTICLE
 Use when: topic is about comparing tools, ranking software, or evaluating multiple options.
@@ -35,8 +37,6 @@ Use when: topic is about solving a seller pain point, helping merchants decide, 
 Structure: third-party observer angle → problem in current market → why common tools fail → how 潮际好麦 solves it → conclusion.
 Tone: objective, analytical, trust-building.
 
-
-Language: {LANG_INSTRUCTION}
 
 Tone and Persona Guide:
 Write from a real experience or story angle. Structure the article around a clear problem then a logical solution. Be persuasive and logical without feeling promotional or pushy. You are a trusted advisor sharing valuable insights.
@@ -126,12 +126,25 @@ export async function POST(req: NextRequest) {
       const keywords = sanitize(body.kataKunci || "");
       const excerpt = sanitize(body.articleExcerpt || "");
 
-      const imagePromptInstruction = `You are an expert at writing image generation prompts for AI image tools.
+      const imagePromptInstruction = `You are an expert at writing prompts for AI image generation tools like Pollinations.ai.
 
-Based on the article content below, write a single image generation prompt in English that visually represents the topic. The image should look like a professional e-commerce or tech marketing photo — realistic, modern, clean. Think scenes like: a seller at a desk with product photos on screen, AI workflow on a laptop, product displayed with multiple generated angles around it, professional studio setup. Match the scene specifically to what the article is actually about.
+Your task: write ONE image generation prompt in English based on the article below. The image will be used as a hero/thumbnail for the article.
 
-Output only the prompt text. No explanation, no quotes, no labels, no extra text.
+Rules:
+- The image must visually match the SPECIFIC topic of the article, not a generic e-commerce scene
+- Think like a photographer or art director — what scene would best represent this article?
+- Style: realistic, professional, modern, high quality, natural lighting
+- No text, no logos, no watermarks in the image
+- Be specific about: subject, setting, mood, composition
+- Output only the prompt. No explanation, no quotes, no labels.
 
+Good prompt examples by topic:
+- Article about AI product photo generator → "E-commerce seller uploading product photo on laptop, multiple AI-generated product images appearing on screen around the original, clean modern home office, warm lighting, realistic photography"
+- Article about background removal tool → "Close-up of a laptop screen showing a product photo being processed with background removed, clean white studio environment, professional photography"
+- Article about Amazon listing optimization → "Professional seller at standing desk with dual monitors showing Amazon seller dashboard and product listings, organized modern office, natural window light"
+- Article about clothing model AI → "Fashion e-commerce workflow on laptop screen showing AI-generated model wearing different outfits, clothing items displayed alongside, bright clean workspace"
+
+Now write a prompt for this article:
 Article title: ${title}
 Keywords: ${keywords}
 Article excerpt: ${excerpt}`;
