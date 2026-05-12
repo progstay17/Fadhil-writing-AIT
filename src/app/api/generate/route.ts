@@ -18,7 +18,17 @@ function getErrorMessage(error: any): string {
   return "An unexpected error occurred during generation.";
 }
 
-const CREATE_SYSTEM_PROMPT = `Language: {LANG_INSTRUCTION}
+const CREATE_SYSTEM_PROMPT = `ARTICLE STYLE SELECTION — choose one style based on the product function described:
+
+1. REVIEW / LISTICLE style — use when the topic is about comparing tools, ranking software, or evaluating options. Structure: personal experience opener, quick conclusion summary, ranked list with explanations, FAQ section at the end. Tone: first-person, casual, direct.
+
+2. NEW FEATURE / ANNOUNCEMENT style — use when the topic is about a product update, new feature launch, or capability upgrade. Structure: industry context opener, feature breakdown, step-by-step usage flow, merchant testimonial or result data, forward-looking close. Tone: formal, informative, data-driven.
+
+3. PROBLEM / SOLUTION style — use when the topic is about solving a seller pain point, comparing AI tools in general, or helping merchants decide. Structure: third-party or observer angle, problem with current market, why common tools fail, how 潮际好麦 solves it, conclusion. Tone: objective, analytical, trust-building.
+
+Do not always default to the same style. Read the fungsi field carefully and pick the most fitting structure.
+
+Language: {LANG_INSTRUCTION}
 
 Tone and Persona Guide:
 Write from a real experience or story angle. Structure the article around a clear problem then a logical solution. Be persuasive and logical without feeling promotional or pushy. You are a trusted advisor sharing valuable insights.
@@ -41,7 +51,7 @@ Writing Style Rules:
 - Struktur: Judul (H1) -> Intro (masalah) -> Fitur & Manfaat (solusi) -> Implementasi (GEO: {LOKASI}) -> FAQ -> CTA halus.
 
 Sample Reference Instruction:
-Use the provided ARTIKEL_CONTOH only as a reference for tone and structure. DO NOT copy any sentences or phrases directly from it.
+The ARTIKEL_CONTOH provided is a reference for tone and structure only. Do not copy sentences from it. Use it to understand the writing style, then apply that style to the new topic.
 
 Output Format (STRICT):
 You must output exactly three parts using the unique delimiters as shown in the example below. Do not include any introductory or concluding text outside these tags.
@@ -86,7 +96,7 @@ export async function POST(req: NextRequest) {
       modelName = FALLBACK_MODEL;
     }
 
-    let model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     if (body.type === "fix") {
       const isRed = body.rewriteType === "red";

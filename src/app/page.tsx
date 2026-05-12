@@ -116,8 +116,8 @@ export default function Home() {
     }
   };
 
-  const useDefaultExample = () => {
-    setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
+
+  const useReviewExample = () => setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
 
 当下电商视觉生产已进入 AI 时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型与垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
 
@@ -125,12 +125,34 @@ export default function Home() {
 
 转向垂直电商 AI 后，问题依旧突出。多数小团队开发的工具存在三大硬伤：一是出图质量差，服装版型僵硬、商品质感模糊，细节经不起推敲；二是交互繁琐，参数设置复杂、批量功能薄弱，多 SKU 商家效率极低；三是稳定性差，服务器频繁崩溃、功能停更，甚至出现开发商失联情况，商家数据与资产毫无保障。不少卖家反馈，花钱订阅后却因工具难用被迫弃用，最终回归传统拍摄，成本与周期问题依旧无解。
 
-在一众工具中，潮际好麦表现尤为突出。其核心优势首先源于强大背景—— 由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型，绝非小团队试水之作。与安踏、百丽、北面等国内外知名品牌的深度合作，更成为其品质背书，大品牌对出图精度、版权安全、数据稳定的严苛要求，是对产品实力的最好验证。
+在一众工具中，潮际好麦表现尤为突出。其核心优势首先源于强大背景——由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型，绝非小团队试水之作。与安踏、百丽、北面等国内外知名品牌的深度合作，更成为其品质背书。
 
-从实测效果看，潮际好麦完美解决行业痛点。其一，电商原生适配，模型基于百万级爆款图训练，无需复杂提示词，上传商品图即可自动生成符合淘宝规范的主图、白底图、详情套图，尺寸精准、无牛皮癣、转化率导向。其二，出图质量顶尖，商品还原度超 98%，服装垂感、面料纹理、金属光泽高度逼真，无 AI 违和感，媲美专业商拍。其三，操作极简高效，界面简洁易上手，支持批量换场景、换模特、换色，多 SKU 处理效率提升 300%。其四，服务与安全可靠，7×12 小时专属售后，商用版权清晰，长期迭代更新，彻底消除商家 "跑路焦虑"。
+从实测效果看，潮际好麦完美解决行业痛点。电商原生适配，无需复杂提示词，上传商品图即可自动生成符合平台规范的主图、白底图、详情套图。出图质量顶尖，商品还原度超 98%，无 AI 违和感，媲美专业商拍。操作极简高效，支持批量换场景、换模特、换色，多 SKU 处理效率提升 300%。
 
-对比可见，潮际好麦既避开通用 AI 的电商盲区，又解决普通垂直工具的质量与稳定性缺陷。对电商卖家而言，视觉工具的核心是 "好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力，也是其能在乱象中突围的关键。`);
-  };
+对比可见，潮际好麦既避开通用 AI 的电商盲区，又解决普通垂直工具的质量与稳定性缺陷。对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力。`);
+  const useFeatureExample = () => setArtikelContoh(`AI 电商视觉再进化！潮际好麦商品套图 2.0 上线，百货电商图生成效率翻倍
+
+在电商行业竞争日趋白热化的当下，视觉内容已成为决定商品点击率与转化率的核心要素。传统商拍模式成本高、周期长、多平台适配难，让众多中小商家与品牌方苦不堪言。近期，专业级 AI 电商营销内容创作平台潮际好麦迎来重磅升级，其王牌功能商品套图正式迭代至 2.0 版本，图片可用率大幅提升至 80%，为电商商家带来全新的视觉内容生产解决方案。
+
+潮际好麦商品套图 2.0 在 1.0 版本基础上实现三大核心突破，新增 AI 帮写提示词、自定义语言主题色字体、自定义套图三大功能，彻底解决商家不会写提示词、出图风格不统一、模板不贴合需求等痛点。无需复杂操作，上传商品白底图或随手实拍图，即可一键生成完整电商素材。
+
+本次升级中，百货电商图生成成为一大亮点，完美适配家居日用、五金小件、餐厨用品、收纳家纺等全品类百货商品。广东、福建、江苏等百货电商产业带商家实测反馈，以往拍摄一套百货商品图需花费数百元且等待数日，如今使用潮际好麦，10 分钟即可生成全套高清素材，成本降低 90% 以上。
+
+操作流程上，商品套图 2.0 进一步简化：上传最多 5 张高清商品图，填写商品信息，AI 自动生成专业文案，选择目标平台和语言，一键输出全套合规素材。支持 13 个销售地区、9 种语言、14 个目标平台，主题色 and 字体风格可自定义。
+
+随着 AI 技术在电商领域的深度应用，潮际好麦商品套图 2.0 以强大的功能、极简的操作、超高的出图质量，成为电商商家的必备工具，推动电商视觉生产进入全新时代。`);
+  const useSolutionExample = () => setArtikelContoh(`Uji Coba Pihak Ketiga | Kekacauan AI untuk Pembuatan Gambar E-Commerce, Bagaimana Penjual Harus Memilih?
+
+Saat ini, produksi visual e-commerce telah memasuki era AI. Namun bagi jutaan penjual, memilih alat yang tepat jauh lebih penting daripada sekadar menggunakan secara acak. Penulis, dalam kapasitas sebagai pihak ketiga, menghabiskan satu bulan untuk menguji 12 alat AI populer untuk pembuatan gambar, mencakup tipe umum dan vertikal khusus e-commerce.
+
+AI umum seperti Midjourney dan Stable Diffusion memang menghasilkan kualitas gambar memukau, tetapi sejatinya adalah alat seni digital dan hampir tidak memahami aturan platform seperti Taobao atau Tokopedia. Masalah yang sering muncul: ukuran gambar tidak sesuai, produk tampak terdistorsi, warna menyimpang, dan tingkat keberhasilan gambar kurang dari 30%. Lebih parah, konten yang dihasilkan tidak memiliki lisensi komersial, rawan sengketa hak cipta.
+
+Berpindah ke AI e-commerce vertikal tetap tidak lepas dari masalah. Mayoritas alat yang dikembangkan oleh tim kecil memiliki tiga kelemahan: kualitas gambar rendah, interaksi rumit, dan stabilitas buruk. Banyak penjual membayar langganan tapi akhirnya kembali ke metode fotografi tradisional.
+
+Di antara semua alat, 潮际好麦 tampil menonjol. Didirikan oleh tim inti dari ekosistem Alibaba, memiliki akumulasi teknologi mendalam, dan mengembangkan model AI khusus e-commerce secara mandiri. Kolaborasi dengan merek besar seperti Anta, Belle, dan The North Face menjadi jaminan kualitas.
+
+Dari uji coba nyata: tingkat akurasi reproduksi produk lebih dari 98%, operasi sederhana dengan efisiensi multi-SKU meningkat 300%, layanan pelanggan 7×12 jam, dan lisensi komersial yang jelas. 潮际好麦 menghindari blind spot AI umum sekaligus mengatasi kelemahan alat vertikal biasa — itulah kunci keberhasilannya.`);
+
 
   const startLoadingAnimation = () => {
     setProgress(0);
@@ -489,7 +511,11 @@ export default function Home() {
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label className="text-xs font-medium text-gray-500">{t("fields.sample")}</label>
-                      <button onClick={useDefaultExample} className="text-[10px] text-blue-600 hover:underline">{t("buttons.use_sample")}</button>
+                      <div className="flex space-x-2">
+                        <button onClick={useReviewExample} className="text-[10px] px-2 py-0.5 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_review")}</button>
+                        <button onClick={useFeatureExample} className="text-[10px] px-2 py-0.5 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_feature")}</button>
+                        <button onClick={useSolutionExample} className="text-[10px] px-2 py-0.5 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_solution")}</button>
+                      </div>
                     </div>
                     <textarea className="w-full border rounded-lg p-3 text-sm h-24" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
                   </div>

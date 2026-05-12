@@ -32,7 +32,10 @@
     "clear_input": "清除输入",
     "paste": "粘贴",
     "copy": "复制",
-    "use_sample": "默认示例"
+    "use_sample": "默认示例",
+    "sample_review": "📊 测评",
+    "sample_feature": "🆕 功能上新",
+    "sample_solution": "💡 解决方案"
   },
   "output": {
     "article": "完整文章",

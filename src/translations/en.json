@@ -32,7 +32,10 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
-    "use_sample": "Default Example"
+    "use_sample": "Default Example",
+    "sample_review": "📊 Review",
+    "sample_feature": "🆕 New Feature",
+    "sample_solution": "💡 Solution"
   },
   "output": {
     "article": "Full Article",
