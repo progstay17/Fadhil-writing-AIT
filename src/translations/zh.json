@@ -32,7 +32,10 @@
     "clear_input": "清除输入",
     "paste": "粘贴",
     "copy": "复制",
-    "use_sample": "使用列表示例"
+    "use_sample": "默认示例",
+    "sample_review": "📊 测评",
+    "sample_feature": "🆕 功能上新",
+    "sample_solution": "💡 解决方案"
   },
   "output": {
     "article": "完整文章",
@@ -57,6 +60,14 @@
     "fixing": "正在修改...",
     "refining": "输出不符合要求，正在优化...",
     "copied": "已复制！"
+  },
+  "image_gen": {
+    "title": "生成图片",
+    "prompt_label": "图片提示词 (可编辑)",
+    "generate_button": "生成",
+    "download_button": "下载 JPG",
+    "error": "图片加载失败。",
+    "retry": "重试"
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪"
 }
