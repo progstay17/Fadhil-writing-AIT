@@ -273,30 +273,45 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
             setArticleOutput(prev => prev + chunk);
           }
 
-          // Post-parse tags
-          const article = fullText.split("<<<ARTIKEL>>>")[1]?.split("<<<META>>>")[0] || "";
-          const meta = fullText.split("<<<META>>>")[1]?.split("<<<SLUG>>>")[0] || "";
-          const slug = fullText.split("<<<SLUG>>>")[1] || "";
+          // Post-parse tags using indexOf for reliability
+          const fullTrimmed = fullText.trim();
+          const DELIM_ARTIKEL = "<<<ARTIKEL>>>";
+          const DELIM_META = "<<<META>>>";
+          const DELIM_SLUG = "<<<SLUG>>>";
 
-          if (article) {
-              setArticleOutput(article.trim());
-              setMetaOutput(meta.trim());
-              setSlugOutput(slug.trim());
+          const artikelStart = fullTrimmed.indexOf(DELIM_ARTIKEL);
+          const metaStart = fullTrimmed.indexOf(DELIM_META);
+          const slugStart = fullTrimmed.indexOf(DELIM_SLUG);
 
-              // Add to history
-              const result: GenerationResult = {
-                  id: Date.now(),
-                  timestamp: new Date().toLocaleTimeString(),
-                  type: "create",
-                  article: article.trim(),
-                  meta: meta.trim(),
-                  slug: slug.trim(),
-                  params: { fungsi, kataKunci }
-              };
-              setHistory(prev => [result, ...prev].slice(0, 5));
-              const firstLine = article.trim().split("\n")[0].replace(/^#+\s*/, "").trim();
-              handleAutoGenerateImagePrompt(firstLine || kataKunci, kataKunci, article.trim());
-          }
+          const article = artikelStart !== -1 && metaStart !== -1
+            ? fullTrimmed.slice(artikelStart + DELIM_ARTIKEL.length, metaStart).trim()
+            : fullTrimmed;
+
+          const meta = metaStart !== -1 && slugStart !== -1
+            ? fullTrimmed.slice(metaStart + DELIM_META.length, slugStart).trim()
+            : "";
+
+          const slug = slugStart !== -1
+            ? fullTrimmed.slice(slugStart + DELIM_SLUG.length).trim()
+            : "";
+
+          setArticleOutput(article);
+          setMetaOutput(meta);
+          setSlugOutput(slug);
+
+          const historyResult: GenerationResult = {
+              id: Date.now(),
+              timestamp: new Date().toLocaleTimeString(),
+              type: "create",
+              article,
+              meta,
+              slug,
+              params: { fungsi, kataKunci }
+          };
+          setHistory(prev => [historyResult, ...prev].slice(0, 5));
+
+          const firstLine = article.split("\n")[0].replace(/^#+\s*/, "").trim();
+          handleAutoGenerateImagePrompt(firstLine || kataKunci, kataKunci, article);
       } else {
           const data = await res.json();
           setSentenceOutput(data.rewritten);
@@ -494,6 +509,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
                     onChange={(e) => setModel(e.target.value)}
                     className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none"
                   >
+                    {/* model selector - v2 */}
                     <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                     <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
                     <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
