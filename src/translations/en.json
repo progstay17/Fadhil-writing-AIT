@@ -32,7 +32,9 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
-    "use_sample": "Use Listicle Example"
+    "sample_review": "📊 Review",
+    "sample_feature": "🆕 New Feature",
+    "sample_solution": "💡 Solution"
   },
   "output": {
     "article": "Full Article",

@@ -32,7 +32,9 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
-    "use_sample": "Pakai Contoh Listicle"
+    "sample_review": "📊 Review",
+    "sample_feature": "🆕 Fitur Baru",
+    "sample_solution": "💡 Solusi"
   },
   "output": {
     "article": "Artikel Lengkap",
