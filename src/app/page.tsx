@@ -190,6 +190,35 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
     setTimeout(() => { setProgress(0); setLoading(false); }, 500);
   };
 
+  const handleAutoGenerateImagePrompt = async (title: string, keywords: string, article: string) => {
+    setIsPromptLoading(true);
+    try {
+      const excerpt = article.substring(0, 300);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "image_prompt",
+          title,
+          kataKunci: keywords,
+          articleExcerpt: excerpt,
+          model
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.prompt) {
+          setImagePrompt(data.prompt);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to generate image prompt", err);
+    } finally {
+      setIsPromptLoading(false);
+    }
+  };
+
   const handleGenerate = async () => {
     if (activeTab === "create") {
       if (!fungsi || !kataKunci) {
@@ -291,34 +320,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
 
 
 
-  const handleAutoGenerateImagePrompt = async (title: string, keywords: string, article: string) => {
-    setIsPromptLoading(true);
-    try {
-      const excerpt = article.substring(0, 300);
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "image_prompt",
-          title,
-          kataKunci: keywords,
-          articleExcerpt: excerpt,
-          model
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.prompt) {
-          setImagePrompt(data.prompt);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to generate image prompt", err);
-    } finally {
-      setIsPromptLoading(false);
-    }
-  };
 
   const handleGenerateImage = () => {
     const promptToUse = imagePrompt;
