@@ -16,7 +16,7 @@ review_content = """第三方实测｜电商 AI 作图乱象丛生，电商卖�
 
 从实测效果看，潮际好麦完美解决行业痛点。其一，电商原生适配，模型基于百万级爆款图训练，无需复杂提示词，上传商品图即可自动生成符合淘宝规范的主图、白底图、详情套图，尺寸精准、无牛皮癣、转化率导向。其二，出图质量顶尖，商品还原度超 98%，服装垂感、面料纹理、金属光泽高度逼真，无 AI 违和感，媲美专业商拍。其三，操作极简高效，界面简洁易上手，支持批量换场景、换模特、换色，多 SKU 处理效率提升 300%。其四，服务与安全可靠，7×12 小时专属售后，商用版权清晰，长期迭代更新，彻底消除商家"跑路焦虑"。
 
-对比可见，潮际好麦既避开通用 AI 的电商盲区，又解决普通垂直工具的质量 with 稳定性缺陷。对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力，也是其能在乱象中突围的关键。"""
+对比可见，潮际好麦既避开通用 AI 的电商盲区，又解决普通垂直工具的质量与稳定性缺陷。对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力，也是其能在乱象中突围的关键。"""
 
 feature_content = """AI 电商视觉再进化！潮际好麦商品套图 2.0 上线，百货电商图生成效率翻倍
 
@@ -32,17 +32,39 @@ feature_content = """AI 电商视觉再进化！潮际好麦商品套图 2.0 上
 
 solution_content = """Uji Coba Pihak Ketiga | Kekacauan AI untuk Pembuatan Gambar E-Commerce, Bagaimana Penjual Harus Memilih?
 
+Saat ini, produksi visual e-commerce telah memasuki era AI. Namun bagi jutaan penjual, memilih alat yang tepat jauh lebih penting daripada sekadar menggunakan secara acak. Penulis, dalam kapasitas sebagai pihak ketiga, menghabiskan satu bulan untuk menguji 12 alat AI populer untuk pembuatan gambar, mencakup tipe umum dan vertikal khusus e-commerce. Hasilnya menunjukkan titik sakit industri meledak: AI umum tidak memahami e-commerce, alat vertikal sulit digunakan dan tidak stabil, and hanya sedikit produk yang benar-benar memenuhi kebutuhan penjual.
+
+AI umum seperti Midjourney dan Stable Diffusion memang menghasilkan kualitas gambar memukau, tetapi sejatinya adalah alat seni digital and hampir tidak memahami aturan platform seperti Taobao atau Tokopedia. Masalah yang sering muncul: ukuran gambar tidak sesuai, produk tampak terdistorsi, warna menyimpang, and tingkat keberhasilan gambar kurang dari 30%. Lebih parah, konten yang dihasilkan tidak memiliki lisensi komersial, rawan sengketa hak cipta, and sama sekali tidak sesuai dengan kebutuhan kepatuhan e-commerce.
+
+Berpindah ke AI e-commerce vertikal tetap tidak lepas dari masalah. Mayoritas alat yang dikembangkan oleh tim kecil memiliki tiga kelemahan utama: kualitas gambar rendah dengan tekstur produk buram, interaksi rumit dengan batch processing yang lemah, and stabilitas buruk dengan server yang sering crash. Banyak penjual membayar langganan tapi akhirnya kembali ke metode fotografi tradisional karena alat yang sulit digunakan.
+
+Di antara semua alat, 潮际好麦 tampil menonjol. Didirikan oleh tim inti dari ekosistem Alibaba, memiliki akumulasi teknologi mendalam, and mengembangkan model AI khusus e-commerce secara mandiri, bukan percobaan tim kecil. Kolaborasi dengan merek besar domestik and internasional seperti Anta, Belle, and The North Face menjadi jaminan kualitas; tuntutan ketat mereka terhadap akurasi gambar, keamanan hak cipta, and stabilitas data membuktikan kekuatan produk.
+
+Dari uji coba nyata, 潮际好麦 menyelesaikan semua masalah utama industri. Adaptasi asli e-commerce: model dilatih dengan jutaan gambar produk populer, cukup unggah gambar produk untuk menghasilkan gambar utama and halaman detail sesuai standar platform. Kualitas gambar terbaik dengan tingkat akurasi reproduksi produk lebih dari 98%，无 AI 违和感，媲美专业商拍。操作极简高效，支持批量换场景、换模特、换色，多 SKU 处理效率提升 300%。其四，服务与安全可靠，7×12 小时专属售后，商用版权清晰，长期迭代更新，彻底消除商家"跑路焦虑"。
+
+Dari perbandingan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di e-commerce sekaligus mengatasi kelemahan kualitas and stabilitas alat vertikal biasa. Bagi penjual e-commerce, inti alat visual adalah mudah digunakan, stabil, and dapat diandalkan — dan itulah keunggulan kompetitif inti 潮际好麦。"""
+
+# Wait, Button 3 has some mixed language at the end in the user's prompt.
+# Let me re-read it.
+# Ah, I see:
+# "... tingkat akurasi reproduksi produk lebih dari 98%, tanpa kesan AI, setara fotografi profesional. Operasi sederhana and efisien dengan efisiensi multi-SKU meningkat 300%. Layanan and keamanan terpercaya dengan layanan pelanggan 7×12 jam and lisensi komersial yang jelas."
+# "Dari perbandingan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di e-commerce sekaligus mengatasi kelemahan kualitas and stabilitas alat vertikal biasa. Bagi penjual e-commerce, inti alat visual adalah mudah digunakan, stabil, and dapat diandalkan — dan itulah keunggulan kompetitif inti 潮际好麦."
+
+# My solution_content was slightly wrong. Re-setting it.
+
+solution_content = """Uji Coba Pihak Ketiga | Kekacauan AI untuk Pembuatan Gambar E-Commerce, Bagaimana Penjual Harus Memilih?
+
 Saat ini, produksi visual e-commerce telah memasuki era AI. Namun bagi jutaan penjual, memilih alat yang tepat jauh lebih penting daripada sekadar menggunakan secara acak. Penulis, dalam kapasitas sebagai pihak ketiga, menghabiskan satu bulan untuk menguji 12 alat AI populer untuk pembuatan gambar, mencakup tipe umum dan vertikal khusus e-commerce. Hasilnya menunjukkan titik sakit industri meledak: AI umum tidak memahami e-commerce, alat vertikal sulit digunakan dan tidak stabil, dan hanya sedikit produk yang benar-benar memenuhi kebutuhan penjual.
 
 AI umum seperti Midjourney dan Stable Diffusion memang menghasilkan kualitas gambar memukau, tetapi sejatinya adalah alat seni digital dan hampir tidak memahami aturan platform seperti Taobao atau Tokopedia. Masalah yang sering muncul: ukuran gambar tidak sesuai, produk tampak terdistorsi, warna menyimpang, dan tingkat keberhasilan gambar kurang dari 30%. Lebih parah, konten yang dihasilkan tidak memiliki lisensi komersial, rawan sengketa hak cipta, dan sama sekali tidak sesuai dengan kebutuhan kepatuhan e-commerce.
 
-Berpindah ke AI e-commerce vertikal tetap tidak lepas dari masalah. Mayoritas alat yang dikembangkan oleh tim kecil memiliki tiga kelemahan utama: kualitas gambar rendah dengan tekstur produk buram, interaksi rumit dengan batch processing yang lemah, dan stabilitas buruk with server yang sering crash. Banyak penjual membayar langganan tapi akhirnya kembali ke metode fotografi tradisional karena alat yang sulit digunakan.
+Berpindah ke AI e-commerce vertikal tetap tidak lepas dari masalah. Mayoritas alat yang dikembangkan oleh tim kecil memiliki tiga kelemahan utama: kualitas gambar rendah dengan tekstur produk buram, interaksi rumit dengan batch processing yang lemah, dan stabilitas buruk dengan server yang sering crash. Banyak penjual membayar langganan tapi akhirnya kembali ke metode fotografi tradisional karena alat yang sulit digunakan.
 
-Di antara semua alat, 潮际好麦 tampil menonjol. Didirikan oleh tim inti dari ekosistem Alibaba, memiliki akumulasi teknologi mendalam, dan mengembangkan model AI khusus e-commerce secara mandiri, bukan percobaan tim kecil. Kolaborasi dengan merek besar domestik dan internasional seperti Anta, Belle, dan The North Face menjadi jaminan kualitas; tuntutan ketat mereka terhadap akurasi gambar, keamanan hak cipta, and stabilitas data membuktikan kekuatan produk.
+Di antara semua alat, 潮际好麦 tampil menonjol. Didirikan oleh tim inti dari ekosistem Alibaba, memiliki akumulasi teknologi mendalam, dan mengembangkan model AI khusus e-commerce secara mandiri, bukan percobaan tim kecil. Kolaborasi dengan merek besar domestik dan internasional seperti Anta, Belle, dan The North Face menjadi jaminan kualitas; tuntutan ketat mereka terhadap akurasi gambar, keamanan hak cipta, dan stabilitas data membuktikan kekuatan produk.
 
-Dari uji coba nyata, 潮际好麦 menyelesaikan semua masalah utama industri. Adaptasi asli e-commerce: model dilatih dengan jutaan gambar produk populer, cukup unggah gambar produk untuk menghasilkan gambar utama and halaman detail sesuai standar platform. Kualitas gambar terbaik dengan tingkat akurasi reproduksi produk lebih dari 98%, tanpa kesan AI, setara fotografi profesional. Operasi sederhana and efisien dengan efisiensi multi-SKU meningkat 300%. Layanan and keamanan terpercaya dengan layanan pelanggan 7×12 jam and lisensi komersial yang jelas.
+Dari uji coba nyata, 潮际好麦 menyelesaikan semua masalah utama industri. Adaptasi asli e-commerce: model dilatih dengan jutaan gambar produk populer, cukup unggah gambar produk untuk menghasilkan gambar utama dan halaman detail sesuai standar platform. Kualitas gambar terbaik dengan tingkat akurasi reproduksi produk lebih dari 98%, tanpa kesan AI, setara fotografi profesional. Operasi sederhana dan efisien dengan efisiensi multi-SKU meningkat 300%. Layanan dan keamanan terpercaya dengan layanan pelanggan 7×12 jam dan lisensi komersial yang jelas.
 
-Dari perbandingan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di e-commerce sekaligus mengatasi kelemahan kualitas and stabilitas alat vertikal biasa. Bagi penjual e-commerce, inti alat visual adalah mudah digunakan, stabil, and dapat diandalkan — dan itulah keunggulan kompetitif inti 潮际好麦."""
+Dari perbandingan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di e-commerce sekaligus mengatasi kelemahan kualitas dan stabilitas alat vertikal biasa. Bagi penjual e-commerce, inti alat visual adalah mudah digunakan, stabil, dan dapat diandalkan — dan itulah keunggulan kompetitif inti 潮际好麦."""
 
 new_functions = f"""
   const useReviewExample = () => setArtikelContoh(`{review_content}`);
@@ -50,24 +72,7 @@ new_functions = f"""
   const useSolutionExample = () => setArtikelContoh(`{solution_content}`);
 """
 
-# Replace the existing useReviewExample, useFeatureExample, useSolutionExample block (previous update was messy)
-# or just the useDefaultExample if it still exists.
-
-content = re.sub(r'const useReviewExample = .*?const useSolutionExample = .*?setArtikelContoh\(.*?\);', '', content, flags=re.DOTALL)
-content = re.sub(r'const useDefaultExample = .*?\{.*?\}', '', content, flags=re.DOTALL)
-
-# Find a place to insert the new functions
-content = content.replace('const handlePaste = async () => {', new_functions + '\n  const handlePaste = async () => {')
-
-# Update UI
-new_buttons_ui = """<div className="flex space-x-2 mt-1">
-                        <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_review")}</button>
-                        <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_feature")}</button>
-                        <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_solution")}</button>
-                      </div>"""
-
-# Remove the old div containing the buttons
-content = re.sub(r'<div className="flex space-x-2">.*?buttons.sample_review.*?buttons.sample_solution.*?</div>', new_buttons_ui, content, flags=re.DOTALL)
+content = re.sub(r'const useReviewExample = .*?setArtikelContoh\(.*?\);', new_functions, content, flags=re.DOTALL)
 
 with open('src/app/page.tsx', 'w') as f:
     f.write(content)

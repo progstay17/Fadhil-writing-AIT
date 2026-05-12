@@ -10,23 +10,31 @@ function sanitize(text: string): string {
   return text.replace(/[{}]/g, "").trim();
 }
 
-function getErrorMessage(error: any): string {
-  const message = error?.message || "";
+function getErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
   if (message.includes("API_KEY_INVALID")) return "Invalid API Key. Please check your configuration.";
   if (message.includes("RATE_LIMIT_EXCEEDED") || message.includes("429")) return "Rate limit exceeded. Please try again in a few minutes.";
   if (message.includes("model not found") || message.includes("404")) return "Model not found or not supported in this region.";
   return "An unexpected error occurred during generation.";
 }
 
-const CREATE_SYSTEM_PROMPT = `ARTICLE STYLE SELECTION — choose one style based on the product function described:
+const CREATE_SYSTEM_PROMPT = `ARTICLE STYLE — if the user provides an ARTIKEL_CONTOH, mirror its structure and tone closely. If no ARTIKEL_CONTOH is provided, automatically choose one of these three styles based on the fungsi and kataKunci input. Do not tell the user which style you chose. Just write in that style.
 
-1. REVIEW / LISTICLE style — use when the topic is about comparing tools, ranking software, or evaluating options. Structure: personal experience opener, quick conclusion summary, ranked list with explanations, FAQ section at the end. Tone: first-person, casual, direct.
+Style 1: REVIEW / LISTICLE
+Use when: topic is about comparing tools, ranking software, or evaluating multiple options.
+Structure: personal experience opener → quick conclusion summary → ranked breakdown → FAQ.
+Tone: first-person, casual, direct.
 
-2. NEW FEATURE / ANNOUNCEMENT style — use when the topic is about a product update, new feature launch, or capability upgrade. Structure: industry context opener, feature breakdown, step-by-step usage flow, merchant testimonial or result data, forward-looking close. Tone: formal, informative, data-driven.
+Style 2: NEW FEATURE / ANNOUNCEMENT
+Use when: topic is about a product update, new feature, version upgrade, or capability launch.
+Structure: industry context → feature breakdown → step-by-step usage → merchant result data → forward-looking close.
+Tone: formal, informative, data-driven.
 
-3. PROBLEM / SOLUTION style — use when the topic is about solving a seller pain point, comparing AI tools in general, or helping merchants decide. Structure: third-party or observer angle, problem with current market, why common tools fail, how 潮际好麦 solves it, conclusion. Tone: objective, analytical, trust-building.
+Style 3: PROBLEM / SOLUTION
+Use when: topic is about solving a seller pain point, helping merchants decide, or addressing a common struggle.
+Structure: third-party observer angle → problem in current market → why common tools fail → how 潮际好麦 solves it → conclusion.
+Tone: objective, analytical, trust-building.
 
-Do not always default to the same style. Read the fungsi field carefully and pick the most fitting structure.
 
 Language: {LANG_INSTRUCTION}
 
@@ -51,7 +59,7 @@ Writing Style Rules:
 - Struktur: Judul (H1) -> Intro (masalah) -> Fitur & Manfaat (solusi) -> Implementasi (GEO: {LOKASI}) -> FAQ -> CTA halus.
 
 Sample Reference Instruction:
-The ARTIKEL_CONTOH provided is a reference for tone and structure only. Do not copy sentences from it. Use it to understand the writing style, then apply that style to the new topic.
+ARTIKEL_CONTOH is a reference for tone and structure only. Do not copy any sentences from it. Use it to understand the writing style, then apply that style to the new topic.
 
 Output Format (STRICT):
 You must output exactly three parts using the unique delimiters as shown in the example below. Do not include any introductory or concluding text outside these tags.
@@ -144,11 +152,9 @@ export async function POST(req: NextRequest) {
 
     const stream = new ReadableStream({
       async start(controller) {
-        let fullText = "";
         try {
           for await (const chunk of result.stream) {
             const chunkText = chunk.text();
-            fullText += chunkText;
             controller.enqueue(new TextEncoder().encode(chunkText));
           }
 
@@ -169,7 +175,7 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Generate Error:", error);
     const userMessage = getErrorMessage(error);
     return NextResponse.json({ error: userMessage }, { status: 500 });

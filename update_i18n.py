@@ -1,5 +1,4 @@
 import json
-import os
 
 files = ['src/translations/en.json', 'src/translations/id.json', 'src/translations/zh.json']
 data = {
@@ -21,16 +20,16 @@ data = {
 }
 
 for file in files:
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='utf-8') as f:
         content = json.load(f)
 
-    # Add keys to buttons section
+    # Remove use_sample
+    if 'use_sample' in content['buttons']:
+        del content['buttons']['use_sample']
+
+    # Add new keys
     for key, value in data[file].items():
         content['buttons'][key] = value
-
-    # Remove use_sample if it exists (not requested but cleaned up as we replace it)
-    # Actually the prompt says "replace single default example button with 3 category buttons"
-    # The i18n keys are just being added.
 
     with open(file, 'w', encoding='utf-8') as f:
         json.dump(content, f, ensure_ascii=False, indent=2)
