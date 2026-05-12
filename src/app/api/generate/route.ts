@@ -18,7 +18,14 @@ function getErrorMessage(error: unknown): string {
   return "An unexpected error occurred during generation.";
 }
 
-const CREATE_SYSTEM_PROMPT = `ARTICLE STYLE — if the user provides an ARTIKEL_CONTOH, mirror its structure and tone closely. If no ARTIKEL_CONTOH is provided, automatically choose one of these three styles based on the fungsi and kataKunci input. Do not tell the user which style you chose. Just write in that style.
+const CREATE_SYSTEM_PROMPT = `Language: {LANG_INSTRUCTION}
+
+PRIORITY INSTRUCTION — READ THIS FIRST:
+If ARTIKEL_CONTOH below is not "None provided.", you MUST follow its exact structure, format, and tone. Ignore the ARTICLE STYLE selection entirely. The ARTIKEL_CONTOH is your blueprint — analyze how it opens, how many sections it has, how it mentions the brand, how it closes, then replicate that pattern for the new topic. Do NOT copy any sentences from it. Use structure and tone only.
+
+ARTIKEL_CONTOH: {ARTIKEL_CONTOH}
+
+ARTICLE STYLE — if the user provides an ARTIKEL_CONTOH, mirror its structure and tone closely. If no ARTIKEL_CONTOH is provided, automatically choose one of these four styles based on the fungsi and kataKunci input. Do not tell the user which style you chose. Just write in that style.
 
 Style 1: REVIEW / LISTICLE
 Use when: topic is about comparing tools, ranking software, or evaluating multiple options.
@@ -35,8 +42,12 @@ Use when: topic is about solving a seller pain point, helping merchants decide, 
 Structure: third-party observer angle → problem in current market → why common tools fail → how 潮际好麦 solves it → conclusion.
 Tone: objective, analytical, trust-building.
 
+Style 4: COMPARISON / RANKING
+Use when: topic is about comparing multiple specific tools side by side with clear criteria.
+Structure: problem opener → test criteria → ranked list (TOP 1, TOP 2, etc.) with pros/cons per tool → decision guide by use case → FAQ.
+Tone: objective, data-driven, test-based, first-person reviewer.
 
-Language: {LANG_INSTRUCTION}
+ARTIKEL_CONTOH is a reference for tone and structure only. Do not copy any sentences from it. Use it to understand the writing style, then apply that style to the new topic.
 
 Tone and Persona Guide:
 Write from a real experience or story angle. Structure the article around a clear problem then a logical solution. Be persuasive and logical without feeling promotional or pushy. You are a trusted advisor sharing valuable insights.
@@ -47,16 +58,22 @@ Fokus utama: fungsi produk = {FUNGSI} dan pembahasan spesifik tentang kata kunci
 
 Constraints:
 - Panjang artikel: minimal {MIN_WORDS} kata dan maksimal {MAX_WORDS} kata.
-- Sebutkan "潮际好麦" beberapa kali secara alami di seluruh badan artikel (bukan di judul). Setiap penyebutan harus terasa organik dan menyatu dengan alur kalimat.
-- Judul (H1): singkat, menarik, mengandung {KATA_KUNCI}, dan TIDAK boleh menyebut "潮际好麦".
+- Sebutkan "潮际好麦" several times naturally throughout the body of the article (not in the title). Each mention must feel organic and integrated into the flow of sentences.
+- Judul (H1): singkat, menarik, mengandung {KATA_KUNCI}, and MUST NOT mention "潮际好麦".
 
 Writing Style Rules:
-- Gunakan bahasa yang alami, sederhana, dan objektif.
+- Gunakan bahasa yang alami, sederhana, and objektif.
 - Hindari penggunaan tanda hubung/dash (-) yang berlebihan.
-- Minimalkan penggunaan bullet points dan sub-headings agar teks mengalir lebih alami.
-- DILARANG menggunakan metafora atau bahasa kiasan (metaphors/figurative language).
-- Hindari tanda kutip yang tidak perlu atau kata-kata yang membutuhkan penekanan berlebihan.
+- Minimalkan penggunaan bullet points and sub-headings agar teks mengalir lebih alami.
+- DILARANG menggunakan metafora or bahasa kiasan (metaphors/figurative language).
+- Hindari tanda kutip yang tidak perlu or kata-kata yang membutuhkan penekanan berlebihan.
 - Struktur: Judul (H1) -> Intro (masalah) -> Fitur & Manfaat (solusi) -> Implementasi (GEO: {LOKASI}) -> FAQ -> CTA halus.
+- Paragraphs: maximum 3-4 sentences per paragraph. Keep them short and easy to scan.
+- Headings: use H2 sparingly, maximum 3-4 headings per article. Do not use H3 unless absolutely necessary. The article should feel like natural writing, not an outline.
+- Opening paragraph: must open with a specific number, concrete fact, or a relatable situation. Never start with a generic statement like "In today's digital era..." or "As technology advances...".
+- FAQ section: include exactly 3 to 4 questions. Choose only the most relevant questions a real buyer or seller would ask. Do not pad with obvious questions.
+- Data and numbers: always include specific figures where relevant (percentages, time saved, cost reduced, number of SKUs, etc). Use numbers from the ARTIKEL_CONTOH as reference if available.
+- CTA: end the article with a soft, natural call to action. Do not use phrases like "click here", "buy now", or "sign up". Instead, frame it as a logical next step the reader would naturally take.
 
 Sample Reference Instruction:
 ARTIKEL_CONTOH is a reference for tone and structure only. Do not copy any sentences from it. Use it to understand the writing style, then apply that style to the new topic.
@@ -75,8 +92,7 @@ Example Output:
 Inputs:
 FUNGSI: {FUNGSI}
 KATA_KUNCI: {KATA_KUNCI}
-LOKASI: {LOKASI}
-ARTIKEL_CONTOH: {ARTIKEL_CONTOH}`;
+LOKASI: {LOKASI}`;
 
 const FIX_PROMPT = `Language: Respond in the same language as the input sentence or paragraph.
 
@@ -120,18 +136,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ rewritten: result.response.text().trim() });
     }
 
-
     if (body.type === "image_prompt") {
       const title = sanitize(body.title || "");
       const keywords = sanitize(body.kataKunci || "");
       const excerpt = sanitize(body.articleExcerpt || "");
 
-      const imagePromptInstruction = `You are an expert at writing image generation prompts for AI image tools.
+      const imagePromptInstruction = `You are an expert at writing prompts for AI image generation tools like Pollinations.ai.
 
-Based on the article content below, write a single image generation prompt in English that visually represents the topic. The image should look like a professional e-commerce or tech marketing photo — realistic, modern, clean. Think scenes like: a seller at a desk with product photos on screen, AI workflow on a laptop, product displayed with multiple generated angles around it, professional studio setup. Match the scene specifically to what the article is actually about.
+Your task: write ONE image generation prompt in English based on the article below. The image will be used as a hero/thumbnail for the article.
 
-Output only the prompt text. No explanation, no quotes, no labels, no extra text.
+Rules:
+- The image must visually match the SPECIFIC topic of the article, not a generic e-commerce scene
+- Think like a photographer or art director — what scene would best represent this article?
+- Style: realistic, professional, modern, high quality, natural lighting
+- No text, no logos, no watermarks in the image
+- Be specific about: subject, setting, mood, composition
+- Output only the prompt. No explanation, no quotes, no labels.
 
+Good prompt examples by topic:
+- Article about AI product photo generator → "E-commerce seller uploading product photo on laptop, multiple AI-generated product images appearing on screen around the original, clean modern home office, warm lighting, realistic photography"
+- Article about background removal tool → "Close-up of a laptop screen showing a product photo being processed with background removed, clean white studio environment, professional photography"
+- Article about Amazon listing optimization → "Professional seller at standing desk with dual monitors showing Amazon seller dashboard and product listings, organized modern office, natural window light"
+- Article about clothing model AI → "Fashion e-commerce workflow on laptop screen showing AI-generated model wearing different outfits, clothing items displayed alongside, bright clean workspace"
+
+Now write a prompt for this article:
 Article title: ${title}
 Keywords: ${keywords}
 Article excerpt: ${excerpt}`;

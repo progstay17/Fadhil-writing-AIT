@@ -34,7 +34,7 @@ interface GenerationResult {
   meta?: string;
   slug?: string;
   rewritten?: string;
-  params: any;
+  params: Record<string, string | number>;
 }
 
 export default function Home() {
@@ -76,8 +76,8 @@ export default function Home() {
   const [statusText, setStatusText] = useState("");
   const [message, setMessage] = useState("");
 
-  const loadingInterval = useRef<any>(null);
-  const statusInterval = useRef<any>(null);
+  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
+  const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
   const changeLanguage = (l: string) => {
     i18n.changeLanguage(l);
@@ -326,7 +326,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
           };
           setHistory(prev => [result, ...prev].slice(0, 5));
       }
-    } catch (err: any) {
+    } catch (err: Error) {
       setMessage(err.message || "Error generating content.");
     } finally {
       stopLoadingAnimation();
