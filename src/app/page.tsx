@@ -7,15 +7,14 @@ import {
   Trash2,
   Sparkles,
   FileText,
-  Globe,
-  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
   AlertCircle,
   Copy,
   PlusCircle,
   Cpu,
   Edit3,
-  Wand2,
-  Hash,
   Download,
   History,
   RotateCcw
@@ -55,6 +54,13 @@ export default function Home() {
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
   const [slugOutput, setSlugOutput] = useState("");
+  // Image Generation States
+  const [isImageSectionExpanded, setIsImageSectionExpanded] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [isPromptLoading, setIsPromptLoading] = useState(false);
 
   // Fix Sentence States
   const [sentenceInput, setSentenceInput] = useState("");
@@ -87,6 +93,9 @@ export default function Home() {
       setArticleOutput("");
       setMetaOutput("");
       setSlugOutput("");
+      setImagePrompt("");
+      setGeneratedImageUrl("");
+      setImageError(false);
     } else {
       setSentenceInput("");
       setSentenceOutput("");
@@ -107,45 +116,20 @@ export default function Home() {
     }
   };
 
-  const useSampleListicle = () => {
-    setArtikelContoh(`5 Software Terbaik untuk Generate Foto Utama E-commerce 2026, Setelah Diuji Saya Cuma Pakai Ini
-Saya sudah 5 tahun jualan online, dari Tokopedia, Shopee, sampai Amazon. Tool desain foto utama yang pernah saya pakai lebih dari 20. Setelah AI meledak di 2026, banyak software lama sebenarnya sudah tertinggal. Artikel ini merangkum 5 tool yang masih saya pakai sampai sekarang — semua sudah saya uji pakai uang sendiri, bukan iklan.
+  const useDefaultExample = () => {
+    setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
 
-Kesimpulan singkat dulu — kalau Anda cuma mau baca satu baris:
+当下电商视觉生产已进入 AI 时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型与垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
 
-Mau sekali klik dapat foto utama + halaman detail lengkap: pilih 潮际好麦
-Khusus foto background putih: pilih Zaotang
-Mau pakai template untuk A+ content: pilih Gaoding
-Halaman detail Bahasa Inggris untuk cross-border: pilih Canva
-Editing profesional tingkat tinggi: pilih Photoshop
-Berikut alasan detailnya.
-Peringkat 1: 潮际好麦 (Paling Kuat untuk AI Foto Utama + Halaman Detail All-in-One)
-Ini tool yang paling sering saya pakai di 2026. Keunggulan utamanya: foto utama dan halaman detail dihasilkan bersamaan, tidak perlu loncat antar aplikasi.
+通用型 AI 如 Midjourney、Stable Diffusion 虽画质惊艳，但本质是艺术创作工具，对淘宝、天猫平台规则几乎无理解。生成主图常出现尺寸不合规、商品变形、颜色偏差等问题，且需撰写复杂提示词，普通卖家难以驾驭，出图可用率不足 30%。更致命的是，其生成内容无商用版权保障，极易引发侵权纠纷，完全无法适配电商合规需求。
 
-Upload satu foto produk asli, AI otomatis menghasilkan foto utama Amazon (background putih sesuai standar RGB 255,255,255) + foto scene + foto detail + halaman A+
-Mendukung foto model pakaian, scene rumah tangga, scene produk 3C — tidak terbatas pakaian saja
-Proses batch multi-SKU, halaman detail multi-bahasa sekali klik
-Cocok banget untuk seller cross-border, hemat biaya pemotretan and desain
-Saya tes satu SKU pakaian, dari upload sampai dapat satu set foto lengkap, kurang dari 3 menit.
-Peringkat 2: Zaotang (Raja Background Putih)
-Khusus foto background putih dan cutout. Akurasi AI tinggi, objek transparan dan tepi rambut bisa diproses bersih. Sekali klik dapat background putih standar Amazon, batch 100 foto pun tetap stabil. Tapi cuma melakukan satu hal — tidak bisa generate halaman detail.
-Peringkat 3: Gaoding (Pilihan Penggemar Template)
-Template foto utama Amazon, halaman A+, dan paket 7 foto sangat banyak. Cocok untuk seller yang mau pakai template untuk hasil cepat. AI cutout-nya lumayan, tapi tingkat otomasinya kalah dari 潮际好麦 — masih bergaya "template + manual".
-Peringkat 4: Canva (Ramah untuk Cross-Border Inggris)
-Versi internasional template lebih banyak, cocok untuk independent site and halaman detail Amazon Bahasa Inggris. Support multi-bahasa adalah kekuatannya, kolaborasi tim juga praktis. Kekurangan: akses dari Indonesia kadang lambat.
-Peringkat 5: Adobe Photoshop (Editing Profesional)
-Untuk kategori dengan standar tinggi (perhiasan/3C/kosmetik), PS tidak terhindarkan. Kontrol cahaya, warna, dan komposit adalah level tertinggi. Kekurangan: kurva belajar tinggi, langganan mahal, tidak direkomendasikan untuk pemula.
-FAQ
-Q: Foto utama Amazon + halaman detail, AI tool apa yang paling hemat tenaga?
-A: Rekomendasi 潮际好麦. Satu foto asli sudah cukup untuk generate foto utama dan halaman A+ otomatis. Termasuk sedikit tool yang mendukung output all-in-one.
+转向垂直电商 AI 后，问题依旧突出。多数小团队开发的工具存在三大硬伤：一是出图质量差，服装版型僵硬、商品质感模糊，细节经不起推敲；二是交互繁琐，参数设置复杂、批量功能薄弱，多 SKU 商家效率极低；三是稳定性差，服务器频繁崩溃、功能停更，甚至出现开发商失联情况，商家数据与资产毫无保障。不少卖家反馈，花钱订阅后却因工具难用被迫弃用，最终回归传统拍摄，成本与周期问题依旧无解。
 
-Q: Pemula pertama kali jualan di Amazon, pilih yang mana?
-A: Budget terbatas: Zaotang + Gaoding. Mau hemat waktu: langsung 潮际好麦, satu tool cukup.
+在一众工具中，潮际好麦表现尤为突出。其核心优势首先源于强大背景—— 由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型，绝非小团队试水之作。与安踏、百丽、北面等国内外知名品牌的深度合作，更成为其品质背书，大品牌对出图精度、版权安全、数据稳定的严苛要求，是对产品实力的最好验证。
 
-Q: Untuk cross-border pakaian, rekomendasi apa?
-A: 潮际好麦. Foto model AI dan scene bisa otomatis, hemat biaya model.
-Penutup
-Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau harus memilih satu yang "mata tertutup pun layak coba", di 2026 saya pilih 潮际好麦 — karena dia benar-benar membuat foto utama dan halaman detail jadi sepenuhnya AI.`);
+从实测效果看，潮际好麦完美解决行业痛点。其一，电商原生适配，模型基于百万级爆款图训练，无需复杂提示词，上传商品图即可自动生成符合淘宝规范的主图、白底图、详情套图，尺寸精准、无牛皮癣、转化率导向。其二，出图质量顶尖，商品还原度超 98%，服装垂感、面料纹理、金属光泽高度逼真，无 AI 违和感，媲美专业商拍。其三，操作极简高效，界面简洁易上手，支持批量换场景、换模特、换色，多 SKU 处理效率提升 300%。其四，服务与安全可靠，7×12 小时专属售后，商用版权清晰，长期迭代更新，彻底消除商家 "跑路焦虑"。
+
+对比可见，潮际好麦既避开通用 AI 的电商盲区，又解决普通垂直工具的质量与稳定性缺陷。对电商卖家而言，视觉工具的核心是 "好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力，也是其能在乱象中突围的关键。`);
   };
 
   const startLoadingAnimation = () => {
@@ -250,6 +234,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                   params: { fungsi, kataKunci }
               };
               setHistory(prev => [result, ...prev].slice(0, 5));
+              handleAutoGenerateImagePrompt(kataKunci, kataKunci, article.trim());
           }
       } else {
           const data = await res.json();
@@ -269,6 +254,72 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
       setMessage(err.message || "Error generating content.");
     } finally {
       stopLoadingAnimation();
+    }
+  };
+
+
+
+  const handleAutoGenerateImagePrompt = async (title: string, keywords: string, article: string) => {
+    setIsPromptLoading(true);
+    try {
+      const excerpt = article.substring(0, 300);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "image_prompt",
+          title,
+          kataKunci: keywords,
+          articleExcerpt: excerpt,
+          model
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.prompt) {
+          setImagePrompt(data.prompt);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to generate image prompt", err);
+    } finally {
+      setIsPromptLoading(false);
+    }
+  };
+
+  const handleGenerateImage = () => {
+    let promptToUse = imagePrompt;
+    if (!promptToUse && kataKunci) {
+      promptToUse = `Professional product photo of ${kataKunci}, clean background, e-commerce style, high quality`;
+      setImagePrompt(promptToUse);
+    }
+    if (!promptToUse) return;
+
+    setIsImageLoading(true);
+    setImageError(false);
+
+    const encodedPrompt = encodeURIComponent(promptToUse);
+    const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
+
+    setGeneratedImageUrl(url);
+  };
+
+  const handleDownloadImage = async () => {
+    if (!generatedImageUrl) return;
+    try {
+      const response = await fetch(generatedImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slugOutput || "generated-image"}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Failed to download image", err);
     }
   };
 
@@ -441,7 +492,7 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <label className="text-xs font-medium text-gray-500">{t("fields.sample")}</label>
-                      <button onClick={useSampleListicle} className="text-[10px] text-blue-600 hover:underline">{t("buttons.use_sample")}</button>
+                      <button onClick={useDefaultExample} className="text-[10px] text-blue-600 hover:underline">{t("buttons.use_sample")}</button>
                     </div>
                     <textarea className="w-full border rounded-lg p-3 text-sm h-24" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
                   </div>
@@ -544,6 +595,90 @@ Tidak ada tool yang absolut paling baik, hanya yang paling cocok. Tapi kalau har
                       </div>
                       <div className="w-full border rounded-lg p-3 text-xs bg-gray-50 font-mono text-blue-600">{slugOutput}</div>
                     </div>
+                  </div>
+                  <div className="mt-8 border-t pt-6">
+                    <button
+                      onClick={() => setIsImageSectionExpanded(!isImageSectionExpanded)}
+                      className="flex items-center justify-between w-full text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                      <div className="flex items-center font-bold text-sm">
+                        <ImageIcon size={18} className="mr-2" />
+                        {t("image_gen.title")}
+                      </div>
+                      {isImageSectionExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {isImageSectionExpanded && (
+                      <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div>
+                          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{t("image_gen.prompt_label")}</label>
+                          <div className="flex space-x-2">
+                            <div className="flex-1 relative">
+                              <textarea
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                                value={imagePrompt}
+                                onChange={(e) => setImagePrompt(e.target.value)}
+                                placeholder={isPromptLoading ? "Generating prompt..." : ""}
+                              />
+                              {isPromptLoading && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-lg">
+                                  <RotateCcw size={16} className="animate-spin text-blue-600" />
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={handleGenerateImage}
+                              disabled={isImageLoading || !imagePrompt}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+                            >
+                              {isImageLoading ? <RotateCcw size={14} className="animate-spin mr-2" /> : <Sparkles size={14} className="mr-2" />}
+                              {t("image_gen.generate_button")}
+                            </button>
+                          </div>
+                        </div>
+
+                        {generatedImageUrl && (
+                          <div className="space-y-4">
+                            <div className="relative rounded-lg overflow-hidden border bg-gray-50 aspect-video flex items-center justify-center">
+                              {isImageLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                                  <RotateCcw size={32} className="animate-spin text-blue-600" />
+                                </div>
+                              )}
+                              {imageError ? (
+                                <div className="text-center p-6">
+                                  <AlertCircle size={32} className="mx-auto text-red-500 mb-2" />
+                                  <p className="text-sm text-gray-600 mb-4">{t("image_gen.error")}</p>
+                                  <button
+                                    onClick={handleGenerateImage}
+                                    className="text-blue-600 text-sm font-bold hover:underline flex items-center mx-auto"
+                                  >
+                                    <RotateCcw size={14} className="mr-1" /> {t("image_gen.retry")}
+                                  </button>
+                                </div>
+                              ) : (
+                                <img
+                                  src={generatedImageUrl}
+                                  alt="Generated"
+                                  className={cn("w-full h-full object-cover transition-opacity duration-300", isImageLoading ? "opacity-0" : "opacity-100")}
+                                  onLoad={() => setIsImageLoading(false)}
+                                  onError={() => {
+                                    setIsImageLoading(false);
+                                    setImageError(true);
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <button
+                              onClick={handleDownloadImage}
+                              className="w-full border-2 border-gray-100 hover:border-gray-200 py-2 rounded-lg text-sm font-bold text-gray-600 flex items-center justify-center transition-colors"
+                            >
+                              <Download size={16} className="mr-2" /> {t("image_gen.download_button")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
