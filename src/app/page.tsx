@@ -495,8 +495,8 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
                     className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none"
                   >
                     <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                    <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                   </select>
                 </div>
               </div>
