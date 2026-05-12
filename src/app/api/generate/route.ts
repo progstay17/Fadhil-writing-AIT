@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const FALLBACK_MODEL = "gemini-flash-latest";
-const ALLOWED_MODELS = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-flash-latest"];
+const FALLBACK_MODEL = "gemini-2.0-flash";
+const ALLOWED_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
 
 function sanitize(text: string): string {
   if (!text) return "";
