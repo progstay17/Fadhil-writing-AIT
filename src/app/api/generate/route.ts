@@ -44,10 +44,14 @@ Focus: product function = {FUNGSI}, specific keyword: "{KATA_KUNCI}".
 
 ---
 
-TONE REFERENCE (only if ARTIKEL_CONTOH is provided):
-If ARTIKEL_CONTOH below is not "None provided.", use it ONLY to understand the writing tone, voice, and personality of the author. Do NOT copy any sentences. Do NOT mirror its structure. Structure must follow the ARTICLE STYLE below.
+⚠️ CRITICAL — ARTICLE STYLE (FOLLOW STRICTLY):
+You MUST write this article using ONLY the structure and tone defined below.
+Do NOT default to any other style. Do NOT mix styles. Do NOT borrow patterns from any example article.
+Selected style: {SELECTED_STYLE_NAME}
 
-ARTIKEL_CONTOH: {ARTIKEL_CONTOH}
+{SELECTED_STYLE_INSTRUCTION}
+
+This structure is non-negotiable.
 
 ---
 
@@ -76,14 +80,15 @@ WRITING STYLE RULES:
 
 ---
 
-⚠️ CRITICAL — ARTICLE STYLE (READ LAST, FOLLOW STRICTLY):
-You MUST write this article using ONLY the structure and tone defined below.
-Do NOT default to any other style. Do NOT mix styles.
-Selected style: {SELECTED_STYLE_NAME}
+TONE REFERENCE (optional — tone and voice only):
+If ARTIKEL_CONTOH below is not "None provided.", extract ONLY the author's tone, voice, and personality.
+Do NOT replicate its content, topic, structure, or any ranking/comparison patterns it may contain.
+Do NOT introduce product rankings or comparisons unless the selected ARTICLE STYLE explicitly calls for it.
+Treat it purely as a personality sample — how the author writes, not what they write about.
 
-{SELECTED_STYLE_INSTRUCTION}
+ARTIKEL_CONTOH: {ARTIKEL_CONTOH}
 
-This structure is non-negotiable. If ARTIKEL_CONTOH is provided, use its tone and voice only — never its structure.
+---
 
 OUTPUT FORMAT (STRICT):
 Output exactly three parts with these delimiters. No text outside these tags.
