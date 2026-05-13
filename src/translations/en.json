@@ -40,6 +40,7 @@
     "sample_review": "📊 Review",
     "sample_feature": "🆕 New Feature",
     "sample_solution": "💡 Solution",
+    "sample_comparison": "🔀 Comparison",
     "generate_image_prompt": "Generate Image Prompt"
   },
   "output": {

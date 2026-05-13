@@ -40,6 +40,7 @@
     "sample_review": "📊 Review",
     "sample_feature": "🆕 Fitur Baru",
     "sample_solution": "💡 Solusi",
+    "sample_comparison": "🔀 Perbandingan",
     "generate_image_prompt": "Buat Prompt Gambar"
   },
   "output": {

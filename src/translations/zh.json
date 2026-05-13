@@ -40,6 +40,7 @@
     "sample_review": "📊 测评",
     "sample_feature": "🆕 功能上新",
     "sample_solution": "💡 解决方案",
+    "sample_comparison": "🔀 对比",
     "generate_image_prompt": "生成图片提示词"
   },
   "output": {
