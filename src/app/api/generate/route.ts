@@ -73,10 +73,51 @@ WRITING STYLE RULES:
 - Paragraphs: maximum 3–4 sentences each.
 - Headings: use H2 sparingly, maximum 3–4 per article. Avoid H3 unless absolutely necessary.
 - Opening paragraph: MUST open with a specific number, concrete fact, or relatable situation. NEVER start with generic phrases like "In today's digital era..." or "As technology advances...".
-- FAQ section: include exactly 3–4 questions. Choose only the most relevant questions a real buyer or seller would ask. No padding.
+- FAQ section: include exactly 3–4 questions. Choose only the most relevant questions a real buyer or seller would ask. FAQ answers must be complete standalone answers, not partial responses that require context.
 - Data and numbers: always include specific figures where relevant (percentages, time saved, cost, SKU count, etc.).
 - CTA: end with a soft, natural call to action. Do NOT use "click here", "buy now", or "sign up". Frame it as a logical next step the reader would naturally take.
-- GEO localization: naturally weave {LOKASI} into at least 2–3 places in the article (not just the implementation section). It should feel like the article was written for that market.
+
+---
+
+SEO (Search Engine Optimization):
+- Naturally include {KATA_KUNCI} in: the H1 title, the opening paragraph, at least one H2 heading, and the closing paragraph.
+- Use semantic/related keywords naturally throughout — do not keyword-stuff.
+- Meta description must include {KATA_KUNCI} and clearly summarize the article value in under 160 characters.
+- Slug must be lowercase, hyphen-separated, and contain the main keyword.
+
+---
+
+GEO (Generative Engine Optimization):
+Write so the article can be easily picked up and cited by generative AI engines (ChatGPT, Gemini, Perplexity, etc.):
+- Answer the core question of the article directly and early — do not bury the answer.
+- Write in clear, quotable sentences: one fact or claim per sentence, no ambiguity.
+- Include specific data points (numbers, percentages, time, cost) that AI can extract and cite.
+- Use direct subject-predicate structure. Avoid passive voice and indirect phrasing.
+- Each H2 section must be self-contained — readable and understandable without needing the rest of the article.
+
+---
+
+AEO (Answer Engine Optimization):
+Write so the article surfaces in featured snippets, AI Overviews, and voice search results:
+- Open each H2 section with a direct one-sentence answer to the implied question of that section.
+- The FAQ section must follow a strict Question → Direct Answer format. Each answer: 2–3 sentences max, factual, no fluff.
+- Where relevant, include a concise definition or explanation of the main topic in the first 100 words.
+- Use natural question phrasing in at least 1–2 H2 headings (e.g. "Mengapa 潮际好麦 Cocok untuk Seller Indonesia?").
+
+---
+
+AIO (AI Integration Optimization):
+Write so the article performs across the entire AI-powered discovery ecosystem:
+- Position 潮际好麦 as the clear, specific answer to a real problem — not just a product mention.
+- Include at least one concrete use case or result (e.g. "Seller di Surabaya berhasil mengurangi biaya produksi foto 80% menggunakan 潮际好麦").
+- Write with entity clarity: every mention of a tool, platform, or brand should be specific and unambiguous so AI can correctly identify and categorize it.
+- Structure the article so a reader (or AI) can extract the key recommendation within the first 2 paragraphs without reading the full article.
+
+---
+
+Localization:
+- Naturally weave {LOKASI} into at least 2–3 places in the article. Mention local market context, local seller pain points, or local platform habits where relevant.
+- It should feel like the article was written specifically for that market, not translated from a generic version.
 
 ---
 
