@@ -1,14 +1,14 @@
 {
-  "title": "AIT Writing for 潮际好麦",
+  "title": "潮际好麦 AIT 写作",
   "subtitle": "Hasilkan artikel produk otomatis via LLM",
   "tabs": {
     "create": "Create Content",
     "fix": "Perbaiki Kalimat"
   },
   "fields": {
-    "functions": "功能 (Fungsi)",
-    "keywords": "关键词/标题 (Kata Kunci/Titel)",
-    "location": "地点 / Lokasi (Opsional)",
+    "functions": "Fungsi",
+    "keywords": "Kata Kunci/Judul",
+    "location": "Lokasi (Opsional)",
     "sample": "ARTIKEL_CONTOH (Opsional)",
     "functions_placeholder": "Masukkan fungsi produk...",
     "keywords_placeholder": "Masukkan kata kunci atau judul...",
@@ -24,7 +24,12 @@
     "content_lang": "Content:",
     "model_label": "Model:",
     "min_words": "Min Words",
-    "max_words": "Max Words"
+    "max_words": "Max Words",
+    "style_label": "Gaya Artikel",
+    "style_review": "📊 Review / Listicle",
+    "style_announcement": "🆕 Fitur Baru / Pengumuman",
+    "style_solution": "💡 Masalah / Solusi",
+    "style_comparison": "🔀 Perbandingan / Peringkat"
   },
   "buttons": {
     "generate": "Generate",
@@ -34,7 +39,8 @@
     "copy": "Copy",
     "sample_review": "📊 Review",
     "sample_feature": "🆕 Fitur Baru",
-    "sample_solution": "💡 Solusi"
+    "sample_solution": "💡 Solusi",
+    "generate_image_prompt": "Buat Prompt Gambar"
   },
   "output": {
     "article": "Artikel Lengkap",

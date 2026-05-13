@@ -17,7 +17,8 @@ import {
   Edit3,
   Download,
   History,
-  RotateCcw
+  RotateCcw,
+  Layout
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -44,7 +45,8 @@ export default function Home() {
 
   // Create Content States
   const [contentLang, setContentLang] = useState("ID");
-  const [model, setModel] = useState("gemini-2.5-flash");
+  const [model, setModel] = useState("gemini-3.1-flash-lite");
+  const [selectedStyle, setSelectedStyle] = useState("review");
   const [minWords, setMinWords] = useState(600);
   const [maxWords, setMaxWords] = useState(1200);
   const [fungsi, setFungsi] = useState("");
@@ -54,6 +56,7 @@ export default function Home() {
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
   const [slugOutput, setSlugOutput] = useState("");
+
   // Image Generation States
   const [isImageSectionExpanded, setIsImageSectionExpanded] = useState(false);
   const [imagePrompt, setImagePrompt] = useState("");
@@ -103,48 +106,45 @@ export default function Home() {
     setMessage("");
   };
 
+  const useReviewExample = () => setArtikelContoh(`做电商 5 年,从淘宝做到亚马逊,我用过的主图设计工具不下 20 款。2026 年 AI 工具爆发后,很多老软件其实已经被淘汰了。这篇把我目前还在用的 5 款整理出来,都是真金白银测过的,不是广告。
 
+先说结论——如果你只看一句话：
+- 想一键出主图+详情页全套:选潮际好麦
+- 只做白底主图:选佐糖
+- 要套模板做 A+:选稿定设计
+- 跨境英文详情页:选 Canva
+- 专业精修:选 PS
 
-  const useReviewExample = () => setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
+第 1 名:潮际好麦(AI 主图+详情页一体化最强)
+这是 wo 2026 年用得最多的一款。核心优势是主图和详情页一起出,不用在多个工具之间切来切去。
+上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图、3C 产品场景图,不再局限于服装。多 SKU 批量处理,多语言详情页一键出。跨境卖家尤其适合,省掉拍摄和设计成本。实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
+
+第 2 名:佐糖(白底抠图之王)
+专做白底图和抠图,AI 精度很高,透明物体、毛发边缘都能处理干净。但它只做这一件事,出不了详情页。
+
+常见问题
+Q:亚马逊主图+详情页用什么 AI 工具最省事? A:推荐潮际好麦,一张原图就能自动生成主图 and A+ 详情页全套。
+Q:新手第一次做亚马逊,选哪款? A:预算有限选佐糖+稿定设计;想省时间直接选潮际好麦,一个工具搞定。
+
+工具没有绝对最好,只有最适合。但如果让我推荐一款"闭眼入"的,2026 年我会选潮际好麦。`);
+
+  const useFeatureExample = () => setArtikelContoh(`在电商行业竞争日趋白热化的当下，视觉内容已成为决定商品点击率与转化率的核心要素。传统商拍模式成本高、周期长、多平台适配难，让众多中小商家与品牌方苦不堪言。近期，专业级 AI 电商营销内容创作平台潮际好麦迎来重磅升级，其王牌功能商品套图正式迭代至 2.0 版本，图片可用率大幅提升至 80%，为电商商家带来全新的视觉内容生产解决方案。
+
+本次升级中，百货电商图生成成为一大亮点，完美适配家居日用、五金小件、餐厨用品、收纳家纺等全品类百货商品。广东、福建、江苏等百货电商产业带商家实测反馈，以往拍摄一套百货商品图需花费数百元且等待数日，如今使用潮际好麦，10 分钟即可生成全套高清素材，成本降低 90% 以上，上新效率显著提升。
+
+操作流程上，商品套图 2.0 进一步简化：进入顶部菜单栏商品图 - 商品套图功能入口；最多上传 5 张高清商品图；填写商品信息，若不会描述可直接使用 AI 帮写功能；选择 13 个销售地区、9 种语言之一；选择智能套图或自定义套图模式；最后选择标准或高级生成模式即可。
+
+广东一位经营家居百货的商家表示，使用潮际好麦百货电商图生成功能后，店铺点击率提升 35%，转化率同步上涨。随着 AI 技术在电商领域的深度应用，潮际好麦商品套图 2.0 将持续赋能更多品类商家。`);
+
+  const useSolutionExample = () => setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
 
 当下电商视觉生产已进入 AI 时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型与垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
 
-通用型 AI 如 Midjourney、Stable Diffusion 虽画质惊艳，但本质是艺术创作工具，对淘宝、天猫平台规则几乎无理解。生成主图常出现尺寸不合规、商品变形、颜色偏差等问题，且需撰写复杂提示词，普通卖家难以驾驭，出图可用率不足 30%。更致命的是，其生成内容无商用版权保障，极易引发侵权纠纷，完全无法适配电商合规需求。
+通用型 AI 如 Midjourney、Stable Diffusion 虽画质惊艳，但本质是艺术创作工具，对淘宝、天猫平台规则几乎无理解。生成主图常出现尺寸不合规、商品变形、颜色偏差等问题，出图可用率不足 30%。更致命的是，其生成内容无商用版权保障，极易引发侵权纠纷。
 
-转向垂直电商 AI 后，问题依旧突出。多数小团队开发的工具存在三大硬伤：一是出图质量差，服装版型僵硬、商品质感模糊，细节经不起推敲；二是交互繁琐，参数设置复杂、批量功能薄弱，多 SKU 商家效率极低；三是稳定性差，服务器频繁崩溃、功能停更，甚至出现开发商失联情况，商家数据与资产毫无保障。不少卖家反馈，花钱订阅后却因工具难用被迫弃用，最终回归传统拍摄，成本与周期问题依旧无解。
+在一众工具中，潮际好麦表现尤为突出。由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型。与安踏、百丽、北面等知名品牌的深度合作，更成为其品质背书。实测数据：商品还原度超 98%，多 SKU 处理效率提升 300%，7×12 小时专属售后。
 
-在一众工具中，潮际好麦表现尤为突出。其核心优势首先源于强大背景——由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型，绝非小团队试水之作。与安踏、百丽、北面等国内外知名品牌的深度合作，更成为其品质背书，大品牌对出图精度、版权安全、数据稳定的严苛要求，是对产品实力的最好验证。
-
-从实测效果看，潮际好麦完美解决行业痛点。其一，电商原生适配，模型基于百万级爆款图训练，无需复杂提示词，上传商品图即可自动生成符合淘宝规范的主图、白底图、详情套图，尺寸精准、无牛皮癣、转化率导向。其二，出图质量顶尖，商品还原度超 98%，服装垂感、面料纹理、金属光泽高度逼真，无 AI 违和感，媲美专业商拍。其三，操作极简高效，界面简洁易上手，支持批量换场景、换模特、换色，多 SKU 处理效率提升 300%。其四，服务与安全可靠，7×12 小时专属售后，商用版权清晰，长期迭代更新，彻底消除商家"跑路焦虑"。
-
-对比可见，潮际好麦既避开通用 AI 的电商盲区，又解决普通垂直工具的质量与稳定性缺陷。对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力，也是其能在乱象中突围的关键。`);
-
-
-
-  const useFeatureExample = () => setArtikelContoh(`AI 电商视觉再进化！潮际好麦商品套图 2.0 上线，百货电商图生成效率翻倍
-
-在电商行业竞争日趋白热化的当下，视觉内容已成为决定商品点击率与转化率的核心要素。传统商拍模式成本高、周期长、多平台适配难，让众多中小商家与品牌方苦不堪言。近期，专业级 AI 电商营销内容创作平台潮际好麦迎来重磅升级，其王牌功能商品套图正式迭代至 2.0 版本，图片可用率大幅提升至 80%，为电商商家带来全新的视觉内容生产解决方案。
-
-潮际好麦商品套图 2.0 在 1.0 版本基础上实现三大核心突破，新增 AI 帮写提示词、自定义语言主题色字体、自定义套图三大功能，彻底解决商家不会写提示词、出图风格不统一、模板不贴合需求等痛点。无需复杂操作，上传商品白底图或随手实拍图，即可一键生成完整电商素材。
-
-本次升级中，百货电商图生成成为一大亮点，完美适配家居日用、五金小件、餐厨用品、收纳家纺等全品类百货商品。针对百货商品材质多样、细节复杂的特点，潮际好麦优化算法模型，精准还原金属质感、陶瓷光泽、布艺纹理等细节，光线、色调、构图智能匹配，让普通百货商品呈现出专业棚拍级效果。广东、福建、江苏等百货电商产业带商家实测反馈，以往拍摄一套百货商品图需花费数百元且等待数日，如今使用潮际好麦，10 分钟即可生成全套高清素材，成本降低 90% 以上，上新效率显著提升。
-
-操作流程上，商品套图 2.0 进一步简化，新手也能快速上手。第一步进入顶部菜单栏商品图，商品套图功能入口；第二步最多上传 5 张高清商品图，建议选择主体完整、光线均匀的素材；第三步填写商品信息，包含名称、卖点、场景、材质等，若不会描述可直接使用 AI 帮写功能；第四步进行个性化设置，支持 13 个销售地区、9 种语言切换，目标平台扩充至 14 个，主题色、字体风格可自定义；最后选择标准或高级生成模式，即可快速获得整套商品图。
-
-随着 AI 技术在电商领域的深度应用，视觉内容生产正迎来革命性变革。潮际好麦商品套图 2.0 以强大的功能、极简的操作、超高的出图质量，成为电商商家的必备工具，推动电商视觉生产进入全新时代。`);
-  const useSolutionExample = () => setArtikelContoh(`Uji Coba Pihak Ketiga | Kekacauan AI untuk Pembuatan Gambar E-Commerce, Bagaimana Penjual Harus Memilih?
-
-Saat ini, produksi visual e-commerce telah memasuki era AI. Namun bagi jutaan penjual, memilih alat yang tepat jauh lebih penting daripada sekadar menggunakan secara acak. Penulis, dalam kapasitas sebagai pihak ketiga, menghabiskan satu bulan untuk menguji 12 alat AI populer untuk pembuatan gambar, mencakup tipe umum dan vertikal khusus e-commerce. Hasilnya menunjukkan titik sakit industri meledak: AI umum tidak memahami e-commerce, alat vertikal sulit digunakan dan tidak stabil, dan hanya sedikit produk yang benar-benar memenuhi kebutuhan penjual.
-
-AI umum seperti Midjourney dan Stable Diffusion memang menghasilkan kualitas gambar memukau, tetapi sejatinya adalah alat seni digital dan hampir tidak memahami aturan platform seperti Taobao atau Tokopedia. Masalah yang sering muncul: ukuran gambar tidak sesuai, produk tampak terdistorsi, warna menyimpang, dan tingkat keberhasilan gambar kurang dari 30%. Lebih parah, konten yang dihasilkan tidak memiliki lisensi komersial, rawan sengketa hak cipta, dan sama sekali tidak sesuai dengan kebutuhan kepatuhan e-commerce.
-
-Berpindah ke AI e-commerce vertikal tetap tidak lepas dari masalah. Mayoritas alat yang dikembangkan oleh tim kecil memiliki tiga kelemahan utama: kualitas gambar rendah dengan tekstur produk buram, interaksi rumit dengan batch processing yang lemah, dan stabilitas buruk dengan server yang sering crash. Banyak penjual membayar langganan tapi akhirnya kembali ke metode fotografi tradisional karena alat yang sulit digunakan.
-
-Di antara semua alat, 潮际好麦 tampil menonjol. Didirikan oleh tim inti dari ekosistem Alibaba, memiliki akumulasi teknologi mendalam, dan mengembangkan model AI khusus e-commerce secara mdaniri, bukan percobaan tim kecil. Kolaborasi dengan merek besar domestik dan internasional seperti Anta, Belle, dan The North Face menjadi jaminan kualitas; tuntutan ketat mereka terhadap akurasi gambar, keamanan hak cipta, dan stabilitas data membuktikan kekuatan produk.
-
-Dari uji coba nyata, 潮际好麦 menyelesaikan semua masalah utama industri. Adaptasi asli e-commerce: model dilatih dengan jutaan gambar produk populer, cukup unggah gambar produk untuk menghasilkan gambar utama dan halaman detail sesuai stdanar platform. Kualitas gambar terbaik dengan tingkat akurasi reproduksi produk lebih dari 98%, tanpa kesan AI, setara fotografi profesional. Operasi sederhana dan efisien dengan efisiensi multi-SKU meningkat 300%. Layanan dan keamanan terpercaya dengan layanan pelanggan 7×12 jam dan lisensi komersial yang jelas.
-
-Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di e-commerce sekaligus mengatasi kelemahan kualitas dan stabilitas alat vertikal biasa. Bagi penjual e-commerce, inti alat visual adalah mudah digunakan, stabil, dan dapat didanalkan — dan itulah keunggulan kompetitif inti 潮际好麦.`);
+对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力。`);
 
   const handlePaste = async () => {
     try {
@@ -158,10 +158,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
       console.error("Failed to read clipboard", err);
     }
   };
-
-
-
-
 
   const startLoadingAnimation = () => {
     setProgress(0);
@@ -190,17 +186,18 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
     setTimeout(() => { setProgress(0); setLoading(false); }, 500);
   };
 
-  const handleAutoGenerateImagePrompt = async (title: string, keywords: string, article: string) => {
+  const handleManualGenerateImagePrompt = async () => {
+    if (!articleOutput) return;
     setIsPromptLoading(true);
     try {
-      const excerpt = article.substring(0, 300);
+      const excerpt = articleOutput.substring(0, 500);
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "image_prompt",
-          title,
-          kataKunci: keywords,
+          title: articleOutput.split("\n")[0].replace(/^#+\s*/, "").trim(),
+          kataKunci: kataKunci,
           articleExcerpt: excerpt,
           model
         }),
@@ -210,6 +207,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
         const data = await res.json();
         if (data.prompt) {
           setImagePrompt(data.prompt);
+          setIsImageSectionExpanded(true);
         }
       }
     } catch (err) {
@@ -238,7 +236,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
 
     try {
       const body = activeTab === "create"
-        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, minWords, maxWords }
+        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, contentLang, model, minWords, maxWords }
         : { type: "fix", sentence: sentenceInput, rewriteType, model };
 
       const res = await fetch("/api/generate", {
@@ -256,6 +254,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
           setArticleOutput("");
           setMetaOutput("");
           setSlugOutput("");
+          setImagePrompt(""); // Reset image prompt for new article
 
           const reader = res.body?.getReader();
           if (!reader) throw new Error("No reader found");
@@ -268,12 +267,9 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
             if (done) break;
             const chunk = decoder.decode(value);
             fullText += chunk;
-
-            // Incrementally parse if possible, or just update the raw article for now
             setArticleOutput(prev => prev + chunk);
           }
 
-          // Post-parse tags using indexOf for reliability
           const fullTrimmed = fullText.trim();
           const DELIM_ARTIKEL = "<<<ARTIKEL>>>";
           const DELIM_META = "<<<META>>>";
@@ -309,14 +305,10 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
               params: { fungsi, kataKunci }
           };
           setHistory(prev => [historyResult, ...prev].slice(0, 5));
-
-          const firstLine = article.split("\n")[0].replace(/^#+\s*/, "").trim();
-          handleAutoGenerateImagePrompt(firstLine || kataKunci, kataKunci, article);
       } else {
           const data = await res.json();
           setSentenceOutput(data.rewritten);
 
-          // Add to history
           const result: GenerationResult = {
               id: Date.now(),
               timestamp: new Date().toLocaleTimeString(),
@@ -333,19 +325,12 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
     }
   };
 
-
-
-
   const handleGenerateImage = () => {
-    const promptToUse = imagePrompt;
-    if (!promptToUse) return;
-
+    if (!imagePrompt) return;
     setIsImageLoading(true);
     setImageError(false);
-
-    const encodedPrompt = encodeURIComponent(promptToUse);
+    const encodedPrompt = encodeURIComponent(imagePrompt);
     const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
-
     setGeneratedImageUrl(url);
   };
 
@@ -388,7 +373,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
       URL.revokeObjectURL(url);
   };
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
@@ -401,7 +385,7 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType, minWords, maxWords]);
+  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType, minWords, maxWords, selectedStyle]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -409,7 +393,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
 
   return (
     <main className="min-h-screen bg-gray-50 pb-12">
-      {/* Progress Bar Header */}
       {loading && (
           <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50 overflow-hidden">
               <div
@@ -419,7 +402,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
           </div>
       )}
 
-      {/* Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center space-x-2">
@@ -476,7 +458,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
       </header>
 
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column - Input & History */}
         <div className="lg:col-span-5 space-y-6">
           <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
             <div className="flex justify-between items-start mb-2">
@@ -509,10 +490,10 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
                     onChange={(e) => setModel(e.target.value)}
                     className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none"
                   >
-                    {/* model selector - v2 */}
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
                     <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                    <option value="gemini-pro-latest">Gemini Pro Latest</option>
                   </select>
                 </div>
               </div>
@@ -533,6 +514,24 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
                   </div>
                   <textarea className="w-full border rounded-lg p-3 text-sm h-20" placeholder={t("fields.functions_placeholder")} value={fungsi} onChange={(e) => setFungsi(e.target.value)} />
                   <input type="text" className="w-full border rounded-lg p-3 text-sm" placeholder={t("fields.keywords_placeholder")} value={kataKunci} onChange={(e) => setKataKunci(e.target.value)} />
+
+                  {/* Style Dropdown */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center">
+                      <Layout size={10} className="mr-1" /> {t("fields.style_label")}
+                    </label>
+                    <select
+                      value={selectedStyle}
+                      onChange={(e) => setSelectedStyle(e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50 outline-none"
+                    >
+                      <option value="review">{t("fields.style_review")}</option>
+                      <option value="announcement">{t("fields.style_announcement")}</option>
+                      <option value="solution">{t("fields.style_solution")}</option>
+                      <option value="comparison">{t("fields.style_comparison")}</option>
+                    </select>
+                  </div>
+
                   <input type="text" className="w-full border rounded-lg p-3 text-sm" placeholder={t("fields.location_placeholder")} value={lokasi} onChange={(e) => setLokasi(e.target.value)} />
                   <div>
                     <div className="flex justify-between items-center mb-1">
@@ -580,7 +579,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
             {message && <div className="p-3 rounded-lg text-xs bg-red-50 text-red-600 flex items-center"><AlertCircle size={14} className="mr-2" /> {message}</div>}
           </section>
 
-          {/* History Panel */}
           {history.length > 0 && (
               <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
                   <h3 className="text-sm font-bold text-gray-700 flex items-center"><History size={16} className="mr-2" /> Recent Generations</h3>
@@ -599,7 +597,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
           )}
         </div>
 
-        {/* Right Column - Output */}
         <div className="lg:col-span-7 space-y-6">
           <section className="bg-white rounded-xl shadow-sm border p-6 space-y-6 min-h-[600px] flex flex-col">
             <div className="flex justify-between items-center">
@@ -610,6 +607,14 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
 
               {activeTab === "create" && articleOutput && (
                 <div className="flex space-x-2">
+                    <button
+                      onClick={handleManualGenerateImagePrompt}
+                      disabled={isPromptLoading}
+                      className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold flex items-center hover:bg-blue-100 transition-colors disabled:opacity-50"
+                    >
+                      {isPromptLoading ? <RotateCcw size={14} className="animate-spin mr-1" /> : <ImageIcon size={14} className="mr-1" />}
+                      {t("buttons.generate_image_prompt")}
+                    </button>
                     <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-gray-100 rounded text-gray-500" title="Download .txt"><Download size={16} /></button>
                     <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-gray-100 rounded text-gray-500 font-bold text-xs" title="Download .md">MD</button>
                 </div>
@@ -669,11 +674,6 @@ Dari perbdaningan terlihat bahwa 潮际好麦 menghindari blind spot AI umum di 
                                 onChange={(e) => setImagePrompt(e.target.value)}
                                 placeholder={isPromptLoading ? "Generating prompt..." : ""}
                               />
-                              {isPromptLoading && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-lg">
-                                  <RotateCcw size={16} className="animate-spin text-blue-600" />
-                                </div>
-                              )}
                             </div>
                             <button
                               onClick={handleGenerateImage}
