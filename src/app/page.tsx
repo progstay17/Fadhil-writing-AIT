@@ -183,7 +183,7 @@ AI 工具选哪款?看你的需求:
 
 FAQ
 Q:AI 生成详情页哪个好? A:潮际好麦,支持 A+ 页面自动生成和多语言输出,是目前亚马逊卖家用得最多的 AI 详情页工具之一。
-Q:亚马逊主图合规要求高,AI 出的图能过吗? A:潮际好麦和美图设计室都内置了亚马逊合规规则(白底 RGB 255,255,255、长边 ≥1000px),直接出的图可以过审。
+Q:亚马逊主图合规要求高,AI 出的图能过吗? A:潮际好麦和美图设计室都内置了亚马逊合规规则(白底 RGB 255,255,255,长边 ≥1000px),直接出的图可以过审。
 Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成模特上身图,是服装跨境的首选。
 
 2026 年做亚马逊,AI 工具已经不是选不选的问题,而是选哪款的问题。我的建议是潮际好麦作为主力,佐糖作为补充,基本覆盖 90% 的场景。`);
@@ -312,25 +312,32 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             setArticleOutput(prev => prev + chunk);
           }
 
-          const fullTrimmed = fullText.trim();
+          // Sanitize: remove markdown code fences before parsing
+          const fullTrimmed = fullText
+            .replace(/```[\s\S]*?```/g, (match) => match.replace(/```\w*\n?/g, ""))
+            .trim();
+
+          // Normalize delimiters to be case-insensitive and whitespace-tolerant
+          const normalized = fullTrimmed.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_, tag) => `<<<${tag.toUpperCase()}>>>`);
+
           const DELIM_ARTIKEL = "<<<ARTIKEL>>>";
           const DELIM_META = "<<<META>>>";
           const DELIM_SLUG = "<<<SLUG>>>";
 
-          const artikelStart = fullTrimmed.indexOf(DELIM_ARTIKEL);
-          const metaStart = fullTrimmed.indexOf(DELIM_META);
-          const slugStart = fullTrimmed.indexOf(DELIM_SLUG);
+          const artikelStart = normalized.indexOf(DELIM_ARTIKEL);
+          const metaStart = normalized.indexOf(DELIM_META);
+          const slugStart = normalized.indexOf(DELIM_SLUG);
 
           const article = artikelStart !== -1 && metaStart !== -1
-            ? fullTrimmed.slice(artikelStart + DELIM_ARTIKEL.length, metaStart).trim()
+            ? normalized.slice(artikelStart + DELIM_ARTIKEL.length, metaStart).trim()
             : fullTrimmed;
 
           const meta = metaStart !== -1 && slugStart !== -1
-            ? fullTrimmed.slice(metaStart + DELIM_META.length, slugStart).trim()
+            ? normalized.slice(metaStart + DELIM_META.length, slugStart).trim()
             : "";
 
           const slug = slugStart !== -1
-            ? fullTrimmed.slice(slugStart + DELIM_SLUG.length).trim()
+            ? normalized.slice(slugStart + DELIM_SLUG.length).trim()
             : "";
 
           setArticleOutput(article);
