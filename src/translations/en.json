@@ -1,14 +1,14 @@
 {
-  "title": "AIT Writing for 潮际好麦",
+  "title": "潮际好麦 AIT 写作",
   "subtitle": "Automatically generate product articles via LLM",
   "tabs": {
     "create": "Create Content",
     "fix": "Fix Sentence"
   },
   "fields": {
-    "functions": "功能 (Functions)",
-    "keywords": "关键词/标题 (Keywords/Title)",
-    "location": "地点 / Lokasi (Optional)",
+    "functions": "Functions",
+    "keywords": "Keywords/Title",
+    "location": "Location (Optional)",
     "sample": "ARTIKEL_CONTOH (Optional)",
     "functions_placeholder": "Enter product functions...",
     "keywords_placeholder": "Enter keywords or title...",
@@ -24,7 +24,12 @@
     "content_lang": "Content:",
     "model_label": "Model:",
     "min_words": "Min Words",
-    "max_words": "Max Words"
+    "max_words": "Max Words",
+    "style_label": "Article Style",
+    "style_review": "📊 Review / Listicle",
+    "style_announcement": "🆕 New Feature / Announcement",
+    "style_solution": "💡 Problem / Solution",
+    "style_comparison": "🔀 Comparison / Ranking"
   },
   "buttons": {
     "generate": "Generate",
@@ -34,7 +39,8 @@
     "copy": "Copy",
     "sample_review": "📊 Review",
     "sample_feature": "🆕 New Feature",
-    "sample_solution": "💡 Solution"
+    "sample_solution": "💡 Solution",
+    "generate_image_prompt": "Generate Image Prompt"
   },
   "output": {
     "article": "Full Article",

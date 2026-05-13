@@ -24,7 +24,12 @@
     "content_lang": "内容语言:",
     "model_label": "模型:",
     "min_words": "最小字数",
-    "max_words": "最大字数"
+    "max_words": "最大字数",
+    "style_label": "文章样式",
+    "style_review": "📊 测评 / 列表",
+    "style_announcement": "🆕 功能上新 / 公告",
+    "style_solution": "💡 解决方案",
+    "style_comparison": "🔀 对比 / 排名"
   },
   "buttons": {
     "generate": "生成",
@@ -34,7 +39,8 @@
     "copy": "复制",
     "sample_review": "📊 测评",
     "sample_feature": "🆕 功能上新",
-    "sample_solution": "💡 解决方案"
+    "sample_solution": "💡 解决方案",
+    "generate_image_prompt": "生成图片提示词"
   },
   "output": {
     "article": "完整文章",
