@@ -18,7 +18,9 @@ import {
   Download,
   History,
   RotateCcw,
-  Layout
+  Layout,
+  Sun,
+  Moon
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -42,6 +44,7 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
   const [activeTab, setActiveTab] = useState("create");
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   // Create Content States
   const [contentLang, setContentLang] = useState("ID");
@@ -82,6 +85,21 @@ export default function Home() {
   const loadingInterval = useRef<NodeJS.Timeout | null>(null);
   const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const resolved = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
+    setTheme(resolved);
+    document.documentElement.classList.toggle('dark', resolved === 'dark');
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
+    localStorage.setItem('theme', next);
+  };
+
   const changeLanguage = (l: string) => {
     i18n.changeLanguage(l);
     setLang(l);
@@ -106,6 +124,19 @@ export default function Home() {
     setMessage("");
   };
 
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (activeTab === "create") {
+        setArtikelContoh(text);
+      } else {
+        setSentenceInput(text);
+      }
+    } catch (err) {
+      console.error("Failed to read clipboard", err);
+    }
+  };
+
   const useReviewExample = () => setArtikelContoh(`做电商 5 年,从淘宝做到亚马逊,我用过的主图设计工具不下 20 款。2026 年 AI 工具爆发后,很多老软件其实已经被淘汰了。这篇把我目前还在用的 5 款整理出来,都是真金白银测过的,不是广告。
 
 先说结论——如果你只看一句话：
@@ -117,7 +148,7 @@ export default function Home() {
 
 第 1 名:潮际好麦(AI 主图+详情页一体化最强)
 这是 wo 2026 年用得最多的一款。核心优势是主图和详情页一起出,不用在多个工具之间切来切去。
-上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图、3C 产品场景图,不再局限于服装。多 SKU 批量处理,多语言详情页一键出。跨境卖家尤其适合,省掉拍摄和设计成本。实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
+上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图、3C 产品场景图,不再局限于服装。多 SKU 批量处理,多语言详情页一键出. 跨境卖家尤其适合,省掉拍摄和设计成本。实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
 
 第 2 名:佐糖(白底抠图之王)
 专做白底图和抠图,AI 精度很高,透明物体、毛发边缘都能处理干净。但它只做这一件事,出不了详情页。
@@ -138,7 +169,7 @@ Q:新手第一次做亚马逊,选哪款? A:预算有限选佐糖+稿定设计;�
 
   const useSolutionExample = () => setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
 
-当下电商视觉生产已进入 AI 时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型与垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
+当下电商视觉生产已进入 AI时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型与垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
 
 通用型 AI 如 Midjourney、Stable Diffusion 虽画质惊艳，但本质是艺术创作工具，对淘宝、天猫平台规则几乎无理解。生成主图常出现尺寸不合规、商品变形、颜色偏差等问题，出图可用率不足 30%。更致命的是，其生成内容无商用版权保障，极易引发侵权纠纷。
 
@@ -153,10 +184,10 @@ Q:新手第一次做亚马逊,选哪款? A:预算有限选佐糖+稿定设计;�
 
 TOP 1:潮际好麦
 综合分最高的一款。主图+详情页一体化,是它最核心的差异点。
-主图:白底合规(RGB 255,255,255)、长边 ≥1000px、无违规文字,直接过亚马逊审核
+主图:白底合规(RGB 255,255,255),长边 ≥1000px,无违规文字,直接过亚马逊审核
 详情页:AI 自动生成 A+ 页面,支持多语言输出(英/日/德/法等)
 场景图:服装能出模特上身图,家居能出场景渲染,3C 能出使用场景
-批量:多 SKU、多色多码一次处理,适合铺货型卖家
+批量:多 SKU,多色多码一次处理,适合铺货型卖家
 上手:上传原图+选类目,AI 自动出图,基本不用学
 实测一个家居产品:上传 1 张平铺图,2 分 40 秒拿到 7 张主图+1 套 A+ 详情页。这个效率是我测过最高的。
 
@@ -167,7 +198,7 @@ TOP 3:稿定设计
 模板数量是它的优势,亚马逊 A+ 模板极多。但 AI 自动化弱一些,更偏"模板+编辑"。适合喜欢自己调细节的卖家。
 
 TOP 4:Canva 可画
-跨境英文详情页首选,多语言模板丰富。AI 抠图和一键换白底都有。缺点是电商垂直模板没稿定多。
+跨境英文详情页首选,多语言模板丰富. AI 抠图和一键换白底都有。缺点是电商垂直模板没稿定多。
 
 TOP 5:佐糖
 白底主图专精,AI 抠图精度很高。但只做抠图+白底,出不了详情页,需要搭配其他工具用。
@@ -187,19 +218,6 @@ Q:亚马逊主图合规要求高,AI 出的图能过吗? A:潮际好麦和美图�
 Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成模特上身图,是服装跨境的首选。
 
 2026 年做亚马逊,AI 工具已经不是选不选的问题,而是选哪款的问题。我的建议是潮际好麦作为主力,佐糖作为补充,基本覆盖 90% 的场景。`);
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (activeTab === "create") {
-        setArtikelContoh(text);
-      } else {
-        setSentenceInput(text);
-      }
-    } catch (err) {
-      console.error("Failed to read clipboard", err);
-    }
-  };
 
   const startLoadingAnimation = () => {
     setProgress(0);
@@ -330,7 +348,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
           const article = artikelStart !== -1 && metaStart !== -1
             ? normalized.slice(artikelStart + DELIM_ARTIKEL.length, metaStart).trim()
-            : fullTrimmed;
+            : fullText;
 
           const meta = metaStart !== -1 && slugStart !== -1
             ? normalized.slice(metaStart + DELIM_META.length, slugStart).trim()
@@ -441,9 +459,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-12">
+    <main className="min-h-screen bg-white dark:bg-gray-950 pb-12 transition-colors duration-300">
       {loading && (
-          <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50 overflow-hidden">
+          <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800 z-50 overflow-hidden">
               <div
                   className="h-full bg-blue-600 transition-all duration-1000 ease-out"
                   style={{ width: `${progress}%` }}
@@ -451,7 +469,8 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           </div>
       )}
 
-      <header className="bg-white border-b sticky top-0 z-10">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10 transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <pre className="text-[8px] leading-[1] font-bold text-blue-600">
@@ -461,16 +480,16 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  / ___  | |  | |
 /_/   ____| |_|  `}
             </pre>
-            <h1 className="text-xl font-bold ml-2 hidden sm:block">{t("title")}</h1>
+            <h1 className="text-xl font-bold ml-2 hidden sm:block text-gray-900 dark:text-gray-100">{t("title")}</h1>
           </div>
 
-          <div className="flex items-center space-x-6">
-            <nav className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <div className="flex items-center space-x-4">
+            <nav className="hidden md:flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
               <button
                 onClick={() => setActiveTab("create")}
                 className={cn(
                   "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",
-                  activeTab === "create" ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700"
+                  activeTab === "create" ? "bg-blue-600 text-white shadow-sm" : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 )}
               >
                 <PlusCircle size={16} className="mr-2" />
@@ -480,7 +499,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                 onClick={() => setActiveTab("fix")}
                 className={cn(
                   "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",
-                  activeTab === "fix" ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700"
+                  activeTab === "fix" ? "bg-blue-600 text-white shadow-sm" : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 )}
               >
                 <Edit3 size={16} className="mr-2" />
@@ -488,29 +507,37 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
               </button>
             </nav>
 
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               {["zh", "en", "id"].map((l) => (
                 <button
                   key={l}
                   onClick={() => changeLanguage(l)}
                   className={cn(
                     "px-3 py-1 rounded-md text-xs font-medium uppercase transition-all",
-                    lang === l ? "bg-white shadow-sm text-blue-600" : "text-gray-500 hover:text-gray-700"
+                    lang === l ? "bg-blue-600 text-white shadow-sm" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                   )}
                 >
                   {l}
                 </button>
               ))}
             </div>
+
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400"
+            >
+              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            </button>
           </div>
         </div>
       </header>
 
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column - Input & History */}
         <div className="lg:col-span-5 space-y-6">
-          <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 space-y-4 transition-colors duration-300">
             <div className="flex justify-between items-start mb-2">
-              <h2 className="font-semibold text-gray-800 flex items-center mt-1">
+              <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center mt-1">
                 {activeTab === "create" ? (
                   <><PlusCircle size={18} className="mr-2 text-blue-500" /> {t("tabs.create")}</>
                 ) : (
@@ -519,11 +546,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
               </h2>
               <div className="flex flex-col items-end space-y-2">
                 <div className="flex items-center space-x-2">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t("fields.content_lang")}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{t("fields.content_lang")}</span>
                   <select
                     value={contentLang}
                     onChange={(e) => setContentLang(e.target.value)}
-                    className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none"
+                    className="text-[10px] border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium outline-none"
                   >
                     <option value="ID">ID</option>
                     <option value="EN">EN</option>
@@ -531,13 +558,13 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   </select>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider flex items-center">
                     <Cpu size={10} className="mr-1" /> {t("fields.model_label")}
                   </span>
                   <select
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
-                    className="text-[10px] border rounded px-2 py-1 bg-gray-50 font-medium outline-none"
+                    className="text-[10px] border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium outline-none"
                   >
                     <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
                     <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
@@ -553,26 +580,46 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{t("fields.min_words")}</label>
-                      <input type="number" className="w-full border rounded-lg px-3 py-2 text-sm" value={minWords} onChange={(e) => setMinWords(parseInt(e.target.value) || 0)} />
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.min_words")}</label>
+                      <input
+                        type="number"
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                        value={minWords}
+                        onChange={(e) => setMinWords(parseInt(e.target.value) || 0)}
+                      />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{t("fields.max_words")}</label>
-                      <input type="number" className="w-full border rounded-lg px-3 py-2 text-sm" value={maxWords} onChange={(e) => setMaxWords(parseInt(e.target.value) || 0)} />
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.max_words")}</label>
+                      <input
+                        type="number"
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                        value={maxWords}
+                        onChange={(e) => setMaxWords(parseInt(e.target.value) || 0)}
+                      />
                     </div>
                   </div>
-                  <textarea className="w-full border rounded-lg p-3 text-sm h-20" placeholder={t("fields.functions_placeholder")} value={fungsi} onChange={(e) => setFungsi(e.target.value)} />
-                  <input type="text" className="w-full border rounded-lg p-3 text-sm" placeholder={t("fields.keywords_placeholder")} value={kataKunci} onChange={(e) => setKataKunci(e.target.value)} />
+                  <textarea
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("fields.functions_placeholder")}
+                    value={fungsi}
+                    onChange={(e) => setFungsi(e.target.value)}
+                  />
+                  <textarea
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("fields.keywords_placeholder")}
+                    value={kataKunci}
+                    onChange={(e) => setKataKunci(e.target.value)}
+                  />
 
                   {/* Style Dropdown */}
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1 flex items-center">
+                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center">
                       <Layout size={10} className="mr-1" /> {t("fields.style_label")}
                     </label>
                     <select
                       value={selectedStyle}
                       onChange={(e) => setSelectedStyle(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50 outline-none"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
                     >
                       <option value="review">{t("fields.style_review")}</option>
                       <option value="announcement">{t("fields.style_announcement")}</option>
@@ -581,65 +628,77 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     </select>
                   </div>
 
-                  <input type="text" className="w-full border rounded-lg p-3 text-sm" placeholder={t("fields.location_placeholder")} value={lokasi} onChange={(e) => setLokasi(e.target.value)} />
+                  <input
+                    type="text"
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("fields.location_placeholder")}
+                    value={lokasi}
+                    onChange={(e) => setLokasi(e.target.value)}
+                  />
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <label className="text-xs font-medium text-gray-500">{t("fields.sample")}</label>
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t("fields.sample")}</label>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_review")}</button>
-                        <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_feature")}</button>
-                        <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_solution")}</button>
-                        <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors">{t("buttons.sample_comparison")}</button>
+                        <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_review")}</button>
+                        <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_feature")}</button>
+                        <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_solution")}</button>
+                        <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_comparison")}</button>
                       </div>
                     </div>
-                    <textarea className="w-full border rounded-lg p-3 text-sm h-24" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
+                    <textarea
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-24 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.sample_placeholder")}
+                      value={artikelContoh}
+                      onChange={(e) => setArtikelContoh(e.target.value)}
+                    />
                   </div>
                 </>
               ) : (
                 <div className="space-y-6">
                   <textarea
-                    className="w-full border rounded-lg p-4 text-sm h-48"
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm h-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder="Masukkan paragraf atau kalimat yang sulit dibaca di sini..."
                     value={sentenceInput}
                     onChange={(e) => setSentenceInput(e.target.value)}
                   />
                   <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => setRewriteType("yellow")} className={cn("p-3 rounded-xl border-2 text-left", rewriteType === "yellow" ? "border-yellow-400 bg-yellow-50" : "border-gray-100")}>
-                      <span className="font-bold text-sm block">🟡 {t("fields.yellow_label")}</span>
-                      <span className="text-[10px] text-gray-500">{t("fields.yellow_desc")}</span>
+                    <button onClick={() => setRewriteType("yellow")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "yellow" ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" : "border-gray-100 dark:border-gray-800")}>
+                      <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🟡 {t("fields.yellow_label")}</span>
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.yellow_desc")}</span>
                     </button>
-                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left", rewriteType === "red" ? "border-red-400 bg-red-50" : "border-gray-100")}>
-                      <span className="font-bold text-sm block">🔴 {t("fields.red_label")}</span>
-                      <span className="text-[10px] text-gray-500">{t("fields.red_desc")}</span>
+                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50 dark:bg-red-900/20" : "border-gray-100 dark:border-gray-800")}>
+                      <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🔴 {t("fields.red_label")}</span>
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.red_desc")}</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "create" ? "bg-blue-600" : "bg-orange-500")}>
+            <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "create" ? "bg-blue-600 hover:bg-blue-700" : "bg-orange-500 hover:bg-orange-600")}>
               {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : t("buttons.fix_now")}</>}
             </button>
 
             <div className="flex space-x-2">
-              <button onClick={handleClear} className="flex-1 border py-2 rounded-lg text-sm flex items-center justify-center"><Trash2 size={14} className="mr-2" /> {t("buttons.clear_input")}</button>
-              <button onClick={handlePaste} className="flex-1 border py-2 rounded-lg text-sm flex items-center justify-center"><Clipboard size={14} className="mr-2" /> {t("buttons.paste")}</button>
+              <button onClick={handleClear} className="flex-1 border border-gray-200 dark:border-gray-700 py-2 rounded-lg text-sm flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><Trash2 size={14} className="mr-2" /> {t("buttons.clear_input")}</button>
+              <button onClick={handlePaste} className="flex-1 border border-gray-200 dark:border-gray-700 py-2 rounded-lg text-sm flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><Clipboard size={14} className="mr-2" /> {t("buttons.paste")}</button>
             </div>
 
-            {message && <div className="p-3 rounded-lg text-xs bg-red-50 text-red-600 flex items-center"><AlertCircle size={14} className="mr-2" /> {message}</div>}
+            {message && <div className="p-3 rounded-lg text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center"><AlertCircle size={14} className="mr-2" /> {message}</div>}
           </section>
 
+          {/* History Panel */}
           {history.length > 0 && (
-              <section className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
-                  <h3 className="text-sm font-bold text-gray-700 flex items-center"><History size={16} className="mr-2" /> Recent Generations</h3>
+              <section className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-4 transition-colors duration-300">
+                  <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center"><History size={16} className="mr-2" /> Recent Generations</h3>
                   <div className="space-y-2">
                       {history.map(item => (
-                          <button key={item.id} onClick={() => restoreHistory(item)} className="w-full text-left p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 transition-all">
+                          <button key={item.id} onClick={() => restoreHistory(item)} className="w-full text-left p-2 hover:bg-white dark:hover:bg-gray-700 rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all">
                               <div className="flex justify-between items-center mb-1">
-                                  <span className="text-[10px] font-bold text-blue-600 uppercase">{item.type}</span>
-                                  <span className="text-[10px] text-gray-400">{item.timestamp}</span>
+                                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">{item.type}</span>
+                                  <span className="text-[10px] text-gray-400 dark:text-gray-500">{item.timestamp}</span>
                               </div>
-                              <p className="text-xs text-gray-600 truncate">{item.type === "create" ? item.params.kataKunci : item.params.sentence}</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{item.type === "create" ? item.params.kataKunci : item.params.sentence}</p>
                           </button>
                       ))}
                   </div>
@@ -647,10 +706,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           )}
         </div>
 
+        {/* Right Column - Output */}
         <div className="lg:col-span-7 space-y-6">
-          <section className="bg-white rounded-xl shadow-sm border p-6 space-y-6 min-h-[600px] flex flex-col">
+          <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300">
             <div className="flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 flex items-center">
+              <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center">
                 <FileText size={18} className="mr-2 text-green-500" />
                 {activeTab === "create" ? t("output.generation_output") : t("output.fix_result")}
               </h2>
@@ -660,13 +720,13 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     <button
                       onClick={handleManualGenerateImagePrompt}
                       disabled={isPromptLoading}
-                      className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold flex items-center hover:bg-blue-100 transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50"
                     >
                       {isPromptLoading ? <RotateCcw size={14} className="animate-spin mr-1" /> : <ImageIcon size={14} className="mr-1" />}
                       {t("buttons.generate_image_prompt")}
                     </button>
-                    <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-gray-100 rounded text-gray-500" title="Download .txt"><Download size={16} /></button>
-                    <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-gray-100 rounded text-gray-500 font-bold text-xs" title="Download .md">MD</button>
+                    <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 transition-colors" title="Download .txt"><Download size={16} /></button>
+                    <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 font-bold text-xs transition-colors" title="Download .md">MD</button>
                 </div>
               )}
             </div>
@@ -676,34 +736,34 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                 <>
                   <div className="relative group">
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-sm font-semibold text-gray-600">{t("output.article")}</h3>
-                      <button onClick={() => copyToClipboard(articleOutput)} className="text-gray-400 hover:text-blue-600"><Copy size={16} /></button>
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.article")}</h3>
+                      <button onClick={() => copyToClipboard(articleOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={16} /></button>
                     </div>
-                    <div className="w-full border rounded-lg p-4 text-sm bg-gray-50 min-h-[400px] whitespace-pre-wrap text-gray-800">
-                      {articleOutput || <span className="text-gray-300 italic">{t("output.rewritten_placeholder")}</span>}
+                    <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm bg-gray-50 dark:bg-gray-800 min-h-[400px] whitespace-pre-wrap text-gray-800 dark:text-gray-200 transition-colors">
+                      {articleOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-xs font-semibold text-gray-600">{t("output.meta")}</h3>
-                        <button onClick={() => copyToClipboard(metaOutput)} className="text-gray-400 hover:text-blue-600"><Copy size={12} /></button>
+                        <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.meta")}</h3>
+                        <button onClick={() => copyToClipboard(metaOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
                       </div>
-                      <div className="w-full border rounded-lg p-3 text-xs bg-gray-50 min-h-[60px]">{metaOutput}</div>
+                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-h-[60px] transition-colors">{metaOutput}</div>
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-xs font-semibold text-gray-600">{t("output.slug")}</h3>
-                        <button onClick={() => copyToClipboard(slugOutput)} className="text-gray-400 hover:text-blue-600"><Copy size={12} /></button>
+                        <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.slug")}</h3>
+                        <button onClick={() => copyToClipboard(slugOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
                       </div>
-                      <div className="w-full border rounded-lg p-3 text-xs bg-gray-50 font-mono text-blue-600">{slugOutput}</div>
+                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 font-mono text-blue-600 dark:text-blue-400 min-h-[40px] flex items-center transition-colors">{slugOutput}</div>
                     </div>
                   </div>
-                  <div className="mt-8 border-t pt-6">
+                  <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
                     <button
                       onClick={() => setIsImageSectionExpanded(!isImageSectionExpanded)}
-                      className="flex items-center justify-between w-full text-gray-700 hover:text-blue-600 transition-colors"
+                      className="flex items-center justify-between w-full text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       <div className="flex items-center font-bold text-sm">
                         <ImageIcon size={18} className="mr-2" />
@@ -715,11 +775,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     {isImageSectionExpanded && (
                       <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{t("image_gen.prompt_label")}</label>
+                          <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("image_gen.prompt_label")}</label>
                           <div className="flex space-x-2">
                             <div className="flex-1 relative">
                               <textarea
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                                className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none h-20 resize-none transition-colors"
                                 value={imagePrompt}
                                 onChange={(e) => setImagePrompt(e.target.value)}
                                 placeholder={isPromptLoading ? "Generating prompt..." : ""}
@@ -728,7 +788,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                             <button
                               onClick={handleGenerateImage}
                               disabled={isImageLoading || !imagePrompt}
-                              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center self-end"
                             >
                               {isImageLoading ? <RotateCcw size={14} className="animate-spin mr-2" /> : <Sparkles size={14} className="mr-2" />}
                               {t("image_gen.generate_button")}
@@ -738,19 +798,19 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
                         {generatedImageUrl && (
                           <div className="space-y-4">
-                            <div className="relative rounded-lg overflow-hidden border bg-gray-50 aspect-video flex items-center justify-center">
+                            <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 aspect-video flex items-center justify-center transition-colors">
                               {isImageLoading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                                  <RotateCcw size={32} className="animate-spin text-blue-600" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 z-10">
+                                  <RotateCcw size={32} className="animate-spin text-blue-600 dark:text-blue-400" />
                                 </div>
                               )}
                               {imageError ? (
                                 <div className="text-center p-6">
                                   <AlertCircle size={32} className="mx-auto text-red-500 mb-2" />
-                                  <p className="text-sm text-gray-600 mb-4">{t("image_gen.error")}</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t("image_gen.error")}</p>
                                   <button
                                     onClick={handleGenerateImage}
-                                    className="text-blue-600 text-sm font-bold hover:underline flex items-center mx-auto"
+                                    className="text-blue-600 dark:text-blue-400 text-sm font-bold hover:underline flex items-center mx-auto"
                                   >
                                     <RotateCcw size={14} className="mr-1" /> {t("image_gen.retry")}
                                   </button>
@@ -770,7 +830,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                             </div>
                             <button
                               onClick={handleDownloadImage}
-                              className="w-full border-2 border-gray-100 hover:border-gray-200 py-2 rounded-lg text-sm font-bold text-gray-600 flex items-center justify-center transition-colors"
+                              className="w-full border-2 border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 py-2 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-400 flex items-center justify-center transition-colors"
                             >
                               <Download size={16} className="mr-2" /> {t("image_gen.download_button")}
                             </button>
@@ -783,11 +843,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
               ) : (
                 <div className="relative group flex-1 flex flex-col">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-gray-600">{t("output.rewritten_label")}</h3>
-                    <button onClick={() => copyToClipboard(sentenceOutput)} className="text-gray-400 hover:text-orange-600"><Copy size={18} /></button>
+                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.rewritten_label")}</h3>
+                    <button onClick={() => copyToClipboard(sentenceOutput)} className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"><Copy size={18} /></button>
                   </div>
-                  <div className="w-full border rounded-xl p-6 text-lg font-medium bg-gray-50 flex-1 min-h-[400px] leading-relaxed text-gray-800">
-                    {sentenceOutput || <span className="text-gray-300 italic">{t("output.rewritten_placeholder")}</span>}
+                  <div className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-lg font-medium bg-gray-50 dark:bg-gray-800 flex-1 min-h-[400px] leading-relaxed text-gray-800 dark:text-gray-200 transition-colors">
+                    {sentenceOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
                   </div>
                 </div>
               )}
@@ -797,7 +857,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       </div>
 
       <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
-        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">{t("footer")}</p>
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">{t("footer")}</p>
       </footer>
     </main>
   );

@@ -15,6 +15,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
+      <head>
+        <script dangerouslySetInnerHTML={{__html: `
+          (function() {
+            const stored = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+              document.documentElement.classList.add('dark');
+            }
+          })();
+        `}} />
+      </head>
       <body className={inter.className}>
         <I18nextProvider i18n={i18n}>
           {children}
