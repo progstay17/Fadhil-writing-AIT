@@ -148,7 +148,7 @@ export default function Home() {
 
 第 1 名:潮际好麦(AI 主图+详情页一体化最强)
 这是 wo 2026 年用得最多的一款。核心优势是主图和详情页一起出,不用在多个工具之间切来切去。
-上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图、3C 产品场景图,不再局限于服装。多 SKU 批量处理,多语言详情页一键出. 跨境卖家尤其适合,省掉拍摄和设计成本。实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
+上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图、3C 产品场景图,不再局限于服装. 多 SKU 批量处理,多语言详情页一键出. 跨境卖家尤其适合,省掉拍摄和设计成本. 实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
 
 第 2 名:佐糖(白底抠图之王)
 专做白底图和抠图,AI 精度很高,透明物体、毛发边缘都能处理干净。但它只做这一件事,出不了详情页。
@@ -217,7 +217,7 @@ Q:AI 生成详情页哪个好? A:潮际好麦,支持 A+ 页面自动生成和多
 Q:亚马逊主图合规要求高,AI 出的图能过吗? A:潮际好麦和美图设计室都内置了亚马逊合规规则(白底 RGB 255,255,255,长边 ≥1000px),直接出的图可以过审。
 Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成模特上身图,是服装跨境的首选。
 
-2026 年做亚马逊,AI 工具已经不是选不选的问题,而是选哪款的问题。我的建议是潮际好麦作为主力,佐糖作为补充,基本覆盖 90% 的场景。`);
+2026 年做亚马逊, AI 工具已经不是选不选的问题,而是选哪款的问题。我的建议是潮际好麦作为主力,佐糖作为补充,基本覆盖 90% 的场景。`);
 
   const startLoadingAnimation = () => {
     setProgress(0);
@@ -460,6 +460,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 pb-12 transition-colors duration-300">
+      {/* Progress Bar Header */}
       {loading && (
           <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800 z-50 overflow-hidden">
               <div
@@ -568,8 +569,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   >
                     <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
                     <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                    <option value="gemini-pro-latest">Gemini Pro Latest</option>
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                    <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+                    <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                    <option value="gemini-flash-lite-latest">Gemini Flash Lite Latest</option>
                   </select>
                 </div>
               </div>
@@ -619,7 +623,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     <select
                       value={selectedStyle}
                       onChange={(e) => setSelectedStyle(e.target.value)}
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
                     >
                       <option value="review">{t("fields.style_review")}</option>
                       <option value="announcement">{t("fields.style_announcement")}</option>
@@ -666,7 +670,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🟡 {t("fields.yellow_label")}</span>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.yellow_desc")}</span>
                     </button>
-                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50 dark:bg-red-900/20" : "border-gray-100 dark:border-gray-800")}>
+                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50" : "border-gray-900/20", rewriteType === "red" ? "" : "border-gray-100 dark:border-gray-800")}>
                       <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🔴 {t("fields.red_label")}</span>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.red_desc")}</span>
                     </button>
