@@ -44,12 +44,8 @@ Focus: product function = {FUNGSI}, specific keyword: "{KATA_KUNCI}".
 
 ---
 
-ARTICLE STYLE: {SELECTED_STYLE_INSTRUCTION}
-
----
-
 TONE REFERENCE (only if ARTIKEL_CONTOH is provided):
-If ARTIKEL_CONTOH below is not "None provided.", use it ONLY to understand the writing tone, voice, and personality of the author. Do NOT copy any sentences. Do NOT mirror its structure. Structure must follow the ARTICLE STYLE above.
+If ARTIKEL_CONTOH below is not "None provided.", use it ONLY to understand the writing tone, voice, and personality of the author. Do NOT copy any sentences. Do NOT mirror its structure. Structure must follow the ARTICLE STYLE below.
 
 ARTIKEL_CONTOH: {ARTIKEL_CONTOH}
 
@@ -78,7 +74,16 @@ WRITING STYLE RULES:
 - CTA: end with a soft, natural call to action. Do NOT use "click here", "buy now", or "sign up". Frame it as a logical next step the reader would naturally take.
 - GEO localization: naturally weave {LOKASI} into at least 2–3 places in the article (not just the implementation section). It should feel like the article was written for that market.
 
-STRUCTURE per style is defined in {SELECTED_STYLE_INSTRUCTION} above.
+---
+
+⚠️ CRITICAL — ARTICLE STYLE (READ LAST, FOLLOW STRICTLY):
+You MUST write this article using ONLY the structure and tone defined below.
+Do NOT default to any other style. Do NOT mix styles.
+Selected style: {SELECTED_STYLE_NAME}
+
+{SELECTED_STYLE_INSTRUCTION}
+
+This structure is non-negotiable. If ARTIKEL_CONTOH is provided, use its tone and voice only — never its structure.
 
 OUTPUT FORMAT (STRICT):
 Output exactly three parts with these delimiters. No text outside these tags.
@@ -185,7 +190,15 @@ Article excerpt: ${excerpt}`;
       ? "Write the entire response in Bahasa Indonesia."
       : `Write the entire response in ${lang} language.`;
 
+    const STYLE_NAMES: Record<string, string> = {
+      review: "Review / Listicle",
+      announcement: "New Feature / Announcement",
+      solution: "Problem / Solution",
+      comparison: "Comparison / Ranking",
+    };
+
     const styleInstruction = STYLE_INSTRUCTIONS[selectedStyle] ?? STYLE_INSTRUCTIONS["solution"];
+    const styleNameLabel = STYLE_NAMES[selectedStyle] ?? "Problem / Solution";
 
     const prompt = CREATE_SYSTEM_PROMPT
       .replace("{LANG_INSTRUCTION}", langInstruction)
@@ -195,7 +208,8 @@ Article excerpt: ${excerpt}`;
       .replace("{MIN_WORDS}", minW.toString())
       .replace("{MAX_WORDS}", maxW.toString())
       .replace("{ARTIKEL_CONTOH}", artikelContoh || "None provided.")
-      .replace(/{SELECTED_STYLE_INSTRUCTION}/g, styleInstruction);
+      .replace("{SELECTED_STYLE_NAME}", styleNameLabel)
+      .replace("{SELECTED_STYLE_INSTRUCTION}", styleInstruction);
 
     const result = await model.generateContentStream(prompt);
 
