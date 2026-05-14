@@ -20,7 +20,7 @@ import {
   RotateCcw,
   Layout,
   Sun,
-  Moon
+  Moon, LogOut
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -85,13 +85,29 @@ export default function Home() {
   const loadingInterval = useRef<NodeJS.Timeout | null>(null);
   const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
+    useEffect(() => {
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const resolved = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
+
+    const token = localStorage.getItem("ait_token");
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
     setTheme(resolved);
     document.documentElement.classList.toggle('dark', resolved === 'dark');
   }, []);
+
+
+
+
+
+    const handleLogout = () => {
+    localStorage.removeItem("ait_token");
+    window.location.href = "/login";
+  };
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
@@ -253,7 +269,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       const excerpt = articleOutput.substring(0, 500);
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("ait_token")}` },
         body: JSON.stringify({
           type: "image_prompt",
           title: articleOutput.split("\n")[0].replace(/^#+\s*/, "").trim(),
@@ -269,6 +285,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           setImagePrompt(data.prompt);
           setIsImageSectionExpanded(true);
         }
+      } else if (res.status === 401) {
+        localStorage.removeItem("ait_token");
+        window.location.href = "/login";
       }
     } catch (err) {
       console.error("Failed to generate image prompt", err);
@@ -301,11 +320,16 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("ait_token")}` },
         body: JSON.stringify(body),
       });
 
       if (!res.ok) {
+          if (res.status === 401) {
+            localStorage.removeItem("ait_token");
+            window.location.href = "/login";
+            return;
+          }
           const errData = await res.json();
           throw new Error(errData.error || "Failed to generate");
       }
@@ -529,6 +553,15 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             >
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
+
+
           </div>
         </div>
       </header>
