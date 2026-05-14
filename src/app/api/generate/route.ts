@@ -216,7 +216,7 @@ Article excerpt: ${excerpt}`;
         .replace("{SELECTED_STYLE_NAME}", styleNameLabel)
         .replace("{SELECTED_STYLE_INSTRUCTION}", styleInstruction);
 
-      return body.type === "stream"
+      return body.type === "create"
         ? await model.generateContentStream(prompt)
         : await model.generateContent(prompt);
     };
@@ -248,7 +248,7 @@ Article excerpt: ${excerpt}`;
       return NextResponse.json({ prompt: response.text().trim() });
     }
 
-    if (body.type === "stream" || !body.type) {
+    if (body.type === "create" || !body.type) {
       const stream = new ReadableStream({
         async start(controller) {
           try {
