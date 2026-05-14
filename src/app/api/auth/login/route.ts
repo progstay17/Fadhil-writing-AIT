@@ -27,7 +27,16 @@ export async function POST(req: NextRequest) {
       .setExpirationTime("24h")
       .sign(secret);
 
-    return NextResponse.json({ token });
+    const response = NextResponse.json({ success: true });
+    response.cookies.set("ait_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
