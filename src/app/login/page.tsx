@@ -25,10 +25,8 @@ export default function LoginPage() {
     }
 
     // Check if already logged in
-    const token = localStorage.getItem("ait_token");
-    if (token) {
-      router.push("/");
-    }
+    fetch("/api/auth/me")
+      .then(res => { if (res.ok) router.push("/"); });
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -45,8 +43,7 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.token) {
-        localStorage.setItem("ait_token", data.token);
+      if (res.ok) {
         router.push("/");
       } else {
         setError(data.error || "Login failed. Please check your credentials.");

@@ -90,11 +90,9 @@ export default function Home() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const resolved = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
 
-    const token = localStorage.getItem("ait_token");
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
+    fetch("/api/auth/me")
+      .then(res => { if (!res.ok) window.location.href = "/login"; })
+      .catch(() => { window.location.href = "/login"; });
 
     setTheme(resolved);
     document.documentElement.classList.toggle('dark', resolved === 'dark');
@@ -104,8 +102,8 @@ export default function Home() {
 
 
 
-    const handleLogout = () => {
-    localStorage.removeItem("ait_token");
+    const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
   };
 
@@ -269,7 +267,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       const excerpt = articleOutput.substring(0, 500);
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("ait_token")}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "image_prompt",
           title: articleOutput.split("\n")[0].replace(/^#+\s*/, "").trim(),
@@ -286,7 +284,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           setIsImageSectionExpanded(true);
         }
       } else if (res.status === 401) {
-        localStorage.removeItem("ait_token");
+
         window.location.href = "/login";
       }
     } catch (err) {
@@ -320,13 +318,13 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("ait_token")}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
       if (!res.ok) {
           if (res.status === 401) {
-            localStorage.removeItem("ait_token");
+
             window.location.href = "/login";
             return;
           }
