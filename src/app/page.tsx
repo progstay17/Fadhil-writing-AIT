@@ -349,7 +349,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             if (done) break;
             const chunk = decoder.decode(value);
             fullText += chunk;
-            setArticleOutput(prev => prev + chunk);
+            setArticleOutput(fullText);
           }
 
           // Sanitize: remove markdown code fences before parsing

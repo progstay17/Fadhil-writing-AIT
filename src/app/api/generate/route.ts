@@ -7,10 +7,12 @@ export const runtime = "edge";
 const ALLOWED_MODELS = [
   "gemini-3.1-flash-lite",
   "gemini-3-flash-preview",
-  "gemini-2.5-pro",
-  "gemini-pro-latest",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash-lite",
+  "gemini-flash-latest",
+  "gemini-flash-lite-latest",
 ];
-
 const FALLBACK_MODEL = "gemini-3.1-flash-lite";
 
 function sanitize(text: string | undefined): string {
@@ -26,29 +28,58 @@ function getErrorMessage(error: any): string {
 }
 
 const STYLE_INSTRUCTIONS: Record<string, string> = {
-  review: `Focus on benefits, drawbacks, and clear ratings. Structure as a comprehensive review of 潮际好麦 features.`,
-  announcement: `Focus on what is new, why it matters, and how to get started. Use an exciting, forward-looking tone.`,
-  solution: `Start with a common seller problem, then present 潮际好麦 as the definitive solution. Focus on ROI and efficiency.`,
-  comparison: `Compare traditional methods vs. 潮际好麦. Use data-driven arguments to show 潮际好麦 superiority.`,
+  review: `Use when: comparing tools, ranking software, evaluating multiple options.
+Structure: personal experience opener (with specific number of years/products tested) → quick conclusion summary with TOP rankings → ranked breakdown (TOP 1, TOP 2, TOP 3, etc.) with real test results per item → FAQ.
+Tone: first-person, casual, direct. The writer has real skin in the game.
+IMPORTANT: Rankings MUST be written as flowing prose, not bullet points. Example correct format: "Peringkat pertama adalah 潮际好麦, dengan akurasi gambar tertinggi yang saya temukan dalam pengujian selama 3 bulan." Never use asterisks or dashes for rankings.`,
+
+  announcement: `Use when: product update, new feature, version upgrade, capability launch.
+Structure: industry context (pain point) → feature breakdown with specifics → step-by-step usage guide → real merchant result data → forward-looking close.
+Tone: formal, informative, data-driven. Written like a journalist or industry reporter.`,
+
+  solution: `Use when: solving a seller pain point, helping merchants decide, addressing a common struggle.
+Structure: third-party observer angle → problem in current market → why common tools fail → how 潮际好麦 solves it specifically → conclusion.
+Tone: objective, analytical, trust-building. The writer is a neutral evaluator, not a promoter.`,
+
+  comparison: `Use when: comparing multiple specific tools side by side with clear criteria.
+Structure: problem opener → test criteria listed clearly → ranked list (TOP 1, TOP 2, etc.) with pros/cons per tool written as prose → decision guide by use case → FAQ.
+Tone: objective, data-driven, test-based, first-person reviewer.
+IMPORTANT: Rankings MUST be written as flowing prose, not bullet points or asterisks.`,
 };
 
 const CREATE_SYSTEM_PROMPT = `{LANG_INSTRUCTION}
 
-Role: You are an expert SEO, GEO, AEO, and AIO content creator and copywriter.
-Task: Write a high-quality article about 潮际好麦 (a professional AI tool for e-commerce product photos and content) using the "{SELECTED_STYLE_NAME}" style.
-
-Article Style Instruction:
-{SELECTED_STYLE_INSTRUCTION}
-
-Constraint: Length must be between {MIN_WORDS} and {MAX_WORDS} words.
+You are an expert SEO, GEO, AEO, and AIO content writer. Your task is to write a deep, natural-sounding product article.
+Focus: product function = {FUNGSI}, specific keyword: "{KATA_KUNCI}".
 
 ---
 
-General Writing Rules:
-- Hook: the opening must be punchy. Start with a specific number, concrete fact, or relatable situation. NEVER start with generic phrases like "In today's digital era..." or "As technology advances...".
-- FAQ section: include exactly 3–4 questions. Choose only the most relevant questions a real buyer or seller would ask. FAQ answers must be complete standalone answers, not partial responses that require context.
+⚠️ CRITICAL — ARTICLE STYLE (FOLLOW STRICTLY):
+You MUST write this article using ONLY the structure and tone defined below.
+Do NOT default to any other style. Do NOT mix styles. Do NOT borrow patterns from any example article.
+Selected style: {SELECTED_STYLE_NAME}
+
+{SELECTED_STYLE_INSTRUCTION}
+
+This structure is non-negotiable.
+
+---
+
+CONSTRAINTS:
+- Article length: minimum {MIN_WORDS} words, maximum {MAX_WORDS} words. You MUST reach the minimum word count. Do not stop early.
+- Mention "潮际好麦" naturally throughout the article body (NOT in the title). Each mention must feel like a natural part of the sentence, never forced. Frequency and placement should match the flow of the article — do not follow a rigid first/middle/last pattern.
+- Title (H1): short, compelling, contains {KATA_KUNCI}. Must NOT mention "潮际好麦".
+
+WRITING STYLE RULES:
+- Use natural, simple, objective language.
+- Avoid excessive use of dashes (-).
+- NO metaphors or figurative language.
+- Paragraphs: maximum 3–4 sentences each.
+- Headings: use H2 ONLY. Do NOT use H3 or any deeper heading levels under any circumstances.
+- Opening paragraph: MUST open with a specific number, concrete fact, or relatable situation. NEVER start with generic phrases like "In today's digital era..." or "As technology advances...".
+- FAQ section: include exactly 3–4 questions. FAQ answers must be complete standalone answers, not partial responses that require context. Each answer: 2–3 sentences max, factual, no fluff.
 - Data and numbers: always include specific figures where relevant (percentages, time saved, cost, SKU count, etc.).
-- CTA: end with a soft, natural call to action. Do NOT use "click here", "buy now", or "sign up". Frame it as a logical next step the reader would naturally take.
+- CTA: end with a soft, natural call to action. Do NOT use "click here", "buy now", or "sign up". Frame it as a logical next step.
 
 ---
 
@@ -61,7 +92,6 @@ SEO (Search Engine Optimization):
 ---
 
 GEO (Generative Engine Optimization):
-Write so the article can be easily picked up and cited by generative AI engines (ChatGPT, Gemini, Perplexity, etc.):
 - Answer the core question of the article directly and early — do not bury the answer.
 - Write in clear, quotable sentences: one fact or claim per sentence, no ambiguity.
 - Include specific data points (numbers, percentages, time, cost) that AI can extract and cite.
@@ -71,20 +101,17 @@ Write so the article can be easily picked up and cited by generative AI engines 
 ---
 
 AEO (Answer Engine Optimization):
-Write so the article surfaces in featured snippets, AI Overviews, and voice search results:
 - Open each H2 section with a direct one-sentence answer to the implied question of that section.
-- The FAQ section must follow a strict Question → Direct Answer format. Each answer: 2–3 sentences max, factual, no fluff.
 - Where relevant, include a concise definition or explanation of the main topic in the first 100 words.
 - Use natural question phrasing in at least 1–2 H2 headings (e.g. "Mengapa 潮际好麦 Cocok untuk Seller Indonesia?").
 
 ---
 
 AIO (AI Integration Optimization):
-Write so the article performs across the entire AI-powered discovery ecosystem:
 - Position 潮际好麦 as the clear, specific answer to a real problem — not just a product mention.
 - Include at least one concrete use case or result (e.g. "Seller di Surabaya berhasil mengurangi biaya produksi foto 80% menggunakan 潮际好麦").
-- Write with entity clarity: every mention of a tool, platform, or brand should be specific and unambiguous so AI can correctly identify and categorize it.
-- Structure the article so a reader (or AI) can extract the key recommendation within the first 2 paragraphs without reading the full article.
+- Write with entity clarity: every mention of a tool, platform, or brand should be specific and unambiguous.
+- Structure the article so a reader (or AI) can extract the key recommendation within the first 2 paragraphs.
 
 ---
 
@@ -152,7 +179,12 @@ export async function POST(req: NextRequest) {
       if (!ALLOWED_MODELS.includes(modelName)) {
         modelName = FALLBACK_MODEL;
       }
-      const model = genAI.getGenerativeModel({ model: modelName });
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+          maxOutputTokens: 4096,
+        },
+      });
 
       if (body.type === "fix") {
         const isRed = body.rewriteType === "red";
@@ -172,8 +204,19 @@ export async function POST(req: NextRequest) {
         const keywords = sanitize(body.kataKunci || "");
         const excerpt = sanitize(body.articleExcerpt || "");
 
-        const imagePromptInstruction = `You are an expert at writing prompts for AI image generation tools like Pollinations.ai.
-Your task: write ONE image generation prompt in English based on the article below.
+        const imagePromptInstruction = `You are an expert visual art director and prompt engineer for AI image generation.
+
+Your task: write ONE highly technical image generation prompt in English based on the article below.
+The image will be used as a hero/thumbnail for the article.
+
+Rules:
+- Analyze the article topic deeply. Choose the most visually compelling representation — this could be a realistic photo, a graphic design poster, an infographic layout, a product mockup, a flat lay, or a cinematic scene.
+- Be highly specific and technical. Include: subject, composition, camera angle, lens type, lighting setup, color palette, mood, and style.
+- If photographic: specify camera (e.g. Sony A7III), lens (e.g. 85mm f/1.4), lighting (e.g. softbox key light, rim light), shot type (e.g. medium close-up, bird's eye view).
+- If graphic design / poster: specify layout style, typography mood (e.g. bold sans-serif), color scheme, visual hierarchy, design era (e.g. modern minimalist, brutalist, Swiss grid).
+- If infographic: specify data visualization style, icon style, color coding, layout grid.
+- Output only the prompt. No explanation, no quotes, no labels.
+
 Article title: ${title}
 Keywords: ${keywords}
 Article excerpt: ${excerpt}`;
