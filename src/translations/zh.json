@@ -29,7 +29,8 @@
     "style_review": "📊 测评 / 列表",
     "style_announcement": "🆕 功能上新 / 公告",
     "style_solution": "💡 解决方案",
-    "style_comparison": "🔀 对比 / 排名"
+    "style_comparison": "🔀 对比 / 排名",
+    "style_other": "✏️ Free / Custom"
   },
   "buttons": {
     "generate": "生成",
