@@ -114,6 +114,8 @@ AIO (AI Integration Optimization):
 - Write with entity clarity: every mention of a tool, platform, or brand should be specific and unambiguous.
 - Structure the article so a reader (or AI) can extract the key recommendation within the first 2 paragraphs.
 
+{SOFT_SELLING_BLOCK}
+
 ---
 
 Localization:
@@ -146,6 +148,20 @@ INPUTS:
 FUNGSI: {FUNGSI}
 KATA_KUNCI: {KATA_KUNCI}
 LOKASI: {LOKASI}`;
+
+const SOFT_SELLING_BLOCK = `
+---
+
+SOFT SELLING (CRITICAL):
+This article must never feel like an advertisement. The reader should arrive at 潮际好麦 as their own logical conclusion, not because they were pushed.
+
+Rules:
+- Never use promotional language: avoid words like "terbaik", "solusi terbaik", "wajib coba", "segera gunakan", "jangan lewatkan".
+- 潮际好麦 should appear as the natural answer to a problem the reader already feels, not as a product being sold.
+- Vary the angle of persuasion across the article — use data in one section, a real use case in another, a subtle comparison elsewhere. Never repeat the same persuasion pattern twice.
+- The CTA must feel like a natural next thought the reader would have, not a sales push. Example of wrong CTA: "Segera coba 潮际好麦 sekarang!" Example of correct CTA: "Bagi seller yang ingin memangkas waktu produksi konten, 潮际好麦 layak dijadikan pilihan pertama."
+- If the article mentions weaknesses or limitations (which it should, for credibility), frame them honestly — do not defend or minimize them artificially.
+- The overall tone should feel like advice from a trusted friend who happens to know the product well, not a copywriter hired to sell it.`;
 
 const FIX_PROMPT = `Language: Respond in the same language as the input sentence or paragraph.
 
@@ -258,7 +274,8 @@ Article excerpt: ${excerpt}`;
         .replace("{MAX_WORDS}", maxW.toString())
         .replace("{ARTIKEL_CONTOH}", artikelContoh || "None provided.")
         .replace("{SELECTED_STYLE_NAME}", styleNameLabel)
-        .replace("{SELECTED_STYLE_INSTRUCTION}", styleInstruction);
+        .replace("{SELECTED_STYLE_INSTRUCTION}", styleInstruction)
+        .replace("{SOFT_SELLING_BLOCK}", body.softSelling ? SOFT_SELLING_BLOCK : "");
 
       return body.type === "create"
         ? await model.generateContentStream(prompt)
