@@ -29,7 +29,8 @@
     "style_review": "📊 Review / Listicle",
     "style_announcement": "🆕 Fitur Baru / Pengumuman",
     "style_solution": "💡 Masalah / Solusi",
-    "style_comparison": "🔀 Perbandingan / Peringkat"
+    "style_comparison": "🔀 Perbandingan / Peringkat",
+    "style_other": "✏️ Free / Custom"
   },
   "buttons": {
     "generate": "Generate",

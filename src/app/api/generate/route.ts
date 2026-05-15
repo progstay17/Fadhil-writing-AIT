@@ -46,6 +46,11 @@ Tone: objective, analytical, trust-building. The writer is a neutral evaluator, 
 Structure: problem opener → test criteria listed clearly → ranked list (TOP 1, TOP 2, etc.) with pros/cons per tool written as prose → decision guide by use case → FAQ.
 Tone: objective, data-driven, test-based, first-person reviewer.
 IMPORTANT: Rankings MUST be written as flowing prose, not bullet points or asterisks.`,
+
+  other: `Write naturally based on the topic and inputs provided. No fixed structure is imposed.
+If ARTIKEL_CONTOH is provided, use it as the primary reference for both tone AND structure.
+If no ARTIKEL_CONTOH is provided, choose the most suitable structure organically based on the topic.
+Tone: flexible — match whatever feels most natural and effective for the subject matter.`,
 };
 
 const CREATE_SYSTEM_PROMPT = `{LANG_INSTRUCTION}
@@ -260,6 +265,7 @@ Article excerpt: ${excerpt}`;
         announcement: "New Feature / Announcement",
         solution: "Problem / Solution",
         comparison: "Comparison / Ranking",
+        other: "Free / Custom",
       };
 
       const styleInstruction = STYLE_INSTRUCTIONS[selectedStyle] ?? STYLE_INSTRUCTIONS["solution"];

@@ -662,6 +662,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       <option value="announcement">{t("fields.style_announcement")}</option>
                       <option value="solution">{t("fields.style_solution")}</option>
                       <option value="comparison">{t("fields.style_comparison")}</option>
+                      <option value="other">{t("fields.style_other")}</option>
                     </select>
                   </div>
 

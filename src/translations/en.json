@@ -29,7 +29,8 @@
     "style_review": "📊 Review / Listicle",
     "style_announcement": "🆕 New Feature / Announcement",
     "style_solution": "💡 Problem / Solution",
-    "style_comparison": "🔀 Comparison / Ranking"
+    "style_comparison": "🔀 Comparison / Ranking",
+    "style_other": "✏️ Free / Custom"
   },
   "buttons": {
     "generate": "Generate",
