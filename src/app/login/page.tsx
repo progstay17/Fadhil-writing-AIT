@@ -136,7 +136,7 @@ export default function LoginPage() {
 
         <div className="pt-4 text-center">
           <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">
-            © 2024 潮际好麦 AIT
+            © 2026 潮际好麦 AIT
           </p>
         </div>
       </div>
