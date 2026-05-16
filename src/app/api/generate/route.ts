@@ -73,6 +73,10 @@ This structure is non-negotiable.
 
 CONSTRAINTS:
 - Article length: minimum {MIN_WORDS} words, maximum {MAX_WORDS} words. You MUST reach the minimum word count. Do not stop early.
+- The article must be able to stand alone as genuinely informative content even if all brand mentions were removed. The topic, data, and insights must have value independent of the brand.
+- Include at least one honest limitation or weakness related to the topic (not necessarily about 潮际好麦). Do not defend or minimize it — honesty builds credibility.
+- Always write from a clear perspective: either first-person tester ("saya menguji...") or third-party analyst ("berdasarkan data..."). Never write in a neutral corporate tone.
+- Demonstrate expertise: mention a specific context that shows the writer has real experience (e.g. years of testing, number of products compared, specific platform used).
 - Mention "潮际好麦" naturally throughout the article body (NOT in the title). Each mention must feel like a natural part of the sentence, never forced. Frequency and placement should match the flow of the article — do not follow a rigid first/middle/last pattern.
 - Title (H1): short, compelling, contains {KATA_KUNCI}. Must NOT mention "潮际好麦".
 
@@ -83,7 +87,7 @@ WRITING STYLE RULES:
 - Paragraphs: maximum 3–4 sentences each.
 - Headings: use H2 ONLY. Do NOT use H3 or any deeper heading levels under any circumstances.
 - Opening paragraph: MUST open with a specific number, concrete fact, or relatable situation. NEVER start with generic phrases like "In today's digital era..." or "As technology advances...".
-- FAQ section: include exactly 3–4 questions. FAQ answers must be complete standalone answers, not partial responses that require context. Each answer: 2–3 sentences max, factual, no fluff.
+{FAQ_INSTRUCTION}
 - Data and numbers: always include specific figures where relevant (percentages, time saved, cost, SKU count, etc.).
 - CTA: end with a soft, natural call to action. Do NOT use "click here", "buy now", or "sign up". Frame it as a logical next step.
 
@@ -161,12 +165,16 @@ SOFT SELLING (CRITICAL):
 This article must never feel like an advertisement. The reader should arrive at 潮际好麦 as their own logical conclusion, not because they were pushed.
 
 Rules:
-- Never use promotional language: avoid words like "terbaik", "solusi terbaik", "wajib coba", "segera gunakan", "jangan lewatkan".
-- 潮际好麦 should appear as the natural answer to a problem the reader already feels, not as a product being sold.
-- Vary the angle of persuasion across the article — use data in one section, a real use case in another, a subtle comparison elsewhere. Never repeat the same persuasion pattern twice.
-- The CTA must feel like a natural next thought the reader would have, not a sales push. Example of wrong CTA: "Segera coba 潮际好麦 sekarang!" Example of correct CTA: "Bagi seller yang ingin memangkas waktu produksi konten, 潮际好麦 layak dijadikan pilihan pertama."
-- If the article mentions weaknesses or limitations (which it should, for credibility), frame them honestly — do not defend or minimize them artificially.
-- The overall tone should feel like advice from a trusted friend who happens to know the product well, not a copywriter hired to sell it.`;
+- The article topic is the hero, not the brand. 潮际好麦 is a supporting character that solves a problem the reader already feels.
+- Brand mention cap: mention "潮际好麦" maximum 5 times per article. Quality over quantity.
+- "潮际好麦" must NEVER appear as an H2 heading or any heading level.
+- Never write a paragraph that is purely about 潮际好麦's features without connecting it to a reader pain point first.
+- Vary persuasion angles — use data in one section, a real use case in another, a credibility signal elsewhere. Never repeat the same persuasion pattern twice in one article.
+- Promotional language is strictly forbidden: avoid "terbaik", "solusi terbaik", "wajib coba", "segera gunakan", "jangan lewatkan", "platform unggulan", "pilihan utama".
+- CTA must feel like a natural next thought. Wrong: "Segera coba 潮际好麦 sekarang!" Correct: "Bagi seller yang ingin memangkas waktu produksi konten, 潮际好麦 layak dijadikan pilihan pertama."
+- The overall tone must feel like advice from a trusted friend who knows the product well — not a copywriter hired to sell it.`;
+const FAQ_ON = `- FAQ section: include exactly 3–4 questions. FAQ answers must be complete standalone answers, not partial responses that require context. Each answer: 2–3 sentences max, factual, no fluff.`;
+const FAQ_OFF = `- Do NOT include a FAQ section in this article.`;
 
 const FIX_PROMPT = `Language: Respond in the same language as the input sentence or paragraph.
 
@@ -281,7 +289,8 @@ Article excerpt: ${excerpt}`;
         .replace("{ARTIKEL_CONTOH}", artikelContoh || "None provided.")
         .replace("{SELECTED_STYLE_NAME}", styleNameLabel)
         .replace("{SELECTED_STYLE_INSTRUCTION}", styleInstruction)
-        .replace("{SOFT_SELLING_BLOCK}", body.softSelling ? SOFT_SELLING_BLOCK : "");
+        .replace("{SOFT_SELLING_BLOCK}", body.softSelling ? SOFT_SELLING_BLOCK : "")
+        .replace("{FAQ_INSTRUCTION}", body.includeFaq !== false ? FAQ_ON : FAQ_OFF);
 
       return body.type === "create"
         ? await model.generateContentStream(prompt)
