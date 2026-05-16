@@ -56,6 +56,7 @@ export default function Home() {
   const [kataKunci, setKataKunci] = useState("");
   const [lokasi, setLokasi] = useState("");
   const [softSelling, setSoftSelling] = useState(false);
+  const [includeFaq, setIncludeFaq] = useState(true);
   const [artikelContoh, setArtikelContoh] = useState("");
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
@@ -126,6 +127,7 @@ export default function Home() {
       setKataKunci("");
       setLokasi("");
       setSoftSelling(false);
+      setIncludeFaq(true);
       setArtikelContoh("");
       setArticleOutput("");
       setMetaOutput("");
@@ -315,7 +317,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
     try {
       const body = activeTab === "create"
-        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, contentLang, model, minWords, maxWords }
+        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, contentLang, model, minWords, maxWords }
         : { type: "fix", sentence: sentenceInput, rewriteType, model };
 
       const res = await fetch("/api/generate", {
@@ -689,6 +691,26 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                         className={cn(
                           "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200",
                           softSelling ? "translate-x-6" : "translate-x-1"
+                        )}
+                      />
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      Include FAQ
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIncludeFaq(prev => !prev)}
+                      className={cn(
+                        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
+                        includeFaq ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200",
+                          includeFaq ? "translate-x-6" : "translate-x-1"
                         )}
                       />
                     </button>
