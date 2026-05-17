@@ -3,7 +3,8 @@
   "subtitle": "Automatically generate product articles via LLM",
   "tabs": {
     "create": "Create Content",
-    "fix": "Fix Sentence"
+    "fix": "Fix Sentence",
+    "humanize": "Humanizer (Beta)"
   },
   "fields": {
     "functions": "Functions",
@@ -30,7 +31,10 @@
     "style_announcement": "🆕 New Feature / Announcement",
     "style_solution": "💡 Problem / Solution",
     "style_comparison": "🔀 Comparison / Ranking",
-    "style_other": "✏️ Free / Custom"
+    "style_other": "✏️ Free / Custom",
+    "humanize_input": "AI Text (paste here):",
+    "humanize_placeholder": "Paste the AI-generated text to humanize...",
+    "humanize_lang": "Text Language:"
   },
   "buttons": {
     "generate": "Generate",
@@ -42,7 +46,8 @@
     "sample_feature": "🆕 New Feature",
     "sample_solution": "💡 Solution",
     "sample_comparison": "🔀 Comparison",
-    "generate_image_prompt": "Generate Image Prompt"
+    "generate_image_prompt": "Generate Image Prompt",
+    "humanize_now": "Humanize Now"
   },
   "output": {
     "article": "Full Article",
@@ -53,7 +58,10 @@
     "rewritten_placeholder": "Rewritten sentence will appear here...",
     "generation_output": "Generation Output",
     "word_count": "Word Count",
-    "seo_keywords": "SEO Keywords"
+    "seo_keywords": "SEO Keywords",
+    "humanize_result": "Humanizer Result",
+    "humanize_label": "Humanized text:",
+    "humanize_placeholder_out": "Humanized result will appear here..."
   },
   "seo": {
     "word_count": "Word Count",
@@ -66,7 +74,9 @@
     "generating": "Generating...",
     "fixing": "Fixing...",
     "refining": "Output doesn't meet requirements, refining...",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "humanize_required": "Please enter text to humanize!",
+    "humanizing": "Processing..."
   },
   "image_gen": {
     "title": "Generate Image",

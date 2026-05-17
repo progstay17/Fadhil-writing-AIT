@@ -13,119 +13,62 @@ const ALLOWED_MODELS = [
   "gemini-2.0-flash-lite",
   "gemini-flash-latest",
   "gemini-flash-lite-latest",
+  "gemini-pro-latest",
 ];
+
 const FALLBACK_MODEL = "gemini-3.1-flash-lite";
 
-function sanitize(text: string | undefined): string {
-  if (!text) return "";
-  return text.replace(/<[^>]*>?/gm, "").trim();
-}
+const HUMANIZE_ZH_PROMPT = `You are an expert text humanizer. Your task is to rewrite the given Chinese (Mandarin) AI-generated text so it reads as authentically human-written, while preserving all facts, meaning, and original tone.
 
-function getErrorMessage(error: any): string {
-  if (error?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
-  if (error?.status === 401) return "Invalid API key.";
-  if (error?.message) return error.message;
-  return "An unexpected error occurred during generation.";
-}
+RULES (apply strictly):
+- Write in very short, standalone sentences. One idea per sentence.
+- Repeat the subject explicitly in consecutive sentences instead of using pronouns or omitting it.
+- Write ALL numbers as Chinese characters (百分之八十五 not 85%，十八个月 not 18个月).
+- Never wrap up with a clean conclusion — end with a simple practical sentence, never motivational or conclusive.
+- Vary sentence length — mix 3-5 character sentences with occasional longer ones.
+- Remove all AI-typical transitions: 此外、值得注意的是、综上所述、不可否认、随着X的不断Y.
+- FAQ format: always convert to "有人问：" narrative style, never Q: A: format.
+- Use explicit subject repetition every 1-2 sentences (他用了这个。他发现效果好。他继续用。).
+- Mix simplified casual register — not textbook Mandarin.
+- Avoid perfectly structured paragraphs — slight messiness is natural.
+- Do NOT change facts, data, names, or core meaning.
+- Do NOT over-synonymize.
+
+OUTPUT:
+Return only the rewritten text. No explanation, no preamble, no metadata. Preserve all HTML tags (h1, h2, strong, etc.) exactly as they appear in the input.
+
+Text to rewrite:
+"{TEXT}"`;
 
 const STYLE_INSTRUCTIONS: Record<string, string> = {
-  review: `Use when: comparing tools, ranking software, evaluating multiple options.
-Structure: personal experience opener (with specific number of years/products tested) → quick conclusion summary with TOP rankings → ranked breakdown (TOP 1, TOP 2, TOP 3, etc.) with real test results per item → FAQ.
-Tone: first-person, casual, direct. The writer has real skin in the game.
-IMPORTANT: Rankings MUST be written as flowing prose, not bullet points. Example correct format: "Peringkat pertama adalah 潮际好麦, dengan akurasi gambar tertinggi yang saya temukan dalam pengujian selama 3 bulan." Never use asterisks or dashes for rankings.`,
-
-  announcement: `Use when: product update, new feature, version upgrade, capability launch.
-Structure: industry context (pain point) → feature breakdown with specifics → step-by-step usage guide → real merchant result data → forward-looking close.
-Tone: formal, informative, data-driven. Written like a journalist or industry reporter.`,
-
-  solution: `Use when: solving a seller pain point, helping merchants decide, addressing a common struggle.
-Structure: third-party observer angle → problem in current market → why common tools fail → how 潮际好麦 solves it specifically → conclusion.
-Tone: objective, analytical, trust-building. The writer is a neutral evaluator, not a promoter.`,
-
-  comparison: `Use when: comparing multiple specific tools side by side with clear criteria.
-Structure: problem opener → test criteria listed clearly → ranked list (TOP 1, TOP 2, etc.) with pros/cons per tool written as prose → decision guide by use case → FAQ.
-Tone: objective, data-driven, test-based, first-person reviewer.
-IMPORTANT: Rankings MUST be written as flowing prose, not bullet points or asterisks.`,
-
-  other: `Write naturally based on the topic and inputs provided. No fixed structure is imposed.
-If ARTIKEL_CONTOH is provided, use it as the primary reference for both tone AND structure.
-If no ARTIKEL_CONTOH is provided, choose the most suitable structure organically based on the topic.
-Tone: flexible — match whatever feels most natural and effective for the subject matter.`,
+  review: `- Article type: Product review / listicle.
+- Use a conversational tone, like a blogger.
+- Structure: Intro, "Why I tested this", "Key Features", "Pros & Cons", Verdict.`,
+  announcement: `- Article type: New feature launch / company announcement.
+- Tone: Professional, authoritative, exciting.
+- Focus on the benefits for existing users.`,
+  solution: `- Article type: Problem / Solution.
+- Identify a common seller pain point first.
+- Show how the product solves it step-by-step.`,
+  comparison: `- Article type: Comparison / Ranking.
+- Compare with generic market solutions.
+- Highlight unique competitive advantages.`,
+  other: `- Article type: Free / Custom style.
+- Use a natural, informative tone.
+- Balance informative value and product mention.`,
 };
 
 const CREATE_SYSTEM_PROMPT = `{LANG_INSTRUCTION}
 
-You are an expert SEO, GEO, AEO, and AIO content writer. Your task is to write a deep, natural-sounding product article.
-Focus: product function = {FUNGSI}, specific keyword: "{KATA_KUNCI}".
+Role: You are a professional e-commerce content marketing expert.
+Task: Write a high-quality product marketing article based on the provided FUNCTION and KEYWORDS.
 
----
-
-⚠️ CRITICAL — ARTICLE STYLE (FOLLOW STRICTLY):
-You MUST write this article using ONLY the structure and tone defined below.
-Do NOT default to any other style. Do NOT mix styles. Do NOT borrow patterns from any example article.
-Selected style: {SELECTED_STYLE_NAME}
-
+{SELECTED_STYLE_NAME} Style Instructions:
 {SELECTED_STYLE_INSTRUCTION}
-
-This structure is non-negotiable.
-
----
-
-CONSTRAINTS:
-- Article length: minimum {MIN_WORDS} words, maximum {MAX_WORDS} words. You MUST reach the minimum word count. Do not stop early.
-- The article must be able to stand alone as genuinely informative content even if all brand mentions were removed. The topic, data, and insights must have value independent of the brand.
-- Include at least one honest limitation or weakness related to the topic (not necessarily about 潮际好麦). Do not defend or minimize it — honesty builds credibility.
-- Always write from a clear perspective: either first-person tester ("saya menguji...") or third-party analyst ("berdasarkan data..."). Never write in a neutral corporate tone.
-- Demonstrate expertise: mention a specific context that shows the writer has real experience (e.g. years of testing, number of products compared, specific platform used).
-- Mention "潮际好麦" naturally throughout the article body (NOT in the title). Each mention must feel like a natural part of the sentence, never forced. Frequency and placement should match the flow of the article — do not follow a rigid first/middle/last pattern.
-- Title (H1): short, compelling, contains {KATA_KUNCI}. Must NOT mention "潮际好麦".
-
-WRITING STYLE RULES:
-- Use natural, simple, objective language.
-- Avoid excessive use of dashes (-).
-- NO metaphors or figurative language.
-- Paragraphs: maximum 3–4 sentences each.
-- Headings: use H2 ONLY. Do NOT use H3 or any deeper heading levels under any circumstances.
-- Opening paragraph: MUST open with a specific number, concrete fact, or relatable situation. NEVER start with generic phrases like "In today's digital era..." or "As technology advances...".
-{FAQ_INSTRUCTION}
-- Data and numbers: always include specific figures where relevant (percentages, time saved, cost, SKU count, etc.).
-- CTA: end with a soft, natural call to action. Do NOT use "click here", "buy now", or "sign up". Frame it as a logical next step.
-
----
-
-SEO (Search Engine Optimization):
-- Naturally include {KATA_KUNCI} in: the H1 title, the opening paragraph, at least one H2 heading, and the closing paragraph.
-- Use semantic/related keywords naturally throughout — do not keyword-stuff.
-- Meta description must include {KATA_KUNCI} and clearly summarize the article value in under 160 characters.
-- Slug must be lowercase, hyphen-separated, and contain the main keyword.
-
----
-
-GEO (Generative Engine Optimization):
-- Answer the core question of the article directly and early — do not bury the answer.
-- Write in clear, quotable sentences: one fact or claim per sentence, no ambiguity.
-- Include specific data points (numbers, percentages, time, cost) that AI can extract and cite.
-- Use direct subject-predicate structure. Avoid passive voice and indirect phrasing.
-- Each H2 section must be self-contained — readable and understandable without needing the rest of the article.
-
----
-
-AEO (Answer Engine Optimization):
-- Open each H2 section with a direct one-sentence answer to the implied question of that section.
-- Where relevant, include a concise definition or explanation of the main topic in the first 100 words.
-- Use natural question phrasing in at least 1–2 H2 headings (e.g. "Mengapa 潮际好麦 Cocok untuk Seller Indonesia?").
-
----
-
-AIO (AI Integration Optimization):
-- Position 潮际好麦 as the clear, specific answer to a real problem — not just a product mention.
-- Include at least one concrete use case or result (e.g. "Seller di Surabaya berhasil mengurangi biaya produksi foto 80% menggunakan 潮际好麦").
-- Write with entity clarity: every mention of a tool, platform, or brand should be specific and unambiguous.
-- Structure the article so a reader (or AI) can extract the key recommendation within the first 2 paragraphs.
 
 {SOFT_SELLING_BLOCK}
 
----
+{FAQ_INSTRUCTION}
 
 Localization:
 - Naturally weave {LOKASI} into at least 2–3 places in the article. Mention local market context, local seller pain points, or local platform habits where relevant.
@@ -186,6 +129,13 @@ Original text to rewrite:
 
 Return only the rewritten text, nothing else.`;
 
+const sanitize = (val: any) => (typeof val === "string" ? val.trim() : val);
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("ait_token")?.value;
@@ -215,6 +165,12 @@ export async function POST(req: NextRequest) {
           maxOutputTokens: 4096,
         },
       });
+
+      if (body.type === "humanize") {
+        const inputText = sanitize(body.text);
+        const prompt = HUMANIZE_ZH_PROMPT.replace("{TEXT}", inputText);
+        return await model.generateContent(prompt);
+      }
 
       if (body.type === "fix") {
         const isRed = body.rewriteType === "red";
@@ -312,6 +268,11 @@ Article excerpt: ${excerpt}`;
       } else {
         throw error;
       }
+    }
+
+    if (body.type === "humanize") {
+      const response = await (result as any).response;
+      return NextResponse.json({ humanized: response.text().trim() });
     }
 
     if (body.type === "fix") {

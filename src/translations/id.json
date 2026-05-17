@@ -2,8 +2,9 @@
   "title": "潮际好麦 AIT 写作",
   "subtitle": "Hasilkan artikel produk otomatis via LLM",
   "tabs": {
-    "create": "Create Content",
-    "fix": "Perbaiki Kalimat"
+    "create": "Buat Konten",
+    "fix": "Perbaiki Kalimat",
+    "humanize": "Humanizer (Beta)"
   },
   "fields": {
     "functions": "Fungsi",
@@ -21,28 +22,32 @@
     "yellow_desc": "Sedang: Kurangi kerumitan, Grade 8-9.",
     "red_label": "Merah",
     "red_desc": "Tinggi: Sederhanakan drastis, Grade 6-7.",
-    "content_lang": "Content:",
+    "content_lang": "Bahasa Konten:",
     "model_label": "Model:",
-    "min_words": "Min Words",
-    "max_words": "Max Words",
+    "min_words": "Min Kata",
+    "max_words": "Maks Kata",
     "style_label": "Gaya Artikel",
     "style_review": "📊 Review / Listicle",
     "style_announcement": "🆕 Fitur Baru / Pengumuman",
     "style_solution": "💡 Masalah / Solusi",
     "style_comparison": "🔀 Perbandingan / Peringkat",
-    "style_other": "✏️ Free / Custom"
+    "style_other": "✏️ Free / Custom",
+    "humanize_input": "Teks AI (paste di sini):",
+    "humanize_placeholder": "Tempel teks yang ingin di-humanize...",
+    "humanize_lang": "Bahasa Teks:"
   },
   "buttons": {
-    "generate": "Generate",
+    "generate": "Buat Artikel",
     "fix_now": "Perbaiki Sekarang",
-    "clear_input": "Clear Input",
-    "paste": "Paste",
-    "copy": "Copy",
+    "clear_input": "Hapus Input",
+    "paste": "Tempel",
+    "copy": "Salin",
     "sample_review": "📊 Review",
     "sample_feature": "🆕 Fitur Baru",
     "sample_solution": "💡 Solusi",
     "sample_comparison": "🔀 Perbandingan",
-    "generate_image_prompt": "Buat Prompt Gambar"
+    "generate_image_prompt": "Buat Prompt Gambar",
+    "humanize_now": "Humanize Sekarang"
   },
   "output": {
     "article": "Artikel Lengkap",
@@ -51,14 +56,17 @@
     "fix_result": "Hasil Perbaikan",
     "rewritten_label": "Kalimat hasil perbaikan:",
     "rewritten_placeholder": "Kalimat hasil perbaikan akan muncul di sini...",
-    "generation_output": "Generation Output",
-    "word_count": "Word Count",
-    "seo_keywords": "SEO Keywords"
+    "generation_output": "Hasil Generate",
+    "word_count": "Jumlah Kata",
+    "seo_keywords": "Kata Kunci SEO",
+    "humanize_result": "Hasil Humanizer",
+    "humanize_label": "Teks hasil humanize:",
+    "humanize_placeholder_out": "Hasil humanize akan muncul di sini..."
   },
   "seo": {
-    "word_count": "Word Count",
-    "keyword_density": "Keyword Density",
-    "meta_length": "Meta Length"
+    "word_count": "Jumlah Kata",
+    "keyword_density": "Kepadatan Kata Kunci",
+    "meta_length": "Panjang Meta"
   },
   "messages": {
     "required": "Fungsi dan Kata Kunci harus terisi!",
@@ -66,7 +74,9 @@
     "generating": "Sedang menghasilkan...",
     "fixing": "Sedang memperbaiki...",
     "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
-    "copied": "Berhasil disalin!"
+    "copied": "Berhasil disalin!",
+    "humanize_required": "Masukkan teks yang ingin di-humanize!",
+    "humanizing": "Sedang memproses..."
   },
   "image_gen": {
     "title": "Generate Gambar",

@@ -3,7 +3,8 @@
   "subtitle": "通过 LLM 自动生成产品文章",
   "tabs": {
     "create": "创建内容",
-    "fix": "修改句子"
+    "fix": "修改句子",
+    "humanize": "人性化改写 (Beta)"
   },
   "fields": {
     "functions": "功能 (Functions)",
@@ -30,7 +31,10 @@
     "style_announcement": "🆕 功能上新 / 公告",
     "style_solution": "💡 解决方案",
     "style_comparison": "🔀 对比 / 排名",
-    "style_other": "✏️ Free / Custom"
+    "style_other": "✏️ Free / Custom",
+    "humanize_input": "AI 文本（粘贴在此）:",
+    "humanize_placeholder": "粘贴需要人性化改写的 AI 文本...",
+    "humanize_lang": "文本语言:"
   },
   "buttons": {
     "generate": "生成",
@@ -42,7 +46,8 @@
     "sample_feature": "🆕 功能上新",
     "sample_solution": "💡 解决方案",
     "sample_comparison": "🔀 对比",
-    "generate_image_prompt": "生成图片提示词"
+    "generate_image_prompt": "生成图片提示词",
+    "humanize_now": "立即改写"
   },
   "output": {
     "article": "完整文章",
@@ -53,7 +58,10 @@
     "rewritten_placeholder": "修改后的句子将在此显示...",
     "generation_output": "生成结果",
     "word_count": "字数",
-    "seo_keywords": "SEO 关键词"
+    "seo_keywords": "SEO 关键词",
+    "humanize_result": "改写结果",
+    "humanize_label": "改写后的文本:",
+    "humanize_placeholder_out": "改写结果将在此显示..."
   },
   "seo": {
     "word_count": "字数",
@@ -66,7 +74,9 @@
     "generating": "正在生成...",
     "fixing": "正在修改...",
     "refining": "输出不符合要求，正在优化...",
-    "copied": "已复制！"
+    "copied": "已复制！",
+    "humanize_required": "请输入需要改写的文本！",
+    "humanizing": "正在处理..."
   },
   "image_gen": {
     "title": "生成图片",
