@@ -30,7 +30,9 @@
     "style_announcement": "🆕 New Feature / Announcement",
     "style_solution": "💡 Problem / Solution",
     "style_comparison": "🔀 Comparison / Ranking",
-    "style_other": "✏️ Free / Custom"
+    "style_other": "✏️ Free / Custom",
+    "competitor_label": "Competitors (Optional)",
+    "competitor_placeholder": "e.g. Canva, Adobe Express, Pixlr — paste research results here..."
   },
   "buttons": {
     "generate": "Generate",

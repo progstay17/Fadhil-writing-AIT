@@ -30,7 +30,9 @@
     "style_announcement": "🆕 Fitur Baru / Pengumuman",
     "style_solution": "💡 Masalah / Solusi",
     "style_comparison": "🔀 Perbandingan / Peringkat",
-    "style_other": "✏️ Free / Custom"
+    "style_other": "✏️ Free / Custom",
+    "competitor_label": "Kompetitor (Opsional)",
+    "competitor_placeholder": "contoh: Canva, Adobe Express, Pixlr — tempel hasil riset di sini..."
   },
   "buttons": {
     "generate": "Generate",

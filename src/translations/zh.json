@@ -30,7 +30,9 @@
     "style_announcement": "🆕 功能上新 / 公告",
     "style_solution": "💡 解决方案",
     "style_comparison": "🔀 对比 / 排名",
-    "style_other": "✏️ Free / Custom"
+    "style_other": "✏️ Free / Custom",
+    "competitor_label": "竞争对手（可选）",
+    "competitor_placeholder": "例如：Canva、Adobe Express、Pixlr — 在此粘贴调研结果..."
   },
   "buttons": {
     "generate": "生成",
