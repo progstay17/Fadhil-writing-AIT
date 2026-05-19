@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { verifyToken } from "@/lib/auth";
+import { BRAND_BRIEF } from "@/lib/brandBrief";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -57,6 +58,15 @@ const CREATE_SYSTEM_PROMPT = `{LANG_INSTRUCTION}
 
 You are an expert SEO, GEO, AEO, and AIO content writer. Your task is to write a deep, natural-sounding product article.
 Focus: product function = {FUNGSI}, specific keyword: "{KATA_KUNCI}".
+---
+
+BRAND KNOWLEDGE:
+The following is factual information about 潮际好麦. Use this as your primary reference when writing about the brand. Do NOT invent features, prices, or claims beyond what is stated here.
+
+{BRAND_BRIEF}
+
+---
+
 
 ---
 
@@ -321,6 +331,7 @@ Article excerpt: ${excerpt}`;
         .replace("{SELECTED_STYLE_INSTRUCTION}", styleInstruction)
         .replace("{SOFT_SELLING_BLOCK}", body.softSelling ? SOFT_SELLING_BLOCK : "")
         .replace("{FAQ_INSTRUCTION}", body.includeFaq !== false ? FAQ_ON : FAQ_OFF)
+        .replace("{BRAND_BRIEF}", BRAND_BRIEF)
         .replace("{COMPETITOR_BLOCK}",
           body.groundingEnabled
             ? COMPETITOR_BLOCK_AUTO
