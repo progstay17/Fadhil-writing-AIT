@@ -57,6 +57,8 @@ export default function Home() {
   const [lokasi, setLokasi] = useState("");
   const [softSelling, setSoftSelling] = useState(false);
   const [includeFaq, setIncludeFaq] = useState(true);
+  const [groundingEnabled, setGroundingEnabled] = useState(false);
+  const [kompetitor, setKompetitor] = useState("");
   const [artikelContoh, setArtikelContoh] = useState("");
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
@@ -128,6 +130,8 @@ export default function Home() {
       setLokasi("");
       setSoftSelling(false);
       setIncludeFaq(true);
+      setGroundingEnabled(false);
+      setKompetitor("");
       setArtikelContoh("");
       setArticleOutput("");
       setMetaOutput("");
@@ -317,7 +321,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
     try {
       const body = activeTab === "create"
-        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, contentLang, model, minWords, maxWords }
+        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords }
         : { type: "fix", sentence: sentenceInput, rewriteType, model };
 
       const res = await fetch("/api/generate", {
@@ -334,6 +338,26 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           }
           const errData = await res.json();
           throw new Error(errData.error || "Failed to generate");
+      }
+
+      if (groundingEnabled) {
+        const data = await res.json();
+        const fullText = data.article || "";
+        const normalized = fullText.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: any, tag: string) => `<<<${tag.toUpperCase()}>>>`);
+
+        const articleMatch = normalized.match(/<<<ARTIKEL>>>([\s\S]*?)(?:<<<|$)/i);
+        const metaMatch = normalized.match(/<<<META>>>([\s\S]*?)(?:<<<|$)/i);
+        const slugMatch = normalized.match(/<<<SLUG>>>([\s\S]*?)(?:<<<|$)/i);
+
+        const article = articleMatch ? articleMatch[1].trim() : fullText.trim();
+        const meta = metaMatch ? metaMatch[1].trim() : "";
+        const slug = slugMatch ? slugMatch[1].trim() : "";
+
+        setArticleOutput(article);
+        setMetaOutput(meta);
+        setSlugOutput(slug);
+        setLoading(false);
+        return;
       }
 
       if (activeTab === "create") {
@@ -362,7 +386,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             .trim();
 
           // Normalize delimiters to be case-insensitive and whitespace-tolerant
-          const normalized = fullTrimmed.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_, tag) => `<<<${tag.toUpperCase()}>>>`);
+          const normalized = fullTrimmed.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: any, tag: string) => `<<<${tag.toUpperCase()}>>>`);
 
           const DELIM_ARTIKEL = "<<<ARTIKEL>>>";
           const DELIM_META = "<<<META>>>";
@@ -695,6 +719,55 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       />
                     </button>
                   </div>
+
+                  {/* Competitor Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        🔍 Auto-Research Competitors
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setGroundingEnabled(prev => !prev)}
+                        className={cn(
+                          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
+                          groundingEnabled ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
+                        )}
+                      >
+                        <span className={cn(
+                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200",
+                          groundingEnabled ? "translate-x-6" : "translate-x-1"
+                        )} />
+                      </button>
+                    </div>
+
+                    {!groundingEnabled && (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs text-gray-400 dark:text-gray-500">
+                            {t("fields.competitor_label")}
+                          </label>
+                          <button
+                            type="button"
+                            disabled={!fungsi.trim() || !kataKunci.trim()}
+                            onClick={() => {
+                              const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}\nKata kunci target: ${kataKunci}\n\nTolong carikan 3-5 tools/platform kompetitor yang relevan dengan topik ini.\nUntuk setiap kompetitor, berikan:\n- Nama tool\n- Keunggulan utama (1-2 poin)\n- Kelemahan utama (1 poin)\n- Kisaran harga jika ada\n\nFormat output: plain text, langsung bisa saya paste ke form.`;
+                              navigator.clipboard.writeText(researchPrompt);
+                            }}
+                            className="text-xs text-blue-500 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                          >
+                            📋 Copy Research Prompt
+                          </button>
+                        </div>
+                        <textarea
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                          placeholder={t("fields.competitor_placeholder")}
+                          value={kompetitor}
+                          onChange={(e) => setKompetitor(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                       Include FAQ
@@ -714,6 +787,55 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                         )}
                       />
                     </button>
+                  </div>
+
+                  {/* Competitor Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        🔍 Auto-Research Competitors
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setGroundingEnabled(prev => !prev)}
+                        className={cn(
+                          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
+                          groundingEnabled ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
+                        )}
+                      >
+                        <span className={cn(
+                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200",
+                          groundingEnabled ? "translate-x-6" : "translate-x-1"
+                        )} />
+                      </button>
+                    </div>
+
+                    {!groundingEnabled && (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs text-gray-400 dark:text-gray-500">
+                            {t("fields.competitor_label")}
+                          </label>
+                          <button
+                            type="button"
+                            disabled={!fungsi.trim() || !kataKunci.trim()}
+                            onClick={() => {
+                              const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}\nKata kunci target: ${kataKunci}\n\nTolong carikan 3-5 tools/platform kompetitor yang relevan dengan topik ini.\nUntuk setiap kompetitor, berikan:\n- Nama tool\n- Keunggulan utama (1-2 poin)\n- Kelemahan utama (1 poin)\n- Kisaran harga jika ada\n\nFormat output: plain text, langsung bisa saya paste ke form.`;
+                              navigator.clipboard.writeText(researchPrompt);
+                            }}
+                            className="text-xs text-blue-500 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                          >
+                            📋 Copy Research Prompt
+                          </button>
+                        </div>
+                        <textarea
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                          placeholder={t("fields.competitor_placeholder")}
+                          value={kompetitor}
+                          onChange={(e) => setKompetitor(e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-1">
