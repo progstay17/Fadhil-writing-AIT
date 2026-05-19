@@ -59,6 +59,9 @@ export default function Home() {
   const [includeFaq, setIncludeFaq] = useState(true);
   const [groundingEnabled, setGroundingEnabled] = useState(false);
   const [kompetitor, setKompetitor] = useState("");
+  const [konteks, setKonteks] = useState("");
+  const [sudutPandang, setSudutPandang] = useState("analyst");
+  const [negativePrompt, setNegativePrompt] = useState("");
   const [artikelContoh, setArtikelContoh] = useState("");
   const [articleOutput, setArticleOutput] = useState("");
   const [metaOutput, setMetaOutput] = useState("");
@@ -281,6 +284,8 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           title: articleOutput.split("\n")[0].replace(/^#+\s*/, "").trim(),
           kataKunci: kataKunci,
           articleExcerpt: excerpt,
+          konteks: konteks,
+          fungsi: fungsi,
           model
         }),
       });
@@ -321,7 +326,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
     try {
       const body = activeTab === "create"
-        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords }
+        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt }
         : { type: "fix", sentence: sentenceInput, rewriteType, model };
 
       const res = await fetch("/api/generate", {
@@ -668,11 +673,33 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   />
                   <textarea
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("fields.konteks_placeholder")}
+                    value={konteks}
+                    onChange={(e) => setKonteks(e.target.value)}
+                  />
+                  <textarea
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.keywords_placeholder")}
                     value={kataKunci}
                     onChange={(e) => setKataKunci(e.target.value)}
                   />
 
+
+                  {/* Point of View Dropdown */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center">
+                      <Cpu size={10} className="mr-1" /> {t("fields.pov_label")}
+                    </label>
+                    <select
+                      value={sudutPandang}
+                      onChange={(e) => setSudutPandang(e.target.value)}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                    >
+                      <option value="tester">{t("fields.pov_tester")}</option>
+                      <option value="analyst">{t("fields.pov_analyst")}</option>
+                      <option value="journalist">{t("fields.pov_journalist")}</option>
+                    </select>
+                  </div>
                   {/* Style Dropdown */}
                   <div>
                     <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center">
@@ -784,6 +811,12 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                           placeholder={t("fields.competitor_placeholder")}
                           value={kompetitor}
                           onChange={(e) => setKompetitor(e.target.value)}
+                        />
+                        <textarea
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                          placeholder={t("fields.negative_placeholder")}
+                          value={negativePrompt}
+                          onChange={(e) => setNegativePrompt(e.target.value)}
                         />
                       </div>
                     )}

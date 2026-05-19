@@ -9,6 +9,12 @@
     "functions": "功能 (Functions)",
     "keywords": "关键词/标题 (Keywords/Title)",
     "location": "地点 / Lokasi (可选)",
+    "konteks": "背景与补充数据 (Context & Data)",
+    "konteks_placeholder": "例如：6-7月婚礼季，70%的卖家自拍失败，TikTok上火爆的韩国时尚趋势...",
+    "pov_label": "视角 (Point of View)",
+    "pov_tester": "🧑 第一人称测试者 (我测试过...)",
+    "pov_analyst": "📊 第三方分析师 (基于数据...)",
+    "pov_journalist": "📰 新闻/资讯风格 (根据研究...)",
     "sample": "ARTIKEL_CONTOH (可选)",
     "functions_placeholder": "输入产品功能...",
     "keywords_placeholder": "输入关键词或标题...",
@@ -32,7 +38,9 @@
     "style_comparison": "🔀 对比 / 排名",
     "style_other": "✏️ Free / Custom",
     "competitor_label": "竞争对手（可选）",
-    "competitor_placeholder": "例如：Canva、Adobe Express、Pixlr — 在此粘贴调研结果..."
+    "competitor_placeholder": "例如：Canva、Adobe Express、Pixlr — 在此粘贴调研结果...",
+    "negative_label": "负面提示词 (Negative Prompt)",
+    "negative_placeholder": "例如：不要将潮际好麦放在第2位，不要提到Canva，不要讨论视频功能"
   },
   "buttons": {
     "generate": "生成",

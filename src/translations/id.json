@@ -9,6 +9,12 @@
     "functions": "Fungsi",
     "keywords": "Kata Kunci/Judul",
     "location": "Lokasi (Opsional)",
+    "konteks": "Konteks & Data Tambahan",
+    "konteks_placeholder": "Contoh: Momen wedding season Juni-Juli, data 70% seller gagal foto sendiri, tren fashion Korea viral di TikTok...",
+    "pov_label": "Sudut Pandang",
+    "pov_tester": "🧑 First-person tester (saya menguji...)",
+    "pov_analyst": "📊 Third-party analyst (berdasarkan data...)",
+    "pov_journalist": "📰 Jurnalistik/informatif (menurut riset...)",
     "sample": "ARTIKEL_CONTOH (Opsional)",
     "functions_placeholder": "Masukkan fungsi produk...",
     "keywords_placeholder": "Masukkan kata kunci atau judul...",
@@ -32,7 +38,9 @@
     "style_comparison": "🔀 Perbandingan / Peringkat",
     "style_other": "✏️ Free / Custom",
     "competitor_label": "Kompetitor (Opsional)",
-    "competitor_placeholder": "contoh: Canva, Adobe Express, Pixlr — tempel hasil riset di sini..."
+    "competitor_placeholder": "contoh: Canva, Adobe Express, Pixlr — tempel hasil riset di sini...",
+    "negative_label": "Negative Prompt",
+    "negative_placeholder": "Contoh: Jangan taruh Chaoji Haomai di urutan 2, jangan sebut Canva, jangan bahas fitur video"
   },
   "buttons": {
     "generate": "Generate",

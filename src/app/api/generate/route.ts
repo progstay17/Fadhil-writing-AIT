@@ -54,6 +54,31 @@ If no ARTIKEL_CONTOH is provided, choose the most suitable structure organically
 Tone: flexible — match whatever feels most natural and effective for the subject matter.`,
 };
 
+
+const KONTEKS_BLOCK = (konteks: string) => `
+---
+CONTEXT & ADDITIONAL DATA:
+Use the following context, event, trend, or data as the article's primary angle or opening hook. Weave it naturally into the article — it should feel like the reason this article exists right now, not a forced addition.
+
+${konteks}
+---
+`;
+
+const POV_INSTRUCTIONS: Record<string, string> = {
+  tester: `Write strictly from a first-person tester perspective. Use "saya" naturally. Show personal experience, specific tests done, and real observations. Never switch to third-person.`,
+  analyst: `Write strictly as a third-party analyst. Use "berdasarkan data", "riset menunjukkan", "menurut pengujian". Never use "saya" as the subject. Stay objective and data-driven.`,
+  journalist: `Write strictly in an informative journalistic style. The subject is never "saya" or the reader. Write like a journalist giving useful information to readers — e.g. "Para seller kini bisa...", "Tren ini menunjukkan...", "Studi menemukan...". No personal experience, no first-person.`,
+};
+
+const NEGATIVE_PROMPT_BLOCK = (negative: string) => `
+---
+NEGATIVE CONSTRAINTS (STRICTLY FOLLOW):
+The following are hard rules about what must NOT appear in this article. These override any other instruction.
+
+${negative}
+---
+`;
+
 const CREATE_SYSTEM_PROMPT = `{LANG_INSTRUCTION}
 
 You are an expert SEO, GEO, AEO, and AIO content writer. Your task is to write a deep, natural-sounding product article.
@@ -64,6 +89,8 @@ BRAND KNOWLEDGE:
 The following is factual information about 潮际好麦. Use this as your primary reference when writing about the brand. Do NOT invent features, prices, or claims beyond what is stated here.
 
 {BRAND_BRIEF}
+
+{KONTEKS_BLOCK}
 
 ---
 
@@ -85,7 +112,7 @@ CONSTRAINTS:
 - Article length: minimum {MIN_WORDS} words, maximum {MAX_WORDS} words. You MUST reach the minimum word count. Do not stop early.
 - The article must be able to stand alone as genuinely informative content even if all brand mentions were removed. The topic, data, and insights must have value independent of the brand.
 - Include at least one honest limitation or weakness related to the topic (not necessarily about 潮际好麦). Do not defend or minimize it — honesty builds credibility.
-- Always write from a clear perspective: either first-person tester ("saya menguji...") or third-party analyst ("berdasarkan data..."). Never write in a neutral corporate tone.
+- {POV_INSTRUCTION}
 - Demonstrate expertise: mention a specific context that shows the writer has real experience (e.g. years of testing, number of products compared, specific platform used).
 - Mention "潮际好麦" naturally throughout the article body (NOT in the title). Each mention must feel like a natural part of the sentence, never forced. Frequency and placement should match the flow of the article — do not follow a rigid first/middle/last pattern.
 - Title (H1): short, compelling, contains {KATA_KUNCI}. Must NOT mention "潮际好麦".
@@ -143,6 +170,8 @@ Localization:
 
 {COMPETITOR_BLOCK}
 
+{NEGATIVE_PROMPT_BLOCK}
+
 ---
 
 TONE REFERENCE (optional — tone and voice only):
@@ -183,6 +212,7 @@ Rules:
 - "潮际好麦" must NEVER appear as an H2 heading or any heading level.
 - Never write a paragraph that is purely about 潮际好麦's features without connecting it to a reader pain point first.
 - Vary persuasion angles — use data in one section, a real use case in another, a credibility signal elsewhere. Never repeat the same persuasion pattern twice in one article.
+- In comparison or review articles, 潮际好麦's ranking must be earned through the criteria, not predetermined. If a competitor genuinely scores higher on a criterion, acknowledge it — this builds reader trust.
 - Promotional language is strictly forbidden: avoid "terbaik", "solusi terbaik", "wajib coba", "segera gunakan", "jangan lewatkan", "platform unggulan", "pilihan utama".
 - CTA must feel like a natural next thought. Wrong: "Segera coba 潮际好麦 sekarang!" Correct: "Bagi seller yang ingin memangkas waktu produksi konten, 潮际好麦 layak dijadikan pilihan pertama."
 - The overall tone must feel like advice from a trusted friend who knows the product well — not a copywriter hired to sell it.`;
@@ -199,7 +229,7 @@ ${competitors}
 Rules:
 - Mention competitors briefly and fairly — acknowledge their strengths where relevant
 - Do NOT bash competitors unfairly
-- 潮际好麦 should emerge as the preferred option through comparison, not by dismissing others
+- 潮际好麦 should be presented as a strong option only where it genuinely fits the comparison criteria. Do not force it as the winner if the comparison does not objectively support it. Credibility comes from honest comparison.
 `;
 
 const COMPETITOR_BLOCK_AUTO = `
@@ -211,7 +241,7 @@ Reference them naturally and honestly in the article to make it feel like genuin
 Rules:
 - Mention competitors briefly and fairly — acknowledge their strengths where relevant
 - Do NOT bash competitors unfairly
-- 潮际好麦 should emerge as the preferred option through comparison, not by dismissing others
+- 潮际好麦 should be presented as a strong option only where it genuinely fits the comparison criteria. Do not force it as the winner if the comparison does not objectively support it. Credibility comes from honest comparison.
 `;
 
 
@@ -273,6 +303,8 @@ export async function POST(req: NextRequest) {
         const title = sanitize(body.title || "");
         const keywords = sanitize(body.kataKunci || "");
         const excerpt = sanitize(body.articleExcerpt || "");
+        const konteksForImage = sanitize(body.konteks || "");
+        const fungsiForImage = sanitize(body.fungsi || "");
 
         const imagePromptInstruction = `You are an expert visual art director and prompt engineer for AI image generation.
 
@@ -285,11 +317,14 @@ Rules:
 - If photographic: specify camera (e.g. Sony A7III), lens (e.g. 85mm f/1.4), lighting (e.g. softbox key light, rim light), shot type (e.g. medium close-up, bird's eye view).
 - If graphic design / poster: specify layout style, typography mood (e.g. bold sans-serif), color scheme, visual hierarchy, design era (e.g. modern minimalist, brutalist, Swiss grid).
 - If infographic: specify data visualization style, icon style, color coding, layout grid.
+- Use the product/topic context and event angle to ensure the image is visually relevant to the article's specific subject matter, not just the title keywords.
 - Output only the prompt. No explanation, no quotes, no labels.
 
 Article title: ${title}
 Keywords: ${keywords}
-Article excerpt: ${excerpt}`;
+Article excerpt: ${excerpt}
+Product/topic context: ${fungsiForImage}
+Additional context or event angle: ${konteksForImage || "None"}`;
 
         return await model.generateContent(imagePromptInstruction);
       }
@@ -332,6 +367,9 @@ Article excerpt: ${excerpt}`;
         .replace("{SOFT_SELLING_BLOCK}", body.softSelling ? SOFT_SELLING_BLOCK : "")
         .replace("{FAQ_INSTRUCTION}", body.includeFaq !== false ? FAQ_ON : FAQ_OFF)
         .replace("{BRAND_BRIEF}", BRAND_BRIEF)
+        .replace("{KONTEKS_BLOCK}", body.konteks?.trim() ? KONTEKS_BLOCK(sanitize(body.konteks)) : "")
+        .replace("{POV_INSTRUCTION}", POV_INSTRUCTIONS[body.sudutPandang] || POV_INSTRUCTIONS["analyst"])
+        .replace("{NEGATIVE_PROMPT_BLOCK}", body.negativePrompt?.trim() ? NEGATIVE_PROMPT_BLOCK(sanitize(body.negativePrompt)) : "")
         .replace("{COMPETITOR_BLOCK}",
           body.groundingEnabled
             ? COMPETITOR_BLOCK_AUTO
