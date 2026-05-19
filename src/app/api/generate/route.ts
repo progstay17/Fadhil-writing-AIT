@@ -271,9 +271,6 @@ Return only the rewritten text, nothing else.`;
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("ait_token")?.value;
-
-
-    const token = req.cookies.get("ait_token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const username = await verifyToken(token);
