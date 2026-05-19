@@ -55,12 +55,25 @@ Tone: flexible — match whatever feels most natural and effective for the subje
 };
 
 
-const KONTEKS_BLOCK = (konteks: string) => `
+const KONTEKS_BLOCK = (konteks: string, fungsi: string, kataKunci: string) => `
 ---
-CONTEXT & ADDITIONAL DATA:
-Use the following context, event, trend, or data as the article's primary angle or opening hook. Weave it naturally into the article — it should feel like the reason this article exists right now, not a forced addition.
+ARTICLE ANGLE (CRITICAL — READ BEFORE WRITING ANYTHING):
+Before writing, internalize these three elements as one unified angle:
 
-${konteks}
+1. Product function (what this article is about): ${fungsi}
+2. SEO keyword (the anchor this article must rank for): ${kataKunci}
+3. Context / entry point (why this article is relevant right now): ${konteks}
+
+These are NOT three separate topics. They must converge into a single cohesive article angle.
+
+How to think about it:
+- The CONTEXT is the "why now" — the hook that makes the article timely and relevant
+- The KEYWORD is the "what" — the core subject the reader is searching for
+- The FUNGSI is the "how" — the product capability that answers the reader's need
+
+Example of correct integration: if fungsi = "AI model photo", kata_kunci = "foto produk tanpa model", and konteks = "wedding season Juni-Juli" → the article angle becomes: "why wedding season is the peak moment sellers need AI model photos, and how to do it without hiring real models"
+
+Write the opening paragraph so that all three elements are present and connected. Do not open with the context alone, the keyword alone, or the product alone.
 ---
 `;
 
@@ -258,6 +271,9 @@ Return only the rewritten text, nothing else.`;
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("ait_token")?.value;
+
+
+    const token = req.cookies.get("ait_token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const username = await verifyToken(token);
@@ -367,7 +383,7 @@ Additional context or event angle: ${konteksForImage || "None"}`;
         .replace("{SOFT_SELLING_BLOCK}", body.softSelling ? SOFT_SELLING_BLOCK : "")
         .replace("{FAQ_INSTRUCTION}", body.includeFaq !== false ? FAQ_ON : FAQ_OFF)
         .replace("{BRAND_BRIEF}", BRAND_BRIEF)
-        .replace("{KONTEKS_BLOCK}", body.konteks?.trim() ? KONTEKS_BLOCK(sanitize(body.konteks)) : "")
+        .replace("{KONTEKS_BLOCK}", body.konteks?.trim() ? KONTEKS_BLOCK(sanitize(body.konteks), fungsi, kataKunci) : "")
         .replace("{POV_INSTRUCTION}", POV_INSTRUCTIONS[body.sudutPandang] || POV_INSTRUCTIONS["analyst"])
         .replace("{NEGATIVE_PROMPT_BLOCK}", body.negativePrompt?.trim() ? NEGATIVE_PROMPT_BLOCK(sanitize(body.negativePrompt)) : "")
         .replace("{COMPETITOR_BLOCK}",
