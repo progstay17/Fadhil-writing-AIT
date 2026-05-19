@@ -9,6 +9,12 @@
     "functions": "Functions",
     "keywords": "Keywords/Title",
     "location": "Location (Optional)",
+    "konteks": "Context & Additional Data",
+    "konteks_placeholder": "Example: June-July wedding season, 70% of sellers fail at DIY photography, Korean fashion trend viral on TikTok...",
+    "pov_label": "Point of View",
+    "pov_tester": "🧑 First-person tester (I tested...)",
+    "pov_analyst": "📊 Third-party analyst (based on data...)",
+    "pov_journalist": "📰 Journalistic/informative (according to research...)",
     "sample": "ARTIKEL_CONTOH (Optional)",
     "functions_placeholder": "Enter product functions...",
     "keywords_placeholder": "Enter keywords or title...",
@@ -32,7 +38,9 @@
     "style_comparison": "🔀 Comparison / Ranking",
     "style_other": "✏️ Free / Custom",
     "competitor_label": "Competitors (Optional)",
-    "competitor_placeholder": "e.g. Canva, Adobe Express, Pixlr — paste research results here..."
+    "competitor_placeholder": "e.g. Canva, Adobe Express, Pixlr — paste research results here...",
+    "negative_label": "Negative Prompt",
+    "negative_placeholder": "Example: Don't put Chaoji Haomai in 2nd place, don't mention Canva, don't discuss video features"
   },
   "buttons": {
     "generate": "Generate",
