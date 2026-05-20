@@ -67,13 +67,9 @@ export default function Home() {
   const [metaOutput, setMetaOutput] = useState("");
   const [slugOutput, setSlugOutput] = useState("");
 
-  // Image Generation States
-  const [isImageSectionExpanded, setIsImageSectionExpanded] = useState(false);
-  const [imagePrompt, setImagePrompt] = useState("");
-  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
-  const [isImageLoading, setIsImageLoading] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [isPromptLoading, setIsPromptLoading] = useState(false);
+  // Image Prompts States
+  const [imagePromptsArticleInput, setImagePromptsArticleInput] = useState("");
+  const [imagePromptsOutput, setImagePromptsOutput] = useState<{ reference: string; prompt: string }[]>([]);
 
   // Fix Sentence States
   const [sentenceInput, setSentenceInput] = useState("");
@@ -139,9 +135,9 @@ export default function Home() {
       setArticleOutput("");
       setMetaOutput("");
       setSlugOutput("");
-      setImagePrompt("");
-      setGeneratedImageUrl("");
-      setImageError(false);
+    } else if (activeTab === "image_prompts") {
+      setImagePromptsArticleInput("");
+      setImagePromptsOutput([]);
     } else {
       setSentenceInput("");
       setSentenceOutput("");
@@ -271,46 +267,17 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     setTimeout(() => { setProgress(0); setLoading(false); }, 500);
   };
 
-  const handleManualGenerateImagePrompt = async () => {
-    if (!articleOutput) return;
-    setIsPromptLoading(true);
-    try {
-      const excerpt = articleOutput.substring(0, 500);
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "image_prompt",
-          title: articleOutput.split("\n")[0].replace(/^#+\s*/, "").trim(),
-          kataKunci: kataKunci,
-          articleExcerpt: excerpt,
-          konteks: konteks,
-          fungsi: fungsi,
-          model
-        }),
-      });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.prompt) {
-          setImagePrompt(data.prompt);
-          setIsImageSectionExpanded(true);
-        }
-      } else if (res.status === 401) {
 
-        window.location.href = "/login";
-      }
-    } catch (err) {
-      console.error("Failed to generate image prompt", err);
-    } finally {
-      setIsPromptLoading(false);
-    }
-  };
-
-  const handleGenerate = async () => {
+    const handleGenerate = async () => {
     if (activeTab === "create") {
       if (!fungsi || !kataKunci) {
         setMessage(t("messages.required"));
+        return;
+      }
+    } else if (activeTab === "image_prompts") {
+      if (!imagePromptsArticleInput) {
+        setMessage(t("messages.sentence_required"));
         return;
       }
     } else {
@@ -325,9 +292,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     startLoadingAnimation();
 
     try {
-      const body = activeTab === "create"
-        ? { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt }
-        : { type: "fix", sentence: sentenceInput, rewriteType, model };
+      let body;
+      if (activeTab === "create") {
+        body = { type: "create", fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt };
+      } else if (activeTab === "image_prompts") {
+        body = { type: "image_prompts", article: imagePromptsArticleInput, fungsi, kataKunci, konteks, model };
+      } else {
+        body = { type: "fix", sentence: sentenceInput, rewriteType, model };
+      }
 
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -337,12 +309,18 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
       if (!res.ok) {
           if (res.status === 401) {
-
             window.location.href = "/login";
             return;
           }
           const errData = await res.json();
           throw new Error(errData.error || "Failed to generate");
+      }
+
+      if (activeTab === "image_prompts") {
+        const data = await res.json();
+        setImagePromptsOutput(data.images || []);
+        setLoading(false);
+        return;
       }
 
       if (groundingEnabled) {
@@ -369,7 +347,6 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
           setArticleOutput("");
           setMetaOutput("");
           setSlugOutput("");
-          setImagePrompt(""); // Reset image prompt for new article
 
           const reader = res.body?.getReader();
           if (!reader) throw new Error("No reader found");
@@ -385,12 +362,10 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             setArticleOutput(fullText);
           }
 
-          // Sanitize: remove markdown code fences before parsing
           const fullTrimmed = fullText
             .replace(/```[\s\S]*?```/g, (match) => match.replace(/```\w*\n?/g, ""))
             .trim();
 
-          // Normalize delimiters to be case-insensitive and whitespace-tolerant
           const normalized = fullTrimmed.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: any, tag: string) => `<<<${tag.toUpperCase()}>>>`);
 
           const DELIM_ARTIKEL = "<<<ARTIKEL>>>";
@@ -447,32 +422,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     }
   };
 
-  const handleGenerateImage = () => {
-    if (!imagePrompt) return;
-    setIsImageLoading(true);
-    setImageError(false);
-    const encodedPrompt = encodeURIComponent(imagePrompt);
-    const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
-    setGeneratedImageUrl(url);
-  };
 
-  const handleDownloadImage = async () => {
-    if (!generatedImageUrl) return;
-    try {
-      const response = await fetch(generatedImageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${slugOutput || "generated-image"}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error("Failed to download image", err);
-    }
-  };
+
+
 
   const restoreHistory = (item: GenerationResult) => {
       setActiveTab(item.type);
@@ -610,11 +562,13 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column - Input & History */}
         <div className="lg:col-span-5 space-y-6">
-          <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 space-y-4 transition-colors duration-300">
+          <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-4 transition-colors duration-300">
             <div className="flex justify-between items-start mb-2">
               <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center mt-1">
                 {activeTab === "create" ? (
                   <><PlusCircle size={18} className="mr-2 text-blue-500" /> {t("tabs.create")}</>
+                ) : activeTab === "image_prompts" ? (
+                  <><ImageIcon size={18} className="mr-2 text-purple-500" /> {t("tabs.image_prompts")}</>
                 ) : (
                   <><Edit3 size={18} className="mr-2 text-orange-500" /> {t("tabs.fix")}</>
                 )}
@@ -693,7 +647,6 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     value={kataKunci}
                     onChange={(e) => setKataKunci(e.target.value)}
                   />
-
 
                   {/* Point of View Dropdown */}
                   <div>
@@ -777,59 +730,64 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     </button>
                   </div>
 
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      Google Search (Grounding)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setGroundingEnabled(prev => !prev)}
+                      className={cn(
+                        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
+                        groundingEnabled ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200",
+                          groundingEnabled ? "translate-x-6" : "translate-x-1"
+                        )}
+                      />
+                    </button>
+                  </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        🔍 Auto-Research Competitors
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setGroundingEnabled(prev => !prev)}
-                        className={cn(
-                          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
-                          groundingEnabled ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
-                        )}
-                      >
-                        <span className={cn(
-                          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200",
-                          groundingEnabled ? "translate-x-6" : "translate-x-1"
-                        )} />
-                      </button>
-                    </div>
+                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Advanced Prompting</label>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => {
+                            const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}
+Kata kunci target: ${kataKunci}
 
-                    {!groundingEnabled && (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs text-gray-400 dark:text-gray-500">
-                            {t("fields.competitor_label")}
-                          </label>
-                          <button
-                            type="button"
-                            disabled={!fungsi.trim() || !kataKunci.trim()}
-                            onClick={() => {
-                              const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}\nKata kunci target: ${kataKunci}\n\nTolong carikan 3-5 tools/platform kompetitor yang relevan dengan topik ini.\nUntuk setiap kompetitor, berikan:\n- Nama tool\n- Keunggulan utama (1-2 poin)\n- Kelemahan utama (1 poin)\n- Kisaran harga jika ada\n\nFormat output: plain text, langsung bisa saya paste ke form.`;
-                              navigator.clipboard.writeText(researchPrompt);
-                            }}
-                            className="text-xs text-blue-500 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
-                          >
-                            📋 Copy Research Prompt
-                          </button>
-                        </div>
-                        <textarea
-                          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                          placeholder={t("fields.competitor_placeholder")}
-                          value={kompetitor}
-                          onChange={(e) => setKompetitor(e.target.value)}
-                        />
-                        <textarea
-                          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                          placeholder={t("fields.negative_placeholder")}
-                          value={negativePrompt}
-                          onChange={(e) => setNegativePrompt(e.target.value)}
-                        />
+Tolong carikan 3-5 tools/platform kompetitor yang relevan dengan topik ini.
+Untuk setiap kompetitor, berikan:
+- Nama tool
+- Keunggulan utama (1-2 poin)
+- Kelemahan utama (1 poin)
+- Kisaran harga jika ada
+
+Format output: plain text, langsung bisa saya paste ke form.`;
+                            navigator.clipboard.writeText(researchPrompt);
+                          }}
+                          className="text-xs text-blue-500 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                        >
+                          📋 Copy Research Prompt
+                        </button>
                       </div>
-                    )}
+                    </div>
+                    <textarea
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.competitor_placeholder")}
+                      value={kompetitor}
+                      onChange={(e) => setKompetitor(e.target.value)}
+                    />
+                    <textarea
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.negative_placeholder")}
+                      value={negativePrompt}
+                      onChange={(e) => setNegativePrompt(e.target.value)}
+                    />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-1">
@@ -849,6 +807,35 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     />
                   </div>
                 </>
+              ) : activeTab === "image_prompts" ? (
+                <div className="space-y-4">
+                  <textarea
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-64 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("image_prompts.article_placeholder")}
+                    value={imagePromptsArticleInput}
+                    onChange={(e) => setImagePromptsArticleInput(e.target.value)}
+                  />
+                  <div className="grid grid-cols-1 gap-4">
+                    <textarea
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.functions_placeholder")}
+                      value={fungsi}
+                      onChange={(e) => setFungsi(e.target.value)}
+                    />
+                    <textarea
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.keywords_placeholder")}
+                      value={kataKunci}
+                      onChange={(e) => setKataKunci(e.target.value)}
+                    />
+                    <textarea
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.konteks_placeholder")}
+                      value={konteks}
+                      onChange={(e) => setKonteks(e.target.value)}
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-6">
                   <textarea
@@ -862,7 +849,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🟡 {t("fields.yellow_label")}</span>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.yellow_desc")}</span>
                     </button>
-                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50" : "border-gray-900/20", rewriteType === "red" ? "" : "border-gray-100 dark:border-gray-800")}>
+                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50 dark:bg-red-900/20" : "border-gray-100 dark:border-gray-800")}>
                       <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🔴 {t("fields.red_label")}</span>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.red_desc")}</span>
                     </button>
@@ -871,183 +858,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
               )}
             </div>
 
-            <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "create" ? "bg-blue-600 hover:bg-blue-700" : "bg-orange-500 hover:bg-orange-600")}>
-              {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : t("buttons.fix_now")}</>}
+            <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-600 hover:bg-blue-700")}>
+              {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
             </button>
-
-            <div className="flex space-x-2">
-              <button onClick={handleClear} className="flex-1 border border-gray-200 dark:border-gray-700 py-2 rounded-lg text-sm flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><Trash2 size={14} className="mr-2" /> {t("buttons.clear_input")}</button>
-              <button onClick={handlePaste} className="flex-1 border border-gray-200 dark:border-gray-700 py-2 rounded-lg text-sm flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><Clipboard size={14} className="mr-2" /> {t("buttons.paste")}</button>
-            </div>
-
-            {message && <div className="p-3 rounded-lg text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center"><AlertCircle size={14} className="mr-2" /> {message}</div>}
-          </section>
-
-          {/* History Panel */}
-          {history.length > 0 && (
-              <section className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-4 transition-colors duration-300">
-                  <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center"><History size={16} className="mr-2" /> Recent Generations</h3>
-                  <div className="space-y-2">
-                      {history.map(item => (
-                          <button key={item.id} onClick={() => restoreHistory(item)} className="w-full text-left p-2 hover:bg-white dark:hover:bg-gray-700 rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all">
-                              <div className="flex justify-between items-center mb-1">
-                                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">{item.type}</span>
-                                  <span className="text-[10px] text-gray-400 dark:text-gray-500">{item.timestamp}</span>
-                              </div>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{item.type === "create" ? item.params.kataKunci : item.params.sentence}</p>
-                          </button>
-                      ))}
-                  </div>
-              </section>
-          )}
-        </div>
-
-        {/* Right Column - Output */}
-        <div className="lg:col-span-7 space-y-6">
-          <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300">
-            <div className="flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center">
-                <FileText size={18} className="mr-2 text-green-500" />
-                {activeTab === "create" ? t("output.generation_output") : t("output.fix_result")}
-              </h2>
-
-              {activeTab === "create" && articleOutput && (
-                <div className="flex space-x-2">
-                    <button
-                      onClick={handleManualGenerateImagePrompt}
-                      disabled={isPromptLoading}
-                      className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors disabled:opacity-50"
-                    >
-                      {isPromptLoading ? <RotateCcw size={14} className="animate-spin mr-1" /> : <ImageIcon size={14} className="mr-1" />}
-                      {t("buttons.generate_image_prompt")}
-                    </button>
-                    <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 transition-colors" title="Download .txt"><Download size={16} /></button>
-                    <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 font-bold text-xs transition-colors" title="Download .md">MD</button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-6 flex-1">
-              {activeTab === "create" ? (
-                <>
-                  <div className="relative group">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.article")}</h3>
-                      <button onClick={() => copyToClipboard(articleOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={16} /></button>
-                    </div>
-                    <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm bg-gray-50 dark:bg-gray-800 min-h-[400px] whitespace-pre-wrap text-gray-800 dark:text-gray-200 transition-colors">
-                      {articleOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.meta")}</h3>
-                        <button onClick={() => copyToClipboard(metaOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
-                      </div>
-                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 min-h-[60px] transition-colors">{metaOutput}</div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.slug")}</h3>
-                        <button onClick={() => copyToClipboard(slugOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
-                      </div>
-                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 font-mono text-blue-600 dark:text-blue-400 min-h-[40px] flex items-center transition-colors">{slugOutput}</div>
-                    </div>
-                  </div>
-                  <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
-                    <button
-                      onClick={() => setIsImageSectionExpanded(!isImageSectionExpanded)}
-                      className="flex items-center justify-between w-full text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                    >
-                      <div className="flex items-center font-bold text-sm">
-                        <ImageIcon size={18} className="mr-2" />
-                        {t("image_gen.title")}
-                      </div>
-                      {isImageSectionExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                    </button>
-
-                    {isImageSectionExpanded && (
-                      <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div>
-                          <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("image_gen.prompt_label")}</label>
-                          <div className="flex space-x-2">
-                            <div className="flex-1 relative">
-                              <textarea
-                                className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none h-20 resize-none transition-colors"
-                                value={imagePrompt}
-                                onChange={(e) => setImagePrompt(e.target.value)}
-                                placeholder={isPromptLoading ? "Generating prompt..." : ""}
-                              />
-                            </div>
-                            <button
-                              onClick={handleGenerateImage}
-                              disabled={isImageLoading || !imagePrompt}
-                              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center self-end"
-                            >
-                              {isImageLoading ? <RotateCcw size={14} className="animate-spin mr-2" /> : <Sparkles size={14} className="mr-2" />}
-                              {t("image_gen.generate_button")}
-                            </button>
-                          </div>
-                        </div>
-
-                        {generatedImageUrl && (
-                          <div className="space-y-4">
-                            <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 aspect-video flex items-center justify-center transition-colors">
-                              {isImageLoading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 z-10">
-                                  <RotateCcw size={32} className="animate-spin text-blue-600 dark:text-blue-400" />
-                                </div>
-                              )}
-                              {imageError ? (
-                                <div className="text-center p-6">
-                                  <AlertCircle size={32} className="mx-auto text-red-500 mb-2" />
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t("image_gen.error")}</p>
-                                  <button
-                                    onClick={handleGenerateImage}
-                                    className="text-blue-600 dark:text-blue-400 text-sm font-bold hover:underline flex items-center mx-auto"
-                                  >
-                                    <RotateCcw size={14} className="mr-1" /> {t("image_gen.retry")}
-                                  </button>
-                                </div>
-                              ) : (
-                                <img
-                                  src={generatedImageUrl}
-                                  alt="Generated"
-                                  className={cn("w-full h-full object-cover transition-opacity duration-300", isImageLoading ? "opacity-0" : "opacity-100")}
-                                  onLoad={() => setIsImageLoading(false)}
-                                  onError={() => {
-                                    setIsImageLoading(false);
-                                    setImageError(true);
-                                  }}
-                                />
-                              )}
-                            </div>
-                            <button
-                              onClick={handleDownloadImage}
-                              className="w-full border-2 border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 py-2 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-400 flex items-center justify-center transition-colors"
-                            >
-                              <Download size={16} className="mr-2" /> {t("image_gen.download_button")}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="relative group flex-1 flex flex-col">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.rewritten_label")}</h3>
-                    <button onClick={() => copyToClipboard(sentenceOutput)} className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"><Copy size={18} /></button>
-                  </div>
-                  <div className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-lg font-medium bg-gray-50 dark:bg-gray-800 flex-1 min-h-[400px] leading-relaxed text-gray-800 dark:text-gray-200 transition-colors">
-                    {sentenceOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
-                  </div>
-                </div>
-              )}
-            </div>
           </section>
         </div>
       </div>
