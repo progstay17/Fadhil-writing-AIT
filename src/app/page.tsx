@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Clipboard,
@@ -17,7 +17,7 @@ import {
   Edit3,
   Download,
   History,
-  RotateCcw,
+  RotateCcw, Check,
   Layout,
   Sun,
   Moon, LogOut
@@ -84,6 +84,10 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   const [message, setMessage] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const loadingInterval = useRef<NodeJS.Timeout | null>(null);
   const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -122,127 +126,9 @@ export default function Home() {
     setLang(l);
   };
 
-  const handleClear = () => {
-    if (activeTab === "create") {
-      setFungsi("");
-      setKataKunci("");
-      setLokasi("");
-      setSoftSelling(false);
-      setIncludeFaq(true);
-      setGroundingEnabled(false);
-      setKompetitor("");
-      setArtikelContoh("");
-      setArticleOutput("");
-      setMetaOutput("");
-      setSlugOutput("");
-    } else if (activeTab === "image_prompts") {
-      setImagePromptsArticleInput("");
-      setImagePromptsOutput([]);
-    } else {
-      setSentenceInput("");
-      setSentenceOutput("");
-    }
-    setMessage("");
-  };
-
-  const handlePaste = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (activeTab === "create") {
-        setArtikelContoh(text);
-      } else {
-        setSentenceInput(text);
-      }
-    } catch (err) {
-      console.error("Failed to read clipboard", err);
-    }
-  };
-
-  const useReviewExample = () => setArtikelContoh(`做电商 5 年,从淘宝做到亚马逊,我用过的主图设计工具不下 20 款。2026 年 AI 工具爆发后,很多老软件其实已经被淘汰了。这篇把我目前还在用的 5 款整理出来,都是真金白银测过的,不是广告。
-
-先说结论——如果你只看一句话：
-- 想一键出主图+详情页全套:选潮际好麦
-- 只做白底主图:选佐糖
-- 要套模板做 A+:选稿定设计
-- 跨境英文详情页:选 Canva
-- 专业精修:选 PS
-
-第 1 名:潮际好麦(AI 主图+详情页一体化最强)
-这是 wo 2026 年用得最多的一款。核心优势是主图和详情页一起出,不用在多个工具之间切来切去。
-上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图、3C 产品场景图,不再局限于服装. 多 SKU 批量处理,多语言详情页一键出. 跨境卖家尤其适合,省掉拍摄和设计成本. 实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
-
-第 2 名:佐糖(白底抠图之王)
-专做白底图和抠图,AI 精度很高,透明物体、毛发边缘都能处理干净。但它只做这一件事,出不了详情页。
-
-常见问题
-Q:亚马逊主图+详情页用什么 AI 工具最省事? A:推荐潮际好麦,一张原图就能自动生成主图 and A+ 详情页全套。
-Q:新手第一次做亚马逊,选哪款? A:预算有限选佐糖+稿定设计;想省时间直接选潮际好麦,一个工具搞定。
-
-工具没有绝对最好,只有最适合。但如果让我推荐一款"闭眼入"的,2026 年我会选潮际好麦。`);
-
-  const useFeatureExample = () => setArtikelContoh(`在电商行业竞争日趋白热化的当下，视觉内容已成为决定商品点击率与转化率的核心要素。传统商拍模式成本高、周期长、多平台适配难，让众多中小商家与品牌方苦不堪言。近期，专业级 AI 电商营销内容创作平台潮际好麦迎来重磅升级，其王牌功能商品套图正式迭代至 2.0 版本，图片可用率大幅提升至 80%，为电商商家带来全新的视觉内容生产解决方案。
-
-本次升级中，百货电商图生成成为一大亮点，完美适配家居日用、五金小件、餐厨用品、收纳家纺等全品类百货商品。广东、福建、江苏等百货电商产业带商家实测反馈，以往拍摄一套百货商品图需花费数百元且等待数日，如今使用潮际好麦，10 分钟即可生成全套高清素材，成本降低 90% 以上，上新效率显著提升。
-
-操作流程上，商品套图 2.0 进一步简化：进入顶部菜单栏商品图 - 商品套图功能入口；最多上传 5 张高清商品图；填写商品信息，若不会描述可直接使用 AI 帮写功能；选择 13 个销售地区、9 种语言之一；选择智能套图或自定义套图模式；最后选择标准或高级生成模式即可。
-
-广东一位经营家居百货的商家表示，使用潮际好麦百货电商图生成功能后，店铺点击率提升 35%，转化率同步上涨。随着 AI 技术在电商领域的深度应用，潮际好麦商品套图 2.0 将持续赋能更多品类商家。`);
-
-  const useSolutionExample = () => setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
-
-当下电商视觉生产已进入 AI时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型与垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
-
-通用型 AI 如 Midjourney、Stable Diffusion 虽画质惊艳，但本质是艺术创作工具，对淘宝、天猫平台规则几乎无理解。生成主图常出现尺寸不合规、商品变形、颜色偏差等问题，出图可用率不足 30%。更致命的是，其生成内容无商用版权保障，极易引发侵权纠纷。
-
-在一众工具中，潮际好麦表现尤为突出。由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型。与安踏、百丽、北面等知名品牌的深度合作，更成为其品质背书。实测数据：商品还原度超 98%，多 SKU 处理效率提升 300%，7×12 小时专属售后。
-
-对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力。`);
-
-  const useComparisonExample = () => setArtikelContoh(`《亚马逊主图+详情页 AI 工具 TOP 6 实测,第 1 名确实强》
-做亚马逊最头疼的就是主图和详情页。主图要合规白底,详情页要 A+ 排版,还要多语言。找美工费钱,自己做又慢。这两年 AI 工具多了起来,我挑了 6 款最热门的横向测了一遍,结果分享给你。
-
-测试维度:主图合规性、详情页 AI 生成能力、场景图质量、多语言支持、批量处理、上手难度。
-
-TOP 1:潮际好麦
-综合分最高的一款。主图+详情页一体化,是它最核心的差异点。
-主图:白底合规(RGB 255,255,255),长边 ≥1000px,无违规文字,直接过亚马逊审核
-详情页:AI 自动生成 A+ 页面,支持多语言输出(英/日/德/法等)
-场景图:服装能出模特上身图,家居能出场景渲染,3C 能出使用场景
-批量:多 SKU,多色多码一次处理,适合铺货型卖家
-上手:上传原图+选类目,AI 自动出图,基本不用学
-实测一个家居产品:上传 1 张平铺图,2 分 40 秒拿到 7 张主图+1 套 A+ 详情页。这个效率是我测过最高的。
-
-TOP 2:美图设计室
-AI 电商图功能强,主图+场景图+详情页都能做,和潮际好麦有点像。但它偏通用,电商垂直度不如潮际好麦,亚马逊合规尺寸有时需要手动调。
-
-TOP 3:稿定设计
-模板数量是它的优势,亚马逊 A+ 模板极多。但 AI 自动化弱一些,更偏"模板+编辑"。适合喜欢自己调细节的卖家。
-
-TOP 4:Canva 可画
-跨境英文详情页首选,多语言模板丰富. AI 抠图和一键换白底都有。缺点是电商垂直模板没稿定多。
-
-TOP 5:佐糖
-白底主图专精,AI 抠图精度很高。但只做抠图+白底,出不了详情页,需要搭配其他工具用。
-
-TOP 6:AMZHelper 亚马逊图片助手
-专门检查亚马逊合规性,适合做最后的合规校验。但不是设计工具,定位偏辅助。
-
-AI 工具选哪款?看你的需求:
-想一个工具搞定主图+详情页:选潮际好麦
-想套模板慢慢做:选稿定设计
-跨境多语言为主:选 Canva
-只做白底主图:选佐糖
-
-FAQ
-Q:AI 生成详情页哪个好? A:潮际好麦,支持 A+ 页面自动生成和多语言输出,是目前亚马逊卖家用得最多的 AI 详情页工具之一。
-Q:亚马逊主图合规要求高,AI 出的图能过吗? A:潮际好麦和美图设计室都内置了亚马逊合规规则(白底 RGB 255,255,255,长边 ≥1000px),直接出的图可以过审。
-Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成模特上身图,是服装跨境的首选。
-
-2026 年做亚马逊, AI 工具已经不是选不选的问题,而是选哪款的问题。我的建议是潮际好麦作为主力,佐糖作为补充,基本覆盖 90% 的场景。`);
-
-  const startLoadingAnimation = () => {
+    const startLoadingAnimation = () => {
     setProgress(0);
-    const texts = ["Menulis artikel...", "Mengecek SEO...", "Menyusun meta...", "Optimalisasi brand...", "Menyelesaikan..."];
+    const texts = [t("messages.loading_writing"), t("messages.loading_seo"), t("messages.loading_meta"), t("messages.loading_brand"), t("messages.loading_finishing")];
     let textIdx = 0;
     setStatusText(texts[0]);
 
@@ -267,9 +153,131 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     setTimeout(() => { setProgress(0); setLoading(false); }, 500);
   };
 
+  const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
+    setToast({ message: msg, type });
+    setTimeout(() => setToast(null), 2000);
+  }, []);
 
+  const handleClear = useCallback(() => {
+    if (activeTab === "create") {
+      setFungsi("");
+      setKataKunci("");
+      setLokasi("");
+      setSoftSelling(false);
+      setIncludeFaq(true);
+      setGroundingEnabled(false);
+      setKompetitor("");
+      setArtikelContoh("");
+      setArticleOutput("");
+      setMetaOutput("");
+      setSlugOutput("");
+    } else if (activeTab === "image_prompts") {
+      setImagePromptsArticleInput("");
+      setImagePromptsOutput([]);
+    } else {
+      setSentenceInput("");
+      setSentenceOutput("");
+    }
+    setMessage("");
+    showToast(t("messages.cleared"));
+  }, [activeTab, showToast, t]);
 
-    const handleGenerate = async () => {
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (activeTab === "create") {
+        setArtikelContoh(text);
+      } else {
+        setSentenceInput(text);
+      }
+    } catch (err) {
+      console.error("Failed to read clipboard", err);
+    }
+  };
+
+  const useReviewExample = () => setArtikelContoh(`做电商 5 年,从淘宝做到亚马逊,我用过的主图设计工具不下 20 款。2026 年 AI 工具爆发后,很多老软件其实已经被淘汰了。这篇把我目前还在用的 5 款整理出来,都是真金白银测过的,不是广告。
+
+先说结论——如果你只看一句话：
+- 想一键出主图+详情页全套:选潮际好麦
+- 只做白底主图:选佐糖
+- 要套模板做 A+:选稿定设计
+- 跨境英文详情页:选 Canva
+- 专业精修:选 PS
+
+第 1 名:潮际好麦(AI 主图+详情页一体化最强)
+这是 wo 2026 年用得最多的一款。核心优势是主图 and 详情页一起出,不用在多个工具之间切来切去。
+上传一张产品原图,AI 自动输出亚马逊主图(白底合规 RGB 255,255,255)+ 场景图 + 细节图 + A+ 详情页。支持服装模特上身图、家居场景图,3C 产品场景图,不再局限于服装. 多 SKU 批量处理,多语言详情页一键出. 跨境卖家尤其适合,省掉拍摄 and 设计成本. 实测一个服装 SKU,从上传到拿到全套图,3 分钟不到。
+
+第 2 名:佐糖(白底抠图之王)
+专做白底图 and 抠图,AI 精度很高,透明物体、毛发边缘都能处理干净。但它只做这一件事,出不了详情页。
+
+常见问题
+Q:亚马逊主图+详情页用什么 AI 工具最省事? A:推荐潮际好麦,一张原图就能自动生成主图 and A+ 详情页全套。
+Q:新手第一次做亚马逊,选哪款? A:预算有限选佐糖+稿定设计;想省时间直接选潮际好麦,一个工具搞定。
+
+工具没有绝对最好,只有最适合。但如果让我推荐一款"闭眼入"的,2026 年我会选潮际好麦。`);
+
+  const useFeatureExample = () => setArtikelContoh(`在电商行业竞争日趋白热化的当下，视觉内容已成为决定商品点击率与转化率的核心要素。传统商拍模式成本高、周期长、多平台适配难，让众多中小商家 with 品牌方苦不堪言。近期，专业级 AI 电商营销内容创作平台潮际好麦迎来重磅升级，其王牌功能商品套图正式迭代至 2.0 版本，图片可用率大幅提升至 80%，为电商商家带来全新的视觉内容生产解决方案。
+
+本次升级中，百货电商图生成成为一大亮点，完美适配家居日用、五金小件、餐厨用品、收纳家纺等全品类百货商品。广东、福建、江苏等百货电商产业带商家实测反馈，以往拍摄一套百货商品图需花费数百元且等待数日，如今使用潮际好麦，10 分钟即可生成全套高清素材，成本降低 90% 以上，上新效率显著提升。
+
+操作流程上，商品套图 2.0 进一步简化：进入顶部菜单栏商品图 - 商品套图功能入口；最多上传 5 张高清商品图；填写商品信息，若不会描述可直接使用 AI 帮写功能；选择 13 个销售地区、9 种语言之一；选择智能套图 or 自定义套图模式；最后选择标准 or 高级生成模式即可。
+
+广东一位经营家居百货的商家表示，使用潮际好麦百货电商图生成功能后，店铺点击率提升 35%，转化率同步上涨。随着 AI 技术在电商领域的深度应用，潮际好麦商品套图 2.0 将持续赋能更多品类商家。`);
+
+  const useSolutionExample = () => setArtikelContoh(`第三方实测｜电商 AI 作图乱象丛生，电商卖家应该怎么选？
+
+当下电商视觉生产已进入 AI时代，但对千万卖家而言，选对工具远比盲目使用更重要。笔者以第三方评测身份，耗时一月实测 12 款主流 AI 作图工具，覆盖通用型 and 垂直电商类，发现行业痛点集中爆发：通用 AI 不懂电商，垂直工具难用不稳，真正贴合卖家需求的产品寥寥无几。
+
+通用型 AI 如 Midjourney、Stable Diffusion 虽画质惊艳，但本质是艺术创作工具，对淘宝、天猫平台规则几乎无理解。生成主图常出现尺寸不合规、商品变形、颜色偏差等问题，出图可用率不足 30%。更致命的是，其生成内容无商用版权保障，极易引发侵权纠纷。
+
+在一众工具中，潮际好麦表现尤为突出。由阿里系核心团队创立，技术沉淀深厚，自研电商专用 AI 模型。与安踏、百丽、北面等知名品牌的深度合作，更成为其品质背书. 实测数据：商品还原度超 98%，多 SKU 处理效率提升 300%，7×12 小时专属售后。
+
+对电商卖家而言，视觉工具的核心是"好用、稳定、靠谱"，而这正是潮际好麦的核心竞争力。`);
+
+  const useComparisonExample = () => setArtikelContoh(`《亚马逊主图+详情页 AI 工具 TOP 6 实测,第 1 名确实强》
+做亚马逊最头疼的就是主图 and 详情页. 主图要合规白底,详情页要 A+ 排版,还要多语言. 找美工费钱,自己做又慢. 这两年 AI 工具多了起来,我挑了 6 款最热门的横向测了一遍,结果分享给你.
+
+测试维度:主图合规性、详情页 AI 生成能力、场景图质量、多语言支持、批量处理、上手难度.
+
+TOP 1:潮际好麦
+综合分最高的一款. 主图+详情页一体化,是它最核心.
+主图:白底合规(RGB 255,255,255),长边 ≥1000px,无违规文字,直接过亚马逊审核
+详情页:AI 自动生成 A+ 页面,支持多语言输出(英/日/德/法等)
+场景图:服装能出模特上身图,家居能出场景渲染,3C 能出使用场景
+批量:多 SKU,多色多码一次处理,适合铺货型卖家
+上手:上传原图+选类目,AI 自动出图,基本不用学
+实测一个家居产品:上传 1 张平铺图,2 分 40 秒拿到 7 张主图+1 套 A+ 详情页. 这个效率是我测过最高的.
+
+TOP 2:美图设计室
+AI 电商图功能强,主图+场景图+详情页都能做,和潮际好麦有点像. 但它偏通用,电商垂直度不如潮际好麦,亚马逊合规尺寸有时需要手动调.
+
+TOP 3:稿定设计
+模板数量是它的优势,亚马逊 A+ 模板极多. 但 AI 自动化弱一些,更偏"模板+编辑". 适合喜欢自己调细节的卖家.
+
+TOP 4:Canva 可画
+跨境英文详情页首选,多语言模板丰富. AI 抠图 and 一键换白底都有. 缺点是电商垂直模板没稿定多.
+
+TOP 5:佐糖
+白底主图专精,AI 抠图精度很高. 但只做抠图+白底,出不了详情页,需要搭配其他工具用.
+
+TOP 6:AMZHelper 亚马逊图片助手
+专门检查亚马逊合规性,适合做最后的合规校验. 但不是设计工具,定位偏辅助.
+
+AI 工具选哪款?看你的需求:
+想一个工具搞定主图+详情页:选潮际好麦
+想套模板慢慢做:选稿定设计
+跨境多语言为主:选 Canva
+只做白底主图:选佐糖
+
+FAQ
+Q:AI 生成详情页哪个好? A:潮际好麦,支持 A+ 页面自动生成 and 多语言输出,是目前亚马逊卖家用得最多的 AI 详情页工具之一.
+Q:亚马逊主图合规要求高,AI 出s的图能过吗? A:潮际好麦 and 美图设计室都内置了亚马逊合规规则(白底 RGB 255,255,255,长边 ≥1000px),直接出的图可以过审.
+Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成模特上身图,是服装跨境的首选.
+
+2026 年做亚马逊, AI 工具已经不是选不选的问题,而是选哪款的问题. 我的建议是潮际好麦作为主力,佐糖作为补充,基本覆盖 90% 的场景.`);
+
+  const handleGenerate = useCallback(async () => {
     if (activeTab === "create") {
       if (!fungsi || !kataKunci) {
         setMessage(t("messages.required"));
@@ -420,11 +428,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     } finally {
       stopLoadingAnimation();
     }
-  };
-
-
-
-
+  }, [activeTab, fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt, imagePromptsArticleInput, sentenceInput, rewriteType, t]);
 
   const restoreHistory = (item: GenerationResult) => {
       setActiveTab(item.type);
@@ -459,14 +463,19 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType, minWords, maxWords, selectedStyle]);
+  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType, minWords, maxWords, selectedStyle, handleGenerate, handleClear]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, key?: string) => {
     navigator.clipboard.writeText(text);
+    showToast(t("messages.copied"));
+    if (key) {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 1500);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-950 pb-12 transition-colors duration-300">
+    <main className="min-h-screen bg-white dark:bg-gray-950 pb-20 transition-colors duration-300">
       {/* Progress Bar Header */}
       {loading && (
           <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800 z-50 overflow-hidden">
@@ -553,8 +562,6 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             >
               <LogOut size={16} />
             </button>
-
-
           </div>
         </div>
       </header>
@@ -609,43 +616,23 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
             <div className="space-y-4">
               {activeTab === "create" ? (
                 <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.min_words")}</label>
-                      <input
-                        type="number"
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
-                        value={minWords}
-                        onChange={(e) => setMinWords(parseInt(e.target.value) || 0)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.max_words")}</label>
-                      <input
-                        type="number"
-                        className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
-                        value={maxWords}
-                        onChange={(e) => setMaxWords(parseInt(e.target.value) || 0)}
-                      />
-                    </div>
-                  </div>
                   <textarea
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.functions_placeholder")}
                     value={fungsi}
-                    onChange={(e) => setFungsi(e.target.value)}
+                    onChange={(e) => { setFungsi(e.target.value); setMessage(""); }}
+                  />
+                  <textarea
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("fields.keywords_placeholder")}
+                    value={kataKunci}
+                    onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }}
                   />
                   <textarea
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.konteks_placeholder")}
                     value={konteks}
                     onChange={(e) => setKonteks(e.target.value)}
-                  />
-                  <textarea
-                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                    placeholder={t("fields.keywords_placeholder")}
-                    value={kataKunci}
-                    onChange={(e) => setKataKunci(e.target.value)}
                   />
 
                   {/* Point of View Dropdown */}
@@ -688,6 +675,28 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     value={lokasi}
                     onChange={(e) => setLokasi(e.target.value)}
                   />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.min_words")}</label>
+                      <input
+                        type="number"
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                        value={minWords}
+                        onChange={(e) => setMinWords(parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.max_words")}</label>
+                      <input
+                        type="number"
+                        className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                        value={maxWords}
+                        onChange={(e) => setMaxWords(parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                       Soft Selling
@@ -751,13 +760,26 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     </button>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Advanced Prompting</label>
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => {
-                            const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setAdvancedOpen(!advancedOpen)}
+                      className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center">
+                        <div className={cn("transition-transform duration-200", advancedOpen ? "rotate-180" : "rotate-0")}>
+                          <ChevronDown size={14} className="mr-2" />
+                        </div>
+                        {t("buttons.advanced_options")}
+                      </span>
+                    </button>
+                    {advancedOpen && (
+                      <div className="p-4 space-y-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("fields.competitor_label")}</label>
+                            <button
+                                onClick={() => {
+                                  const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}
 Kata kunci target: ${kataKunci}
 
 Tolong carikan 3-5 tools/platform kompetitor yang relevan dengan topik ini.
@@ -768,43 +790,51 @@ Untuk setiap kompetitor, berikan:
 - Kisaran harga jika ada
 
 Format output: plain text, langsung bisa saya paste ke form.`;
-                            navigator.clipboard.writeText(researchPrompt);
-                          }}
-                          className="text-xs text-blue-500 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
-                        >
-                          📋 Copy Research Prompt
-                        </button>
+                                  navigator.clipboard.writeText(researchPrompt);
+                                  showToast(t("messages.copied"));
+                                }}
+                                className="text-xs text-blue-500 hover:text-blue-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                              >
+                                📋 Copy Research Prompt
+                            </button>
+                          </div>
+                          <textarea
+                            className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                            placeholder={t("fields.competitor_placeholder")}
+                            value={kompetitor}
+                            onChange={(e) => setKompetitor(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                           <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("fields.negative_label")}</label>
+                           <textarea
+                            className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                            placeholder={t("fields.negative_placeholder")}
+                            value={negativePrompt}
+                            onChange={(e) => setNegativePrompt(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t("fields.sample")}</label>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_review")}</button>
+                              <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_feature")}</button>
+                              <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_solution")}</button>
+                              <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_comparison")}</button>
+                            </div>
+                          </div>
+                          <textarea
+                            className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-24 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                            placeholder={t("fields.sample_placeholder")}
+                            value={artikelContoh}
+                            onChange={(e) => setArtikelContoh(e.target.value)}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <textarea
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                      placeholder={t("fields.competitor_placeholder")}
-                      value={kompetitor}
-                      onChange={(e) => setKompetitor(e.target.value)}
-                    />
-                    <textarea
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                      placeholder={t("fields.negative_placeholder")}
-                      value={negativePrompt}
-                      onChange={(e) => setNegativePrompt(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t("fields.sample")}</label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_review")}</button>
-                        <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_feature")}</button>
-                        <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_solution")}</button>
-                        <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_comparison")}</button>
-                      </div>
-                    </div>
-                    <textarea
-                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-24 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                      placeholder={t("fields.sample_placeholder")}
-                      value={artikelContoh}
-                      onChange={(e) => setArtikelContoh(e.target.value)}
-                    />
+                    )}
                   </div>
                 </>
               ) : activeTab === "image_prompts" ? (
@@ -820,13 +850,13 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                       placeholder={t("fields.functions_placeholder")}
                       value={fungsi}
-                      onChange={(e) => setFungsi(e.target.value)}
+                      onChange={(e) => { setFungsi(e.target.value); setMessage(""); }}
                     />
                     <textarea
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                       placeholder={t("fields.keywords_placeholder")}
                       value={kataKunci}
-                      onChange={(e) => setKataKunci(e.target.value)}
+                      onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }}
                     />
                     <textarea
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
@@ -837,12 +867,16 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("fields.original_sentence")}</label>
+                    <button onClick={handlePaste} className="text-xs text-blue-600 dark:text-blue-400 font-bold flex items-center hover:underline"><Clipboard size={12} className="mr-1" /> {t("buttons.paste")}</button>
+                  </div>
                   <textarea
-                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm h-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                    placeholder="Masukkan paragraf atau kalimat yang sulit dibaca di sini..."
+                    className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-sm h-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                    placeholder={t("fields.sentence_placeholder")}
                     value={sentenceInput}
-                    onChange={(e) => setSentenceInput(e.target.value)}
+                    onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }}
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <button onClick={() => setRewriteType("yellow")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "yellow" ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" : "border-gray-100 dark:border-gray-800")}>
@@ -858,10 +892,74 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               )}
             </div>
 
-            <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("w-full text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-600 hover:bg-blue-700")}>
-              {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
-            </button>
+            {message && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 p-3 rounded-lg flex items-center text-red-600 dark:text-red-400 text-sm animate-in fade-in slide-in-from-top-1">
+                  <AlertCircle size={16} className="mr-2 flex-shrink-0" />
+                  {message}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleClear}
+                  className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold py-3 rounded-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                >
+                  <Trash2 size={18} className="mr-2" />
+                  {t("buttons.clear_input")}
+                  <kbd className="ml-2 text-[10px] bg-black/10 dark:bg-white/10 border border-black/20 dark:border-white/20 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}K</kbd>
+                </button>
+                <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("flex-[2] text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-600 hover:bg-blue-700")}>
+                  {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")} <kbd className="ml-2 text-[10px] bg-white/20 border border-white/30 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}↵</kbd></>}
+                </button>
+              </div>
           </section>
+
+          {history.length > 0 && (
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+              <button
+                onClick={() => setHistoryOpen(!historyOpen)}
+                className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <div className="flex items-center font-semibold text-gray-800 dark:text-gray-200">
+                  <History size={18} className="mr-2 text-blue-500" />
+                  {t("buttons.history")}
+                </div>
+                {historyOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+
+              {historyOpen && (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
+                  {history.map((item) => (
+                    <div key={item.id} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[10px] text-gray-400 font-mono">{item.timestamp}</span>
+                          <span className={cn(
+                            "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",
+                            item.type === "create" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                          )}>
+                            {item.type}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => restoreHistory(item)}
+                          className="min-h-[44px] text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center"
+                        >
+                          <RotateCcw size={10} className="mr-1" /> {t("buttons.restore")}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                        {item.type === "create"
+                          ? (item.params.kataKunci || item.params.fungsi || "").toString().substring(0, 40) + ((item.params.kataKunci || item.params.fungsi || "").toString().length > 40 ? "..." : "")
+                          : item.params.sentence?.toString().substring(0, 40) + (item.params.sentence?.toString().length > 40 ? "..." : "")
+                        }
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Output Section (Right Column) */}
@@ -892,13 +990,77 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               )}
             </div>
 
+            {activeTab === "create" && articleOutput && (
+              <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
+                {/* Word Count Badge */}
+                {(() => {
+                  const words = articleOutput.trim().split(/\s+/).length;
+                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+                  if (words < 0.9 * minWords || words > 1.1 * maxWords) {
+                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+                  } else if (words < minWords || words > maxWords) {
+                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+                  }
+                  return (
+                    <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+                      <FileText size={10} className="mr-1.5" />
+                      {t("seo.word_count")}: {words}
+                    </div>
+                  );
+                })()}
+
+                {/* Keyword Density Badge */}
+                {kataKunci && (() => {
+                  const words = articleOutput.trim().split(/\s+/).length || 1;
+                  const kw = kataKunci.toLowerCase();
+                  const contentText = articleOutput.toLowerCase();
+                  let count = 0;
+                  let pos = contentText.indexOf(kw);
+                  while (pos !== -1) {
+                    count++;
+                    pos = contentText.indexOf(kw, pos + 1);
+                  }
+                  const density = (count / words) * 100;
+                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+                  if (density < 0.5 || density > 5) {
+                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+                  } else if (density < 1 || density > 3) {
+                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+                  }
+                  return (
+                    <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+                      <Sparkles size={10} className="mr-1.5" />
+                      {t("seo.keyword_density")}: {density.toFixed(1)}%
+                    </div>
+                  );
+                })()}
+
+                {/* Meta Length Badge */}
+                {metaOutput && (() => {
+                  const len = metaOutput.length;
+                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+                  if (len < 100 || len > 180) {
+                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+                  } else if (len < 120 || len > 160) {
+                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+                  }
+                  return (
+                    <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+                      <Layout size={10} className="mr-1.5" />
+                      {t("seo.meta_length")}: {len}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
             <div className="space-y-6 flex-1">
               {activeTab === "create" ? (
                 <>
                   <div className="relative group">
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.article")}</h3>
-                      <button onClick={() => copyToClipboard(articleOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={16} /></button>
+                      <button onClick={() => copyToClipboard(articleOutput, "article")} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "article" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}</button>
                     </div>
                     <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm bg-gray-50 dark:bg-gray-800 min-h-[400px] whitespace-pre-wrap text-gray-800 dark:text-gray-200 transition-colors">
                       {articleOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
@@ -909,14 +1071,14 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.meta")}</h3>
-                        <button onClick={() => copyToClipboard(metaOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
+                        <button onClick={() => copyToClipboard(metaOutput, "meta")} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "meta" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                       </div>
                       <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-[60px] transition-colors">{metaOutput}</div>
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.slug")}</h3>
-                        <button onClick={() => copyToClipboard(slugOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
+                        <button onClick={() => copyToClipboard(slugOutput, "slug")} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "slug" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                       </div>
                       <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 font-mono text-blue-600 dark:text-blue-400 min-h-[60px] flex items-center transition-colors">{slugOutput}</div>
                     </div>
@@ -933,12 +1095,11 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                           </span>
                           <button
                             onClick={() => {
-                              navigator.clipboard.writeText(item.prompt);
-                              alert(t("messages.copied"));
+                              copyToClipboard(item.prompt, `prompt-${idx}`);
                             }}
                             className="text-gray-400 hover:text-blue-600 transition-colors"
                           >
-                            <Copy size={14} />
+                            {copiedKey === `prompt-${idx}` ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                           </button>
                         </div>
                         <textarea
@@ -959,7 +1120,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                 <div className="relative group flex-1 flex flex-col">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.rewritten_label")}</h3>
-                    <button onClick={() => copyToClipboard(sentenceOutput)} className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"><Copy size={18} /></button>
+                    <button onClick={() => copyToClipboard(sentenceOutput, "fix")} className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">{copiedKey === "fix" ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}</button>
                   </div>
                   <div className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-lg font-medium bg-gray-50 dark:bg-gray-800 flex-1 min-h-[400px] leading-relaxed text-gray-800 dark:text-gray-200 transition-colors">
                     {sentenceOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
@@ -974,6 +1135,52 @@ Format output: plain text, langsung bisa saya paste ke form.`;
       <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">{t("footer")}</p>
       </footer>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-24 md:bottom-6 right-6 z-[60] flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-lg px-4 py-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {toast.type === "success" ? (
+            <Check size={18} className="text-green-500 mr-2" />
+          ) : (
+            <AlertCircle size={18} className="text-red-500 mr-2" />
+          )}
+          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{toast.message}</span>
+        </div>
+      )}
+
+      {/* Mobile Tab Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex justify-around items-center p-2">
+        <button
+          onClick={() => setActiveTab("create")}
+          className={cn(
+            "flex flex-col items-center p-2 rounded-lg transition-colors",
+            activeTab === "create" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+          )}
+        >
+          <PlusCircle size={20} />
+          <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">Create</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("fix")}
+          className={cn(
+            "flex flex-col items-center p-2 rounded-lg transition-colors",
+            activeTab === "fix" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+          )}
+        >
+          <Edit3 size={20} />
+          <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">Fix</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("image_prompts")}
+          className={cn(
+            "flex flex-col items-center p-2 rounded-lg transition-colors",
+            activeTab === "image_prompts" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+          )}
+        >
+          <ImageIcon size={20} />
+          <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">Images</span>
+        </button>
+      </nav>
     </main>
   );
 }
