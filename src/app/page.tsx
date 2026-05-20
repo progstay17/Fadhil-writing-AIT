@@ -863,6 +863,112 @@ Format output: plain text, langsung bisa saya paste ke form.`;
             </button>
           </section>
         </div>
+
+        {/* Output Section (Right Column) */}
+        <div className="lg:col-span-7 space-y-6">
+          <section className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300">
+            <div className="flex justify-between items-center">
+              <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center">
+                <FileText size={18} className="mr-2 text-green-500" />
+                {activeTab === "create" ? t("output.generation_output") : activeTab === "image_prompts" ? t("image_prompts.title") : t("output.fix_result")}
+              </h2>
+
+              {activeTab === "create" && articleOutput && (
+                <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setImagePromptsArticleInput(articleOutput);
+                        setActiveTab("image_prompts");
+                        setImagePromptsOutput([]);
+                      }}
+                      className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold flex items-center hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                    >
+                      <ImageIcon size={14} className="mr-1" />
+                      {t("buttons.generate_image_prompts")}
+                    </button>
+                    <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 transition-colors" title="Download .txt"><Download size={16} /></button>
+                    <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 font-bold text-xs transition-colors" title="Download .md">MD</button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-6 flex-1">
+              {activeTab === "create" ? (
+                <>
+                  <div className="relative group">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.article")}</h3>
+                      <button onClick={() => copyToClipboard(articleOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={16} /></button>
+                    </div>
+                    <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm bg-gray-50 dark:bg-gray-800 min-h-[400px] whitespace-pre-wrap text-gray-800 dark:text-gray-200 transition-colors">
+                      {articleOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.meta")}</h3>
+                        <button onClick={() => copyToClipboard(metaOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
+                      </div>
+                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-[60px] transition-colors">{metaOutput}</div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.slug")}</h3>
+                        <button onClick={() => copyToClipboard(slugOutput)} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Copy size={12} /></button>
+                      </div>
+                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 font-mono text-blue-600 dark:text-blue-400 min-h-[60px] flex items-center transition-colors">{slugOutput}</div>
+                    </div>
+                  </div>
+                </>
+              ) : activeTab === "image_prompts" ? (
+                <div className="space-y-6 flex-1">
+                  {imagePromptsOutput.length > 0 ? (
+                    imagePromptsOutput.map((item, idx) => (
+                      <div key={idx} className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center">
+                            <ImageIcon size={12} className="mr-1 text-blue-500" /> {item.reference}
+                          </span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(item.prompt);
+                              alert(t("messages.copied"));
+                            }}
+                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        </div>
+                        <textarea
+                          readOnly
+                          className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-32 text-gray-700 dark:text-gray-300 outline-none resize-none"
+                          value={item.prompt}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-600">
+                      <ImageIcon size={48} className="mb-4 opacity-20" />
+                      <p className="text-sm italic">{t("output.rewritten_placeholder")}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="relative group flex-1 flex flex-col">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.rewritten_label")}</h3>
+                    <button onClick={() => copyToClipboard(sentenceOutput)} className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"><Copy size={18} /></button>
+                  </div>
+                  <div className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-lg font-medium bg-gray-50 dark:bg-gray-800 flex-1 min-h-[400px] leading-relaxed text-gray-800 dark:text-gray-200 transition-colors">
+                    {sentenceOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
       </div>
 
       <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
