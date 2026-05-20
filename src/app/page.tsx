@@ -561,6 +561,16 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                 <Edit3 size={16} className="mr-2" />
                 {t("tabs.fix")}
               </button>
+              <button
+                onClick={() => setActiveTab("image_prompts")}
+                className={cn(
+                  "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",
+                  activeTab === "image_prompts" ? "bg-blue-600 text-white shadow-sm" : "bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                )}
+              >
+                <ImageIcon size={16} className="mr-2" />
+                {t("tabs.image_prompts")}
+              </button>
             </nav>
 
             <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">

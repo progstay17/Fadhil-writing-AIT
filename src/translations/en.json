@@ -3,7 +3,8 @@
   "subtitle": "Automatically generate product articles via LLM",
   "tabs": {
     "create": "Create Content",
-    "fix": "Fix Sentence"
+    "fix": "Fix Sentence",
+    "image_prompts": "Image Prompts"
   },
   "fields": {
     "functions": "Functions",
@@ -52,7 +53,7 @@
     "sample_feature": "🆕 New Feature",
     "sample_solution": "💡 Solution",
     "sample_comparison": "🔀 Comparison",
-    "generate_image_prompt": "Generate Image Prompt"
+    "generate_image_prompts": "Generate Image Prompts"
   },
   "output": {
     "article": "Full Article",
@@ -78,13 +79,9 @@
     "refining": "Output doesn't meet requirements, refining...",
     "copied": "Copied!"
   },
-  "image_gen": {
-    "title": "Generate Image",
-    "prompt_label": "Image Prompt (Editable)",
-    "generate_button": "Generate",
-    "download_button": "Download JPG",
-    "error": "Failed to load image.",
-    "retry": "Retry"
-  },
-  "footer": "for AIT from Fadhil Ghifarion 法迪"
+  "footer": "for AIT from Fadhil Ghifarion 法迪",
+  "image_prompts": {
+    "article_placeholder": "Paste article here to generate image prompts...",
+    "title": "Image Prompts Generation"
+  }
 }

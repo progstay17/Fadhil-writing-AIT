@@ -3,7 +3,8 @@
   "subtitle": "Hasilkan artikel produk otomatis via LLM",
   "tabs": {
     "create": "Create Content",
-    "fix": "Perbaiki Kalimat"
+    "fix": "Perbaiki Kalimat",
+    "image_prompts": "Prompt Gambar"
   },
   "fields": {
     "functions": "Fungsi",
@@ -52,7 +53,7 @@
     "sample_feature": "🆕 Fitur Baru",
     "sample_solution": "💡 Solusi",
     "sample_comparison": "🔀 Perbandingan",
-    "generate_image_prompt": "Buat Prompt Gambar"
+    "generate_image_prompts": "Hasilkan Prompt Gambar"
   },
   "output": {
     "article": "Artikel Lengkap",
@@ -78,13 +79,9 @@
     "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
     "copied": "Berhasil disalin!"
   },
-  "image_gen": {
-    "title": "Generate Gambar",
-    "prompt_label": "Prompt Gambar (Bisa diedit)",
-    "generate_button": "Generate",
-    "download_button": "Download JPG",
-    "error": "Gagal memuat gambar.",
-    "retry": "Coba Lagi"
-  },
-  "footer": "for AIT from Fadhil Ghifarion 法迪"
+  "footer": "for AIT from Fadhil Ghifarion 法迪",
+  "image_prompts": {
+    "article_placeholder": "Tempel artikel di sini untuk menghasilkan prompt gambar...",
+    "title": "Generasi Prompt Gambar"
+  }
 }
