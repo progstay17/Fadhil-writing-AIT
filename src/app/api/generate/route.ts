@@ -375,35 +375,7 @@ export async function POST(req: NextRequest) {
 
 
 
-      if (body.type === "image_prompt") {
-        const title = sanitize(body.title || "");
-        const keywords = sanitize(body.kataKunci || "");
-        const excerpt = sanitize(body.articleExcerpt || "");
-        const konteksForImage = sanitize(body.konteks || "");
-        const fungsiForImage = sanitize(body.fungsi || "");
 
-        const imagePromptInstruction = `You are an expert visual art director and prompt engineer for AI image generation.
-
-Your task: write ONE highly technical image generation prompt in English based on the article below.
-The image will be used as a hero/thumbnail for the article.
-
-Rules:
-- Analyze the article topic deeply. Choose the most visually compelling representation — this could be a realistic photo, a graphic design poster, an infographic layout, a product mockup, a flat lay, or a cinematic scene.
-- Be highly specific and technical. Include: subject, composition, camera angle, lens type, lighting setup, color palette, mood, and style.
-- If photographic: specify camera (e.g. Sony A7III), lens (e.g. 85mm f/1.4), lighting (e.g. softbox key light, rim light), shot type (e.g. medium close-up, bird's eye view).
-- If graphic design / poster: specify layout style, typography mood (e.g. bold sans-serif), color scheme, visual hierarchy, design era (e.g. modern minimalist, brutalist, Swiss grid).
-- If infographic: specify data visualization style, icon style, color coding, layout grid.
-- Use the product/topic context and event angle to ensure the image is visually relevant to the article's specific subject matter, not just the title keywords.
-- Output only the prompt. No explanation, no quotes, no labels.
-
-Article title: ${title}
-Keywords: ${keywords}
-Article excerpt: ${excerpt}
-Product/topic context: ${fungsiForImage}
-Additional context or event angle: ${konteksForImage || "None"}`;
-
-        return await model.generateContent(imagePromptInstruction);
-      }
 
       // CREATE CONTENT
       const fungsi = sanitize(body.fungsi);
@@ -496,13 +468,6 @@ Additional context or event angle: ${konteksForImage || "None"}`;
 if (body.type === "fix") {
       const response = await (result as any).response;
       return NextResponse.json({ rewritten: response.text().trim() });
-    }
-
-
-
-      if (body.type === "image_prompt") {
-      const response = await (result as any).response;
-      return NextResponse.json({ prompt: response.text().trim() });
     }
 
     if (body.groundingEnabled && (body.type === "create" || !body.type)) {
