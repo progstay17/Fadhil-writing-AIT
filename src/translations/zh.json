@@ -3,7 +3,8 @@
   "subtitle": "通过 LLM 自动生成产品文章",
   "tabs": {
     "create": "创建内容",
-    "fix": "修改句子"
+    "fix": "修改句子",
+    "image_prompts": "图片提示词"
   },
   "fields": {
     "functions": "功能 (Functions)",
@@ -52,7 +53,7 @@
     "sample_feature": "🆕 功能上新",
     "sample_solution": "💡 解决方案",
     "sample_comparison": "🔀 对比",
-    "generate_image_prompt": "生成图片提示词"
+    "generate_image_prompts": "生成图片提示词"
   },
   "output": {
     "article": "完整文章",
@@ -78,13 +79,9 @@
     "refining": "输出不符合要求，正在优化...",
     "copied": "已复制！"
   },
-  "image_gen": {
-    "title": "生成图片",
-    "prompt_label": "图片提示词 (可编辑)",
-    "generate_button": "生成",
-    "download_button": "下载 JPG",
-    "error": "图片加载失败。",
-    "retry": "重试"
-  },
-  "footer": "for AIT from Fadhil Ghifarion 法迪"
+  "footer": "for AIT from Fadhil Ghifarion 法迪",
+  "image_prompts": {
+    "article_placeholder": "在此粘贴文章以生成图片提示词...",
+    "title": "图片提示词生成"
+  }
 }

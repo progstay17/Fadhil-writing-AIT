@@ -258,6 +258,57 @@ Rules:
 `;
 
 
+
+const IMAGE_PROMPTS_INSTRUCTION = (article: string, fungsi: string, kataKunci: string, konteks: string) => `
+You are an expert visual art director and prompt engineer for AI image generation.
+
+You will read the article below and generate exactly 2–3 image generation prompts for it.
+
+BRAND KNOWLEDGE (use this when the section references Chaoji Haomai features):
+${BRAND_BRIEF}
+
+---
+
+RULES:
+
+Image 1 — Hero Image (ALWAYS REQUIRED):
+- Context: the entire article as a whole
+- Label it as: HERO
+- Quote: none — just use "Hero Image" as the reference label
+- The prompt must visually represent the article's overall topic, keyword, and angle
+- Do NOT focus on one section only
+
+Image 2 and Image 3 — Section Images (OPTIONAL, max 2):
+- Gemini decides which paragraphs/sections most benefit from visual illustration
+- Choose sections where a visual would meaningfully add clarity or engagement — e.g. a feature being explained, a workflow being described, a result being shown
+- Each image type is NOT fixed — choose whatever is most appropriate per section: a model photo, a feature explanation visual, a workflow diagram, a product flat lay, a before/after, etc.
+- If the section references a Chaoji Haomai feature, refer to the BRAND KNOWLEDGE above to ensure the prompt is accurate and specific
+
+OUTPUT FORMAT (STRICT):
+Output exactly 2–3 image prompt blocks. No text outside these blocks.
+
+<<<IMAGE>>>
+REFERENCE: Hero Image
+PROMPT: [highly technical image generation prompt in English. Include: subject, composition, camera angle, lens type, lighting, color palette, mood, style. If photographic: specify camera, lens, lighting setup. If graphic/poster: specify layout, typography, color scheme. If infographic: specify data viz style, icon style, layout.]
+<<<END>>>
+
+<<<IMAGE>>>
+REFERENCE: Paragraf [N] — "[exact quoted sentence or phrase from that paragraph that triggered this image choice]"
+PROMPT: [highly technical image generation prompt in English]
+<<<END>>>
+
+---
+
+INPUTS:
+Article keyword: ${kataKunci}
+Product function: ${fungsi}
+Additional context: ${konteks || "None"}
+
+ARTICLE:
+${article}
+`;
+
+
 const FIX_PROMPT = `Language: Respond in the same language as the input sentence or paragraph.
 
 Role: You are an expert writing editor.
@@ -299,7 +350,17 @@ export async function POST(req: NextRequest) {
         tools: body.groundingEnabled ? [{ googleSearch: {} } as any] : undefined,
       });
 
-      if (body.type === "fix") {
+      if (body.type === "image_prompts") {
+        const article = sanitize(body.article || "");
+        const fungsiForImage = sanitize(body.fungsi || "");
+        const keywords = sanitize(body.kataKunci || "");
+        const konteksForImage = sanitize(body.konteks || "");
+
+        const prompt = IMAGE_PROMPTS_INSTRUCTION(article, fungsiForImage, keywords, konteksForImage);
+        return await model.generateContent(prompt);
+      }
+
+    if (body.type === "fix") {
         const isRed = body.rewriteType === "red";
         const rewriteInstruction = isRed
           ? "The following text is very difficult to read. Rewrite it to be bold and clear. Significantly simplify the structure, split into multiple short sentences if necessary, use simple direct words, and remove unnecessary clauses. Preserve core meaning."
@@ -312,35 +373,9 @@ export async function POST(req: NextRequest) {
         return await model.generateContent(prompt);
       }
 
-      if (body.type === "image_prompt") {
-        const title = sanitize(body.title || "");
-        const keywords = sanitize(body.kataKunci || "");
-        const excerpt = sanitize(body.articleExcerpt || "");
-        const konteksForImage = sanitize(body.konteks || "");
-        const fungsiForImage = sanitize(body.fungsi || "");
 
-        const imagePromptInstruction = `You are an expert visual art director and prompt engineer for AI image generation.
 
-Your task: write ONE highly technical image generation prompt in English based on the article below.
-The image will be used as a hero/thumbnail for the article.
 
-Rules:
-- Analyze the article topic deeply. Choose the most visually compelling representation — this could be a realistic photo, a graphic design poster, an infographic layout, a product mockup, a flat lay, or a cinematic scene.
-- Be highly specific and technical. Include: subject, composition, camera angle, lens type, lighting setup, color palette, mood, and style.
-- If photographic: specify camera (e.g. Sony A7III), lens (e.g. 85mm f/1.4), lighting (e.g. softbox key light, rim light), shot type (e.g. medium close-up, bird's eye view).
-- If graphic design / poster: specify layout style, typography mood (e.g. bold sans-serif), color scheme, visual hierarchy, design era (e.g. modern minimalist, brutalist, Swiss grid).
-- If infographic: specify data visualization style, icon style, color coding, layout grid.
-- Use the product/topic context and event angle to ensure the image is visually relevant to the article's specific subject matter, not just the title keywords.
-- Output only the prompt. No explanation, no quotes, no labels.
-
-Article title: ${title}
-Keywords: ${keywords}
-Article excerpt: ${excerpt}
-Product/topic context: ${fungsiForImage}
-Additional context or event angle: ${konteksForImage || "None"}`;
-
-        return await model.generateContent(imagePromptInstruction);
-      }
 
       // CREATE CONTENT
       const fungsi = sanitize(body.fungsi);
@@ -417,14 +452,22 @@ Additional context or event angle: ${konteksForImage || "None"}`;
       }
     }
 
-    if (body.type === "fix") {
+
+    if (body.type === "image_prompts") {
+      const response = await (result as any).response;
+      const text = response.text();
+      const blocks = text.split("<<<IMAGE>>>").filter((b: string) => b.trim() !== "");
+      const images = blocks.map((block: string) => {
+        const parts = block.split("<<<END>>>")[0].split("PROMPT:");
+        const reference = parts[0].replace("REFERENCE:", "").trim();
+        const prompt = parts[1] ? parts[1].trim() : "";
+        return { reference, prompt };
+      });
+      return NextResponse.json({ images });
+    }
+if (body.type === "fix") {
       const response = await (result as any).response;
       return NextResponse.json({ rewritten: response.text().trim() });
-    }
-
-    if (body.type === "image_prompt") {
-      const response = await (result as any).response;
-      return NextResponse.json({ prompt: response.text().trim() });
     }
 
     if (body.groundingEnabled && (body.type === "create" || !body.type)) {
