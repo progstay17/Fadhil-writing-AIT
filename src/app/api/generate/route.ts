@@ -283,6 +283,28 @@ Prompt must always include:
 - Color palette: e.g. "muted warm tones", "cool daylight whites", "desaturated editorial palette"
 - Composition: e.g. "rule of thirds", "flat lay overhead", "eye-level portrait", "slight low angle"
 
+OUTPUT MODE (Gemini decides per image based on article context):
+
+Each image prompt must begin by declaring one of these modes:
+
+MODE A — Single Photograph:
+A single real-feeling photo. Describe subject, setting, camera, lens, lighting, texture, color palette.
+Use when the section describes one scene, one product, one person, or one moment.
+
+MODE B — Composed Layout / Design:
+Use when comparison, workflow, variants, or before/after is involved.
+Layouts can include: side-by-side panels, before/after split, product grid, collage, flat lay with annotations, infographic-style composition.
+Describe the overall layout structure first, then describe each panel or element as a photography or graphic brief.
+Example: "Two-panel layout. Left: [photo brief]. Right: [photo brief]. White divider, no text overlay."
+
+MODE C — Graphic Design / Editorial:
+Use when a section is better served by a designed visual rather than a photo — e.g. a stat callout, a step-by-step diagram, a feature comparison table rendered as a clean graphic.
+Describe layout, typography style, color palette, icon style, grid structure.
+Keep it minimal and editorial — no gradients, no glow, no decorative elements.
+
+Gemini chooses the mode that best serves the article section. No mode is preferred over another.
+Start every prompt with "MODE A —", "MODE B —", or "MODE C —".
+
 Strictly AVOID these words in any prompt:
 "cinematic", "volumetric", "holographic", "glowing", "neon", "8K", "hyper-detailed",
 "concept art", "render", "CGI", "dramatic", "god rays", "bokeh" (as a style word),
