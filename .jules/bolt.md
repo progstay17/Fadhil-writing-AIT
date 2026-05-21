@@ -1,0 +1,3 @@
+## 2025-05-22 - [Optimized Re-renders and SEO Calculations]
+**Learning:** In complex React components with many state variables, top-level effects (like global keyboard shortcuts) that depend on all state variables will cause unnecessary cleanup and re-registration of listeners on every keystroke. Additionally, inline calculations in the render body that depend on large text outputs (like SEO word counts or keyword density) can add up and affect responsiveness during typing.
+**Action:** Use `useRef` to capture latest state/callbacks for global listeners to keep effect dependency arrays stable (e.g., empty `[]`). Wrap non-trivial calculations that depend on a subset of state in `useMemo` to prevent redundant execution on unrelated state changes.
