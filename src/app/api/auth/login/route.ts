@@ -31,13 +31,14 @@ export async function POST(req: NextRequest) {
     response.cookies.set("ait_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 60 * 60 * 24, // 24 hours
       path: "/",
     });
 
     return response;
   } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
