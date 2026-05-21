@@ -260,9 +260,9 @@ Rules:
 
 
 const IMAGE_PROMPTS_INSTRUCTION = (article: string, fungsi: string, kataKunci: string, konteks: string) => `
-You are an expert visual art director and prompt engineer for AI image generation.
+You are an expert photographer and prompt engineer. You write image generation prompts grounded in real photography technique, not AI art aesthetics.
 
-You will read the article below and generate exactly 2–3 image generation prompts for it.
+You will read the article below and generate 1–3 image generation prompts for it.
 
 BRAND KNOWLEDGE (use this when the section references Chaoji Haomai features):
 ${BRAND_BRIEF}
@@ -271,30 +271,48 @@ ${BRAND_BRIEF}
 
 RULES:
 
-Image 1 — Hero Image (ALWAYS REQUIRED):
-- Context: the entire article as a whole
-- Label it as: HERO
-- Quote: none — just use "Hero Image" as the reference label
-- The prompt must visually represent the article's overall topic, keyword, and angle
-- Do NOT focus on one section only
+Every prompt must be written in real photography language — not AI art language.
+Think like a photographer briefing a camera operator, not an AI art director.
 
-Image 2 and Image 3 — Section Images (OPTIONAL, max 2):
-- Gemini decides which paragraphs/sections most benefit from visual illustration
-- Choose sections where a visual would meaningfully add clarity or engagement — e.g. a feature being explained, a workflow being described, a result being shown
-- Each image type is NOT fixed — choose whatever is most appropriate per section: a model photo, a feature explanation visual, a workflow diagram, a product flat lay, a before/after, etc.
-- If the section references a Chaoji Haomai feature, refer to the BRAND KNOWLEDGE above to ensure the prompt is accurate and specific
+Prompt must always include:
+- Camera body: e.g. Sony A7IV, Canon EOS R6, Fujifilm X100V, iPhone 15 Pro
+- Lens: e.g. 85mm f/1.8, 35mm f/2, 50mm f/1.4
+- Lighting: describe real light source — e.g. "soft north-facing window light", "overcast outdoor daylight", "single softbox camera-left", "golden hour backlight"
+- Texture: describe materials in scene — e.g. "matte cotton fabric", "smooth ceramic surface", "rough linen tablecloth", "visible skin pores"
+- Location/setting: real, grounded — e.g. "minimalist home office", "small Indonesian warung", "plain white wall background", "wooden desk with natural grain"
+- Color palette: e.g. "muted warm tones", "cool daylight whites", "desaturated editorial palette"
+- Composition: e.g. "rule of thirds", "flat lay overhead", "eye-level portrait", "slight low angle"
+
+Strictly AVOID these words in any prompt:
+"cinematic", "volumetric", "holographic", "glowing", "neon", "8K", "hyper-detailed",
+"concept art", "render", "CGI", "dramatic", "god rays", "bokeh" (as a style word),
+"photorealistic" (redundant — just describe it), "futuristic", "sci-fi", "UI overlay"
+
+End every prompt with this mandatory negative clause:
+"No holograms, no glowing UI, no neon, no sci-fi elements, no AI art aesthetics,
+no over-processed skin, no fake studio background."
+
+Image 1 — Hero Image (ALWAYS REQUIRED):
+- Represents the overall article topic and keyword
+- Label: HERO
+- Must feel like a real editorial or lifestyle photo relevant to the article subject
+
+Image 2 and 3 — Section Images (OPTIONAL, max 2):
+- Choose sections that benefit most from visual illustration
+- Type is flexible: product flat lay, lifestyle moment, workflow photo, before/after, etc.
+- If the section references a Chaoji Haomai feature, refer to BRAND KNOWLEDGE above
 
 OUTPUT FORMAT (STRICT):
-Output exactly 2–3 image prompt blocks. No text outside these blocks.
+No text outside these blocks.
 
 <<<IMAGE>>>
 REFERENCE: Hero Image
-PROMPT: [highly technical image generation prompt in English. Include: subject, composition, camera angle, lens type, lighting, color palette, mood, style. If photographic: specify camera, lens, lighting setup. If graphic/poster: specify layout, typography, color scheme. If infographic: specify data viz style, icon style, layout.]
+PROMPT: [photography-grounded prompt following all rules above]
 <<<END>>>
 
 <<<IMAGE>>>
-REFERENCE: Paragraf [N] — "[exact quoted sentence or phrase from that paragraph that triggered this image choice]"
-PROMPT: [highly technical image generation prompt in English]
+REFERENCE: Paragraf [N] — "[exact quoted sentence from that paragraph]"
+PROMPT: [photography-grounded prompt following all rules above]
 <<<END>>>
 
 ---
