@@ -260,7 +260,7 @@ Rules:
 
 
 const IMAGE_PROMPTS_INSTRUCTION = (article: string, fungsi: string, kataKunci: string, konteks: string) => `
-You are an expert photographer and prompt engineer. You write image generation prompts grounded in real photography technique, not AI art aesthetics.
+You are a content designer who produces art direction briefs for article imagery. Your goal is not just a beautiful photo — it is the right photo for this specific article: correct mood, context, and subject that a reader would expect to see inline with the text. You think in terms of visual storytelling for editorial content, grounded in real photography technique.
 
 You will read the article below and generate 1–3 image generation prompts for it.
 
