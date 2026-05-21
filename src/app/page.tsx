@@ -539,6 +539,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                 <button
                   key={l}
                   onClick={() => changeLanguage(l)}
+                  aria-pressed={lang === l}
                   className={cn(
                     "px-3 py-1 rounded-md text-xs font-medium uppercase transition-all",
                     lang === l ? "bg-blue-600 text-white shadow-sm" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
@@ -551,12 +552,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
             <button
               onClick={toggleTheme}
+              aria-label={theme === 'light' ? "Switch to dark theme" : "Switch to light theme"}
               className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400"
             >
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
             <button
               onClick={handleLogout}
+              aria-label="Logout"
               className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
               title="Logout"
             >
@@ -763,6 +766,8 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                     <button
                       onClick={() => setAdvancedOpen(!advancedOpen)}
+                      aria-expanded={advancedOpen}
+                      aria-controls="advanced-options-panel"
                       className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase flex items-center">
@@ -773,7 +778,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       </span>
                     </button>
                     {advancedOpen && (
-                      <div className="p-4 space-y-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                      <div id="advanced-options-panel" className="p-4 space-y-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("fields.competitor_label")}</label>
@@ -879,11 +884,19 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                     onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }}
                   />
                   <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => setRewriteType("yellow")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "yellow" ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" : "border-gray-100 dark:border-gray-800")}>
+                    <button
+                      onClick={() => setRewriteType("yellow")}
+                      aria-pressed={rewriteType === "yellow"}
+                      className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "yellow" ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20" : "border-gray-100 dark:border-gray-800")}
+                    >
                       <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🟡 {t("fields.yellow_label")}</span>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.yellow_desc")}</span>
                     </button>
-                    <button onClick={() => setRewriteType("red")} className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50 dark:bg-red-900/20" : "border-gray-100 dark:border-gray-800")}>
+                    <button
+                      onClick={() => setRewriteType("red")}
+                      aria-pressed={rewriteType === "red"}
+                      className={cn("p-3 rounded-xl border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-red-50 dark:bg-red-900/20" : "border-gray-100 dark:border-gray-800")}
+                    >
                       <span className="font-bold text-sm block text-gray-900 dark:text-gray-100">🔴 {t("fields.red_label")}</span>
                       <span className="text-[10px] text-gray-500 dark:text-gray-400">{t("fields.red_desc")}</span>
                     </button>
@@ -918,6 +931,8 @@ Format output: plain text, langsung bisa saya paste ke form.`;
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
               <button
                 onClick={() => setHistoryOpen(!historyOpen)}
+                  aria-expanded={historyOpen}
+                  aria-controls="history-panel"
                 className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-center font-semibold text-gray-800 dark:text-gray-200">
@@ -928,7 +943,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               </button>
 
               {historyOpen && (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
+                  <div id="history-panel" className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
                   {history.map((item) => (
                     <div key={item.id} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
                       <div className="flex justify-between items-start mb-1">
@@ -984,8 +999,8 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                       <ImageIcon size={14} className="mr-1" />
                       {t("buttons.generate_image_prompts")}
                     </button>
-                    <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 transition-colors" title="Download .txt"><Download size={16} /></button>
-                    <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 font-bold text-xs transition-colors" title="Download .md">MD</button>
+                    <button onClick={() => downloadFile(articleOutput, "txt")} aria-label="Download as .txt" className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 transition-colors" title="Download .txt"><Download size={16} /></button>
+                    <button onClick={() => downloadFile(articleOutput, "md")} aria-label="Download as .md" className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-500 dark:text-gray-400 font-bold text-xs transition-colors" title="Download .md">MD</button>
                 </div>
               )}
             </div>
@@ -1002,7 +1017,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                     color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
                   }
                   return (
-                    <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+                    <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
                       <FileText size={10} className="mr-1.5" />
                       {t("seo.word_count")}: {words}
                     </div>
@@ -1028,7 +1043,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                     color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
                   }
                   return (
-                    <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+                    <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
                       <Sparkles size={10} className="mr-1.5" />
                       {t("seo.keyword_density")}: {density.toFixed(1)}%
                     </div>
@@ -1045,7 +1060,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                     color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
                   }
                   return (
-                    <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+                    <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
                       <Layout size={10} className="mr-1.5" />
                       {t("seo.meta_length")}: {len}
                     </div>
@@ -1060,7 +1075,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                   <div className="relative group">
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.article")}</h3>
-                      <button onClick={() => copyToClipboard(articleOutput, "article")} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "article" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}</button>
+                      <button onClick={() => copyToClipboard(articleOutput, "article")} aria-label="Copy article" className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "article" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}</button>
                     </div>
                     <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-sm bg-gray-50 dark:bg-gray-800 min-h-[400px] whitespace-pre-wrap text-gray-800 dark:text-gray-200 transition-colors">
                       {articleOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
@@ -1071,14 +1086,14 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.meta")}</h3>
-                        <button onClick={() => copyToClipboard(metaOutput, "meta")} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "meta" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
+                        <button onClick={() => copyToClipboard(metaOutput, "meta")} aria-label="Copy meta description" className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "meta" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                       </div>
                       <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-[60px] transition-colors">{metaOutput}</div>
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400">{t("output.slug")}</h3>
-                        <button onClick={() => copyToClipboard(slugOutput, "slug")} className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "slug" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
+                        <button onClick={() => copyToClipboard(slugOutput, "slug")} aria-label="Copy slug" className="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{copiedKey === "slug" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</button>
                       </div>
                       <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs bg-gray-50 dark:bg-gray-800 font-mono text-blue-600 dark:text-blue-400 min-h-[60px] flex items-center transition-colors">{slugOutput}</div>
                     </div>
@@ -1097,6 +1112,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                             onClick={() => {
                               copyToClipboard(item.prompt, `prompt-${idx}`);
                             }}
+                            aria-label={`Copy image prompt ${idx + 1}`}
                             className="text-gray-400 hover:text-blue-600 transition-colors"
                           >
                             {copiedKey === `prompt-${idx}` ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
@@ -1120,7 +1136,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                 <div className="relative group flex-1 flex flex-col">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">{t("output.rewritten_label")}</h3>
-                    <button onClick={() => copyToClipboard(sentenceOutput, "fix")} className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">{copiedKey === "fix" ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}</button>
+                    <button onClick={() => copyToClipboard(sentenceOutput, "fix")} aria-label="Copy fix result" className="text-gray-400 dark:text-gray-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">{copiedKey === "fix" ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}</button>
                   </div>
                   <div className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-lg font-medium bg-gray-50 dark:bg-gray-800 flex-1 min-h-[400px] leading-relaxed text-gray-800 dark:text-gray-200 transition-colors">
                     {sentenceOutput || <span className="text-gray-300 dark:text-gray-600 italic">{t("output.rewritten_placeholder")}</span>}
