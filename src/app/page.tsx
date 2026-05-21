@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Clipboard,
@@ -88,6 +88,31 @@ export default function Home() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  // Memoized SEO Calculations
+  const wordCount = useMemo(() => {
+    if (!articleOutput) return 0;
+    return articleOutput.trim().split(/\s+/).length;
+  }, [articleOutput]);
+
+  const keywordDensity = useMemo(() => {
+    if (!articleOutput || !kataKunci) return 0;
+    const words = wordCount || 1;
+    const kw = kataKunci.toLowerCase();
+    const contentText = articleOutput.toLowerCase();
+    let count = 0;
+    let pos = contentText.indexOf(kw);
+    while (pos !== -1) {
+      count++;
+      pos = contentText.indexOf(kw, pos + 1);
+    }
+    return (count / words) * 100;
+  }, [kataKunci, wordCount, articleOutput]);
+
+  const metaLength = useMemo(() => {
+    if (!metaOutput) return 0;
+    return metaOutput.length;
+  }, [metaOutput]);
 
   const loadingInterval = useRef<NodeJS.Timeout | null>(null);
   const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -451,19 +476,28 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       URL.revokeObjectURL(url);
   };
 
+  // Optimize keyboard shortcuts by using Refs to avoid re-registering the event listener on every keystroke
+  const handleGenerateRef = useRef(handleGenerate);
+  const handleClearRef = useRef(handleClear);
+
+  useEffect(() => {
+    handleGenerateRef.current = handleGenerate;
+    handleClearRef.current = handleClear;
+  }, [handleGenerate, handleClear]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        handleGenerate();
+        handleGenerateRef.current();
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
-        handleClear();
+        handleClearRef.current();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fungsi, kataKunci, lokasi, artikelContoh, contentLang, model, activeTab, sentenceInput, rewriteType, minWords, maxWords, selectedStyle, handleGenerate, handleClear]);
+  }, []);
 
   const copyToClipboard = (text: string, key?: string) => {
     navigator.clipboard.writeText(text);
@@ -1009,60 +1043,48 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
                 {/* Word Count Badge */}
                 {(() => {
-                  const words = articleOutput.trim().split(/\s+/).length;
                   let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (words < 0.9 * minWords || words > 1.1 * maxWords) {
+                  if (wordCount < 0.9 * minWords || wordCount > 1.1 * maxWords) {
                     color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (words < minWords || words > maxWords) {
+                  } else if (wordCount < minWords || wordCount > maxWords) {
                     color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
                   }
                   return (
                     <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
                       <FileText size={10} className="mr-1.5" />
-                      {t("seo.word_count")}: {words}
+                      {t("seo.word_count")}: {wordCount}
                     </div>
                   );
                 })()}
 
                 {/* Keyword Density Badge */}
                 {kataKunci && (() => {
-                  const words = articleOutput.trim().split(/\s+/).length || 1;
-                  const kw = kataKunci.toLowerCase();
-                  const contentText = articleOutput.toLowerCase();
-                  let count = 0;
-                  let pos = contentText.indexOf(kw);
-                  while (pos !== -1) {
-                    count++;
-                    pos = contentText.indexOf(kw, pos + 1);
-                  }
-                  const density = (count / words) * 100;
                   let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (density < 0.5 || density > 5) {
+                  if (keywordDensity < 0.5 || keywordDensity > 5) {
                     color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (density < 1 || density > 3) {
+                  } else if (keywordDensity < 1 || keywordDensity > 3) {
                     color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
                   }
                   return (
                     <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
                       <Sparkles size={10} className="mr-1.5" />
-                      {t("seo.keyword_density")}: {density.toFixed(1)}%
+                      {t("seo.keyword_density")}: {keywordDensity.toFixed(1)}%
                     </div>
                   );
                 })()}
 
                 {/* Meta Length Badge */}
                 {metaOutput && (() => {
-                  const len = metaOutput.length;
                   let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (len < 100 || len > 180) {
+                  if (metaLength < 100 || metaLength > 180) {
                     color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (len < 120 || len > 160) {
+                  } else if (metaLength < 120 || metaLength > 160) {
                     color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
                   }
                   return (
                     <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
                       <Layout size={10} className="mr-1.5" />
-                      {t("seo.meta_length")}: {len}
+                      {t("seo.meta_length")}: {metaLength}
                     </div>
                   );
                 })()}
