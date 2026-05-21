@@ -37,7 +37,7 @@ KEY FEATURES:
 - Text to Image (文生图): generate marketing assets from descriptive text prompts
 - Image to Image (图生图): vary or reinterpret reference images
 
-5. AI Toolbox (AI工具箱) — KEY DIFFERENTIATOR:
+5. AI Toolbox (AI工具箱):
 - AI Background Removal (AI抠图): high-precision subject extraction
 - Super Resolution Upscaling (图片超清): enhance low-resolution images
 - AI Image Expansion (AI扩图): outpainting for banner/wide formats
@@ -45,7 +45,7 @@ KEY FEATURES:
 - Hand & Foot Repair (手脚修复): fix AI anatomical deformities on hands and feet
 - Garment Repair (服饰修复): fix artifacts and distortions on clothing
 - Shoe/Boot Repair (鞋靴修复): fix unnatural footwear geometry
-NOTE: These repair tools are the platform's strongest differentiator — users can fix AI hallucinations directly within the platform without needing external software like Photoshop.
+NOTE: These repair tools allow users to fix AI output defects directly within the platform without switching to any external editing software.
 
 WORKFLOW:
 1. Register/login at marketing.k-fashionshop.com (free trial available: 立即免费试用)
@@ -55,7 +55,7 @@ WORKFLOW:
 5. If output has defects → go directly to AI Toolbox for inpainting repair without leaving platform
 6. Download final asset in standard format ready for e-commerce upload
 
-COMPETITIVE ADVANTAGES vs. Midjourney/Canva/generic AI tools:
+COMPETITIVE ADVANTAGES vs. general-purpose AI image tools:
 1. Deep fashion vertical specialization — understands garment geometry, reflective footwear natively
 2. Built-in post-editing ecosystem — no need to export to external software for corrections
 3. Static-to-video centralization — one platform for both catalog images and social media video content
