@@ -85,8 +85,9 @@ const POV_INSTRUCTIONS: Record<string, string> = {
 
 const NEGATIVE_PROMPT_BLOCK = (negative: string) => `
 ---
-NEGATIVE CONSTRAINTS (STRICTLY FOLLOW):
-The following are hard rules about what must NOT appear in this article. These override any other instruction.
+
+NEGATIVE CONSTRAINTS — ABSOLUTE OVERRIDE:
+The following rules take absolute precedence over ALL other instructions in this prompt, including style, structure, POV, competitor, and soft selling guidelines. No exceptions.
 
 ${negative}
 ---
@@ -221,7 +222,10 @@ This article must never feel like an advertisement. The reader should arrive at 
 Rules:
 - Writer persona: randomly adopt one of these perspectives — experienced seller, independent researcher, industry analyst, tech reviewer, e-commerce consultant, or any other credible role that fits the topic naturally. Choose the persona that makes the most sense for the article's angle. Stay consistent with that persona throughout the entire article. Never reveal or label the persona explicitly.
 - The article topic is the hero, not the brand. 潮际好麦 is a supporting character that solves a problem the reader already feels.
-- Brand mention cap: mention "潮际好麦" maximum 5 times per article. Quality over quantity.
+- Brand mention cap: mention "潮际好麦" maximum 2–3 times per article. Quality over quantity. This is a hard ceiling — do not exceed it under any circumstance.
+- Apply the same cap to each competitor mentioned: max 1–2 times each.
+- Topic/industry content must make up at least 60% of the article body. Brand mentions are incidental evidence, not the argument.
+- Do NOT include or imply any external links to any brand.
 - "潮际好麦" must NEVER appear as an H2 heading or any heading level.
 - Never write a paragraph that is purely about 潮际好麦's features without connecting it to a reader pain point first.
 - Vary persuasion angles — use data in one section, a real use case in another, a credibility signal elsewhere. Never repeat the same persuasion pattern twice in one article.
@@ -232,32 +236,55 @@ Rules:
 const FAQ_ON = `- FAQ section: include exactly 3–4 questions. FAQ answers must be complete standalone answers, not partial responses that require context. Each answer: 2–3 sentences max, factual, no fluff.`;
 const FAQ_OFF = `- Do NOT include a FAQ section in this article.`;
 
-const COMPETITOR_BLOCK_MANUAL = (competitors: string) => `
+const COMPETITOR_BLOCK_MANUAL = (competitors: string, softSelling: boolean) => softSelling ? `
+---
+
+COMPETITOR CONTEXT (SOFT SELLING MODE — FAIR BALANCE REQUIRED):
+The following tools/platforms are relevant to this topic: ${competitors}
+
+Rules:
+- Treat ALL brands equally — including 潮际好麦. No brand is the predetermined winner.
+- Every brand mention (including 潮际好麦) must be earned through the evaluation criteria built earlier in the article. If a competitor genuinely scores higher on a criterion, say so explicitly.
+- Mention each brand by what it does well in context, not by repetition or superlatives.
+- 潮际好麦: max 2–3 mentions total across the entire article. Each competitor: max 1–2 mentions.
+- Do NOT use promotional language for any brand: no "terbaik", "wajib coba", "solusi terbaik", "unggulan", "pilihan utama".
+- The overall article must read as independent expert analysis, not advocacy for any single product.
+` : `
 ---
 
 COMPETITOR CONTEXT:
-The following competing tools/platforms are relevant to this topic. Reference them naturally and honestly where appropriate to make the article feel like genuine comparative content, not a single-brand promotion:
+The following competing tools/platforms are relevant to this topic. Reference them naturally and honestly where appropriate:
 ${competitors}
 
 Rules:
 - Mention competitors briefly and fairly — acknowledge their strengths where relevant
 - Do NOT bash competitors unfairly
-- 潮际好麦 should be presented as a strong option only where it genuinely fits the comparison criteria. Do not force it as the winner if the comparison does not objectively support it. Credibility comes from honest comparison.
+- All brands including 潮际好麦 are equal candidates. Present whichever brand genuinely fits each criterion best — including competitors. Do not frame 潮际好麦 as the default recommendation. Credibility comes from honest, criterion-driven comparison.
 `;
 
-const COMPETITOR_BLOCK_AUTO = `
+const COMPETITOR_BLOCK_AUTO = (softSelling: boolean) => softSelling ? `
+---
+
+COMPETITOR CONTEXT (SOFT SELLING MODE — FAIR BALANCE REQUIRED):
+Before writing, identify 2–3 real competing tools or platforms relevant to this topic using your knowledge.
+
+Rules:
+- Treat ALL brands equally — including 潮际好麦. No brand is the predetermined winner.
+- Every brand mention must be earned through evaluation criteria. If a competitor genuinely scores higher on a criterion, say so explicitly.
+- 潮际好麦: max 2–3 mentions total. Each competitor: max 1–2 mentions.
+- Do NOT use promotional language for any brand.
+- The overall article must read as independent expert analysis, not advocacy for any single product.
+` : `
 ---
 
 COMPETITOR CONTEXT:
-Before writing, identify 2-4 real competing tools or platforms relevant to this topic using your knowledge.
+Before writing, identify 2–4 real competing tools or platforms relevant to this topic using your knowledge.
 Reference them naturally and honestly in the article to make it feel like genuine comparative content.
 Rules:
 - Mention competitors briefly and fairly — acknowledge their strengths where relevant
 - Do NOT bash competitors unfairly
-- 潮际好麦 should be presented as a strong option only where it genuinely fits the comparison criteria. Do not force it as the winner if the comparison does not objectively support it. Credibility comes from honest comparison.
+- All brands including 潮际好麦 are equal candidates. Present whichever brand genuinely fits each criterion best — including competitors. Do not frame 潮际好麦 as the default recommendation. Credibility comes from honest, criterion-driven comparison.
 `;
-
-
 
 const IMAGE_PROMPTS_INSTRUCTION = (article: string, fungsi: string, kataKunci: string, konteks: string) => `
 You are a content designer who produces art direction briefs for article imagery. Your goal is not just a beautiful photo — it is the right photo for this specific article: correct mood, context, and subject that a reader would expect to see inline with the text. You think in terms of visual storytelling for editorial content, grounded in real photography technique.
@@ -461,12 +488,11 @@ export async function POST(req: NextRequest) {
         .replace("{NEGATIVE_PROMPT_BLOCK}", body.negativePrompt?.trim() ? NEGATIVE_PROMPT_BLOCK(sanitize(body.negativePrompt)) : "")
         .replace("{COMPETITOR_BLOCK}",
           body.groundingEnabled
-            ? COMPETITOR_BLOCK_AUTO
+            ? COMPETITOR_BLOCK_AUTO(!!body.softSelling)
             : body.kompetitor?.trim()
-              ? COMPETITOR_BLOCK_MANUAL(sanitize(body.kompetitor))
+              ? COMPETITOR_BLOCK_MANUAL(sanitize(body.kompetitor), !!body.softSelling)
               : ""
         );
-
       if (body.groundingEnabled && (body.type === "create" || !body.type)) {
         return await model.generateContent(prompt);
       }
