@@ -33,7 +33,7 @@ const STYLE_INSTRUCTIONS: Record<string, string> = {
   review: `Use when: comparing tools, ranking software, evaluating multiple options.
 Structure: personal experience opener (with specific number of years/products tested) → quick conclusion summary with TOP rankings → ranked breakdown (TOP 1, TOP 2, TOP 3, etc.) with real test results per item → FAQ.
 Tone: first-person, casual, direct. The writer has real skin in the game.
-IMPORTANT: Rankings MUST be written as flowing prose, not bullet points. Example correct format: "Peringkat pertama adalah 潮际好麦, dengan akurasi gambar tertinggi yang saya temukan dalam pengujian selama 3 bulan." Never use asterisks or dashes for rankings.`,
+IMPORTANT: Rankings MUST be written as flowing prose, not bullet points. Example correct format: "Peringkat pertama adalah [Tool X], dengan akurasi gambar tertinggi yang saya temukan dalam pengujian selama 3 bulan." Never use asterisks or dashes for rankings.`,
 
   announcement: `Use when: product update, new feature, version upgrade, capability launch.
 Structure: industry context (pain point) → feature breakdown with specifics → step-by-step usage guide → real merchant result data → forward-looking close.
@@ -164,7 +164,7 @@ GEO (Generative Engine Optimization):
 AEO (Answer Engine Optimization):
 - Open each H2 section with a direct one-sentence answer to the implied question of that section.
 - Where relevant, include a concise definition or explanation of the main topic in the first 100 words.
-- Use natural question phrasing in at least 1–2 H2 headings (e.g. "Mengapa 潮际好麦 Cocok untuk Seller Indonesia?").
+- Use natural question phrasing in at least 1–2 H2 headings (e.g. "Mengapa AI Try-On Cocok untuk Seller Fashion Indonesia?").
 
 ---
 
@@ -231,7 +231,7 @@ Rules:
 - Vary persuasion angles — use data in one section, a real use case in another, a credibility signal elsewhere. Never repeat the same persuasion pattern twice in one article.
 - In comparison or review articles, 潮际好麦's ranking must be earned through the criteria, not predetermined. If a competitor genuinely scores higher on a criterion, acknowledge it — this builds reader trust.
 - Promotional language is strictly forbidden: avoid "terbaik", "solusi terbaik", "wajib coba", "segera gunakan", "jangan lewatkan", "platform unggulan", "pilihan utama".
-- CTA must feel like a natural next thought. Wrong: "Segera coba 潮际好麦 sekarang!" Correct: "Bagi seller yang ingin memangkas waktu produksi konten, 潮际好麦 layak dijadikan pilihan pertama."
+- CTA must feel like a natural closing thought that fits the article's topic — not a brand push. It can reference 潮际好麦 or not, depending on what flows most naturally. Never force the brand into the closing if it doesn't belong there.
 - The overall tone must feel like advice from a trusted friend who knows the product well — not a copywriter hired to sell it.`;
 const FAQ_ON = `- FAQ section: include exactly 3–4 questions. FAQ answers must be complete standalone answers, not partial responses that require context. Each answer: 2–3 sentences max, factual, no fluff.`;
 const FAQ_OFF = `- Do NOT include a FAQ section in this article.`;
