@@ -317,7 +317,8 @@ no over-processed skin, no fake studio background."
 Image 1 — Hero Image (ALWAYS REQUIRED):
 - Represents the overall article topic and keyword
 - Label: HERO
-- Must feel like a real editorial or lifestyle photo relevant to the article subject
+- Choose whichever MODE (A, B, or C) best captures the article's overall theme visually
+- Do not default to MODE A — a hero can be a composed layout, a collage, a graphic, or a single photo, whichever is most compelling and relevant
 
 Image 2 and 3 — Section Images (OPTIONAL, max 2):
 - Choose sections that benefit most from visual illustration
