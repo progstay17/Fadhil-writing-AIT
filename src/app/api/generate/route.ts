@@ -25,7 +25,6 @@ function sanitize(text: string | undefined): string {
 function getErrorMessage(error: any): string {
   if (error?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
   if (error?.status === 401) return "Invalid API key.";
-  if (error?.message) return error.message;
   return "An unexpected error occurred during generation.";
 }
 
