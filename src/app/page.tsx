@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import {
   Clipboard,
   Trash2,
@@ -28,6 +29,143 @@ import { twMerge } from "tailwind-merge";
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+const HistorySection = React.memo(({
+  history,
+  restoreHistory,
+  t
+}: {
+  history: GenerationResult[];
+  restoreHistory: (item: GenerationResult) => void;
+  t: TFunction;
+}) => {
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  if (history.length === 0) return null;
+
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+      <button
+        onClick={() => setHistoryOpen(!historyOpen)}
+        aria-expanded={historyOpen}
+        aria-controls="history-panel"
+        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <div className="flex items-center font-semibold text-gray-800 dark:text-gray-200">
+          <History size={18} className="mr-2 text-blue-500" />
+          {t("buttons.history")}
+        </div>
+        {historyOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+      </button>
+
+      {historyOpen && (
+        <div id="history-panel" className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
+          {history.map((item) => (
+            <div key={item.id} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] text-gray-400 font-mono">{item.timestamp}</span>
+                  <span className={cn(
+                    "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",
+                    item.type === "create" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                  )}>
+                    {item.type}
+                  </span>
+                </div>
+                <button
+                  onClick={() => restoreHistory(item)}
+                  className="min-h-[44px] text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center"
+                >
+                  <RotateCcw size={10} className="mr-1" /> {t("buttons.restore")}
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                {item.type === "create"
+                  ? (item.params.kataKunci || item.params.fungsi || "").toString().substring(0, 40) + ((item.params.kataKunci || item.params.fungsi || "").toString().length > 40 ? "..." : "")
+                  : item.params.sentence?.toString().substring(0, 40) + (item.params.sentence?.toString().length > 40 ? "..." : "")
+                }
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+HistorySection.displayName = "HistorySection";
+
+const SEOStats = React.memo(({
+  wordCount,
+  minWords,
+  maxWords,
+  keywordDensity,
+  kataKunci,
+  metaLength,
+  metaOutput,
+  t
+}: {
+  wordCount: number;
+  minWords: number;
+  maxWords: number;
+  keywordDensity: number;
+  kataKunci: string;
+  metaLength: number;
+  metaOutput: string;
+  t: TFunction;
+}) => {
+  return (
+    <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
+      {/* Word Count Badge */}
+      {(() => {
+        let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+        if (wordCount < 0.9 * minWords || wordCount > 1.1 * maxWords) {
+          color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+        } else if (wordCount < minWords || wordCount > maxWords) {
+          color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+        }
+        return (
+          <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+            <FileText size={10} className="mr-1.5" />
+            {t("seo.word_count")}: {wordCount}
+          </div>
+        );
+      })()}
+
+      {/* Keyword Density Badge */}
+      {kataKunci && (() => {
+        let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+        if (keywordDensity < 0.5 || keywordDensity > 5) {
+          color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+        } else if (keywordDensity < 1 || keywordDensity > 3) {
+          color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+        }
+        return (
+          <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+            <Sparkles size={10} className="mr-1.5" />
+            {t("seo.keyword_density")}: {keywordDensity.toFixed(1)}%
+          </div>
+        );
+      })()}
+
+      {/* Meta Length Badge */}
+      {metaOutput && (() => {
+        let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+        if (metaLength < 100 || metaLength > 180) {
+          color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+        } else if (metaLength < 120 || metaLength > 160) {
+          color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+        }
+        return (
+          <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+            <Layout size={10} className="mr-1.5" />
+            {t("seo.meta_length")}: {metaLength}
+          </div>
+        );
+      })()}
+    </div>
+  );
+});
+SEOStats.displayName = "SEOStats";
 
 interface GenerationResult {
   id: number;
@@ -85,7 +223,6 @@ export default function Home() {
   const [statusText, setStatusText] = useState("");
   const [message, setMessage] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -455,7 +592,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     }
   }, [activeTab, fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt, imagePromptsArticleInput, sentenceInput, rewriteType, t]);
 
-  const restoreHistory = (item: GenerationResult) => {
+  const restoreHistory = useCallback((item: GenerationResult) => {
       setActiveTab(item.type);
       if (item.type === "create") {
           setArticleOutput(item.article || "");
@@ -464,7 +601,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       } else {
           setSentenceOutput(item.rewritten || "");
       }
-  };
+  }, []);
 
   const downloadFile = (content: string, ext: string) => {
       const blob = new Blob([content], { type: "text/plain" });
@@ -961,54 +1098,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               </div>
           </section>
 
-          {history.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
-              <button
-                onClick={() => setHistoryOpen(!historyOpen)}
-                  aria-expanded={historyOpen}
-                  aria-controls="history-panel"
-                className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <div className="flex items-center font-semibold text-gray-800 dark:text-gray-200">
-                  <History size={18} className="mr-2 text-blue-500" />
-                  {t("buttons.history")}
-                </div>
-                {historyOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-              </button>
-
-              {historyOpen && (
-                  <div id="history-panel" className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
-                  {history.map((item) => (
-                    <div key={item.id} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                      <div className="flex justify-between items-start mb-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-[10px] text-gray-400 font-mono">{item.timestamp}</span>
-                          <span className={cn(
-                            "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",
-                            item.type === "create" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
-                          )}>
-                            {item.type}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => restoreHistory(item)}
-                          className="min-h-[44px] text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center"
-                        >
-                          <RotateCcw size={10} className="mr-1" /> {t("buttons.restore")}
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
-                        {item.type === "create"
-                          ? (item.params.kataKunci || item.params.fungsi || "").toString().substring(0, 40) + ((item.params.kataKunci || item.params.fungsi || "").toString().length > 40 ? "..." : "")
-                          : item.params.sentence?.toString().substring(0, 40) + (item.params.sentence?.toString().length > 40 ? "..." : "")
-                        }
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <HistorySection history={history} restoreHistory={restoreHistory} t={t} />
         </div>
 
         {/* Output Section (Right Column) */}
@@ -1040,55 +1130,16 @@ Format output: plain text, langsung bisa saya paste ke form.`;
             </div>
 
             {activeTab === "create" && articleOutput && (
-              <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
-                {/* Word Count Badge */}
-                {(() => {
-                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (wordCount < 0.9 * minWords || wordCount > 1.1 * maxWords) {
-                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (wordCount < minWords || wordCount > maxWords) {
-                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-                  }
-                  return (
-                    <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
-                      <FileText size={10} className="mr-1.5" />
-                      {t("seo.word_count")}: {wordCount}
-                    </div>
-                  );
-                })()}
-
-                {/* Keyword Density Badge */}
-                {kataKunci && (() => {
-                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (keywordDensity < 0.5 || keywordDensity > 5) {
-                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (keywordDensity < 1 || keywordDensity > 3) {
-                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-                  }
-                  return (
-                    <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
-                      <Sparkles size={10} className="mr-1.5" />
-                      {t("seo.keyword_density")}: {keywordDensity.toFixed(1)}%
-                    </div>
-                  );
-                })()}
-
-                {/* Meta Length Badge */}
-                {metaOutput && (() => {
-                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (metaLength < 100 || metaLength > 180) {
-                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (metaLength < 120 || metaLength > 160) {
-                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-                  }
-                  return (
-                    <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
-                      <Layout size={10} className="mr-1.5" />
-                      {t("seo.meta_length")}: {metaLength}
-                    </div>
-                  );
-                })()}
-              </div>
+              <SEOStats
+                wordCount={wordCount}
+                minWords={minWords}
+                maxWords={maxWords}
+                keywordDensity={keywordDensity}
+                kataKunci={kataKunci}
+                metaLength={metaLength}
+                metaOutput={metaOutput}
+                t={t}
+              />
             )}
 
             <div className="space-y-6 flex-1">
