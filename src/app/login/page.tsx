@@ -48,7 +48,7 @@ export default function LoginPage() {
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
