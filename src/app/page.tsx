@@ -619,8 +619,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
               </h2>
               <div className="flex flex-col items-end space-y-2">
                 <div className="flex items-center space-x-2">
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">{t("fields.content_lang")}</span>
+                  <label htmlFor="contentLang" className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider cursor-pointer">{t("fields.content_lang")}</label>
                   <select
+                    id="contentLang"
                     value={contentLang}
                     onChange={(e) => setContentLang(e.target.value)}
                     className="text-[10px] border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium outline-none"
@@ -631,10 +632,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   </select>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider flex items-center">
+                  <label htmlFor="model" className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider flex items-center cursor-pointer">
                     <Cpu size={10} className="mr-1" /> {t("fields.model_label")}
-                  </span>
+                  </label>
                   <select
+                    id="model"
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
                     className="text-[10px] border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium outline-none"
@@ -654,18 +656,24 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
               {activeTab === "create" ? (
                 <>
                   <textarea
+                    id="fungsi"
+                    aria-label={t("fields.functions")}
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.functions_placeholder")}
                     value={fungsi}
                     onChange={(e) => { setFungsi(e.target.value); setMessage(""); }}
                   />
                   <textarea
+                    id="kataKunci"
+                    aria-label={t("fields.keywords")}
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.keywords_placeholder")}
                     value={kataKunci}
                     onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }}
                   />
                   <textarea
+                    id="konteks"
+                    aria-label={t("fields.konteks")}
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.konteks_placeholder")}
                     value={konteks}
@@ -674,10 +682,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
                   {/* Point of View Dropdown */}
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center">
+                    <label htmlFor="sudutPandang" className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center cursor-pointer">
                       <Cpu size={10} className="mr-1" /> {t("fields.pov_label")}
                     </label>
                     <select
+                      id="sudutPandang"
                       value={sudutPandang}
                       onChange={(e) => setSudutPandang(e.target.value)}
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
@@ -689,10 +698,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   </div>
                   {/* Style Dropdown */}
                   <div>
-                    <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center">
+                    <label htmlFor="selectedStyle" className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1 flex items-center cursor-pointer">
                       <Layout size={10} className="mr-1" /> {t("fields.style_label")}
                     </label>
                     <select
+                      id="selectedStyle"
                       value={selectedStyle}
                       onChange={(e) => setSelectedStyle(e.target.value)}
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
@@ -705,18 +715,23 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                     </select>
                   </div>
 
-                  <input
-                    type="text"
-                    className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
-                    placeholder={t("fields.location_placeholder")}
-                    value={lokasi}
-                    onChange={(e) => setLokasi(e.target.value)}
-                  />
+                  <div>
+                    <label htmlFor="lokasi" className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.location")}</label>
+                    <input
+                      id="lokasi"
+                      type="text"
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
+                      placeholder={t("fields.location_placeholder")}
+                      value={lokasi}
+                      onChange={(e) => setLokasi(e.target.value)}
+                    />
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.min_words")}</label>
+                      <label htmlFor="minWords" className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.min_words")}</label>
                       <input
+                        id="minWords"
                         type="number"
                         className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
                         value={minWords}
@@ -724,8 +739,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.max_words")}</label>
+                      <label htmlFor="maxWords" className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-1">{t("fields.max_words")}</label>
                       <input
+                        id="maxWords"
                         type="number"
                         className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
                         value={maxWords}
@@ -735,11 +751,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <label htmlFor="toggle-soft-selling" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 cursor-pointer">
                       Soft Selling
                     </label>
                     <button
+                      id="toggle-soft-selling"
                       type="button"
+                      role="switch"
+                      aria-checked={softSelling}
                       onClick={() => setSoftSelling(prev => !prev)}
                       className={cn(
                         "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
@@ -756,11 +775,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <label htmlFor="toggle-include-faq" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 cursor-pointer">
                       Include FAQ
                     </label>
                     <button
+                      id="toggle-include-faq"
                       type="button"
+                      role="switch"
+                      aria-checked={includeFaq}
                       onClick={() => setIncludeFaq(prev => !prev)}
                       className={cn(
                         "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
@@ -777,11 +799,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <label htmlFor="toggle-grounding" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 cursor-pointer">
                       Google Search (Grounding)
                     </label>
                     <button
+                      id="toggle-grounding"
                       type="button"
+                      role="switch"
+                      aria-checked={groundingEnabled}
                       onClick={() => setGroundingEnabled(prev => !prev)}
                       className={cn(
                         "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
@@ -815,7 +840,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
                       <div id="advanced-options-panel" className="p-4 space-y-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("fields.competitor_label")}</label>
+                            <label htmlFor="kompetitor" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 cursor-pointer">{t("fields.competitor_label")}</label>
                             <button
                                 onClick={() => {
                                   const researchPrompt = `Saya sedang menulis artikel tentang: ${fungsi}
@@ -838,6 +863,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                             </button>
                           </div>
                           <textarea
+                            id="kompetitor"
                             className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                             placeholder={t("fields.competitor_placeholder")}
                             value={kompetitor}
@@ -846,8 +872,9 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                         </div>
 
                         <div className="space-y-2">
-                           <label className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("fields.negative_label")}</label>
+                           <label htmlFor="negativePrompt" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 cursor-pointer">{t("fields.negative_label")}</label>
                            <textarea
+                            id="negativePrompt"
                             className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                             placeholder={t("fields.negative_placeholder")}
                             value={negativePrompt}
@@ -857,7 +884,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
 
                         <div className="space-y-2">
                           <div className="flex justify-between items-center mb-1">
-                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t("fields.sample")}</label>
+                            <label htmlFor="artikelContoh" className="text-xs font-medium text-gray-500 dark:text-gray-400 cursor-pointer">{t("fields.sample")}</label>
                             <div className="flex flex-wrap gap-2 mt-1">
                               <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_review")}</button>
                               <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">{t("buttons.sample_feature")}</button>
@@ -866,6 +893,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                             </div>
                           </div>
                           <textarea
+                            id="artikelContoh"
                             className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-24 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                             placeholder={t("fields.sample_placeholder")}
                             value={artikelContoh}
@@ -879,6 +907,8 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               ) : activeTab === "image_prompts" ? (
                 <div className="space-y-4">
                   <textarea
+                    id="imagePromptsArticleInput"
+                    aria-label={t("image_prompts.article_placeholder")}
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-64 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("image_prompts.article_placeholder")}
                     value={imagePromptsArticleInput}
@@ -886,18 +916,24 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                   />
                   <div className="grid grid-cols-1 gap-4">
                     <textarea
+                      id="fungsi_img"
+                      aria-label={t("fields.functions")}
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                       placeholder={t("fields.functions_placeholder")}
                       value={fungsi}
                       onChange={(e) => { setFungsi(e.target.value); setMessage(""); }}
                     />
                     <textarea
+                      id="kataKunci_img"
+                      aria-label={t("fields.keywords")}
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                       placeholder={t("fields.keywords_placeholder")}
                       value={kataKunci}
                       onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }}
                     />
                     <textarea
+                      id="konteks_img"
+                      aria-label={t("fields.konteks")}
                       className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm h-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                       placeholder={t("fields.konteks_placeholder")}
                       value={konteks}
@@ -908,10 +944,11 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center mb-1">
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("fields.original_sentence")}</label>
+                    <label htmlFor="sentenceInput" className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer">{t("fields.original_sentence")}</label>
                     <button onClick={handlePaste} className="text-xs text-blue-600 dark:text-blue-400 font-bold flex items-center hover:underline"><Clipboard size={12} className="mr-1" /> {t("buttons.paste")}</button>
                   </div>
                   <textarea
+                    id="sentenceInput"
                     className="w-full border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-sm h-48 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 placeholder:opacity-100"
                     placeholder={t("fields.sentence_placeholder")}
                     value={sentenceInput}
@@ -950,6 +987,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                 <button
                   onClick={handleClear}
                   className="flex-1 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold py-3 rounded-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                  title={t("buttons.clear_input")}
                 >
                   <Trash2 size={18} className="mr-2" />
                   {t("buttons.clear_input")}
