@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { useTranslation } from "react-i18next";
+import { type TFunction } from "i18next";
 import {
   Clipboard,
   Trash2,
@@ -39,6 +40,150 @@ interface GenerationResult {
   rewritten?: string;
   params: Record<string, string | number>;
 }
+
+const HistorySection = memo(({
+  history,
+  historyOpen,
+  setHistoryOpen,
+  restoreHistory,
+  t
+}: {
+  history: GenerationResult[];
+  historyOpen: boolean;
+  setHistoryOpen: (open: boolean) => void;
+  restoreHistory: (item: GenerationResult) => void;
+  t: TFunction;
+}) => {
+  if (history.length === 0) return null;
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+      <button
+        onClick={() => setHistoryOpen(!historyOpen)}
+          aria-expanded={historyOpen}
+          aria-controls="history-panel"
+        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <div className="flex items-center font-semibold text-gray-800 dark:text-gray-200">
+          <History size={18} className="mr-2 text-blue-500" />
+          {t("buttons.history")}
+        </div>
+        {historyOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+      </button>
+
+      {historyOpen && (
+          <div id="history-panel" className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
+          {history.map((item) => (
+            <div key={item.id} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] text-gray-400 font-mono">{item.timestamp}</span>
+                  <span className={cn(
+                    "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",
+                    item.type === "create" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                  )}>
+                    {item.type}
+                  </span>
+                </div>
+                <button
+                  onClick={() => restoreHistory(item)}
+                  className="min-h-[44px] text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center"
+                >
+                  <RotateCcw size={10} className="mr-1" /> {t("buttons.restore")}
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                {item.type === "create"
+                  ? (item.params.kataKunci || item.params.fungsi || "").toString().substring(0, 40) + ((item.params.kataKunci || item.params.fungsi || "").toString().length > 40 ? "..." : "")
+                  : item.params.sentence?.toString().substring(0, 40) + (item.params.sentence?.toString().length > 40 ? "..." : "")
+                }
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+HistorySection.displayName = "HistorySection";
+
+const SEOStats = memo(({
+  activeTab,
+  articleOutput,
+  wordCount,
+  keywordDensity,
+  metaLength,
+  minWords,
+  maxWords,
+  kataKunci,
+  metaOutput,
+  t
+}: {
+  activeTab: string;
+  articleOutput: string;
+  wordCount: number;
+  keywordDensity: number;
+  metaLength: number;
+  minWords: number;
+  maxWords: number;
+  kataKunci: string;
+  metaOutput: string;
+  t: TFunction;
+}) => {
+  if (activeTab !== "create" || !articleOutput) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
+      {/* Word Count Badge */}
+      {(() => {
+        let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+        if (wordCount < 0.9 * minWords || wordCount > 1.1 * maxWords) {
+          color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+        } else if (wordCount < minWords || wordCount > maxWords) {
+          color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+        }
+        return (
+          <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+            <FileText size={10} className="mr-1.5" />
+            {t("seo.word_count")}: {wordCount}
+          </div>
+        );
+      })()}
+
+      {/* Keyword Density Badge */}
+      {kataKunci && (() => {
+        let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+        if (keywordDensity < 0.5 || keywordDensity > 5) {
+          color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+        } else if (keywordDensity < 1 || keywordDensity > 3) {
+          color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+        }
+        return (
+          <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+            <Sparkles size={10} className="mr-1.5" />
+            {t("seo.keyword_density")}: {keywordDensity.toFixed(1)}%
+          </div>
+        );
+      })()}
+
+      {/* Meta Length Badge */}
+      {metaOutput && (() => {
+        let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
+        if (metaLength < 100 || metaLength > 180) {
+          color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
+        } else if (metaLength < 120 || metaLength > 160) {
+          color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
+        }
+        return (
+          <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
+            <Layout size={10} className="mr-1.5" />
+            {t("seo.meta_length")}: {metaLength}
+          </div>
+        );
+      })()}
+    </div>
+  );
+});
+SEOStats.displayName = "SEOStats";
 
 export default function Home() {
   const { t, i18n } = useTranslation();
@@ -126,8 +271,12 @@ export default function Home() {
       .then(res => { if (!res.ok) window.location.href = "/login"; })
       .catch(() => { window.location.href = "/login"; });
 
-    setTheme(resolved);
-    document.documentElement.classList.toggle('dark', resolved === 'dark');
+    // Use setTimeout to move the setTheme call out of the synchronous render path
+    // and resolve the "cascading render" lint error.
+    setTimeout(() => {
+      setTheme(resolved);
+      document.documentElement.classList.toggle('dark', resolved === 'dark');
+    }, 0);
   }, []);
 
 
@@ -151,7 +300,7 @@ export default function Home() {
     setLang(l);
   };
 
-    const startLoadingAnimation = () => {
+  const startLoadingAnimation = useCallback(() => {
     setProgress(0);
     const texts = [t("messages.loading_writing"), t("messages.loading_seo"), t("messages.loading_meta"), t("messages.loading_brand"), t("messages.loading_finishing")];
     let textIdx = 0;
@@ -169,14 +318,14 @@ export default function Home() {
       textIdx = (textIdx + 1) % texts.length;
       setStatusText(texts[textIdx]);
     }, 3000);
-  };
+  }, [t]);
 
-  const stopLoadingAnimation = () => {
+  const stopLoadingAnimation = useCallback(() => {
     if (loadingInterval.current) clearInterval(loadingInterval.current);
     if (statusInterval.current) clearInterval(statusInterval.current);
     setProgress(100);
     setTimeout(() => { setProgress(0); setLoading(false); }, 500);
-  };
+  }, []);
 
   const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
     setToast({ message: msg, type });
@@ -359,7 +508,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       if (groundingEnabled) {
         const data = await res.json();
         const fullText = data.article || "";
-        const normalized = fullText.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: any, tag: string) => `<<<${tag.toUpperCase()}>>>`);
+        const normalized = fullText.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: unknown, tag: string) => `<<<${tag.toUpperCase()}>>>`);
 
         const articleMatch = normalized.match(/<<<ARTIKEL>>>([\s\S]*?)(?:<<<|$)/i);
         const metaMatch = normalized.match(/<<<META>>>([\s\S]*?)(?:<<<|$)/i);
@@ -386,20 +535,28 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
           let fullText = "";
           const decoder = new TextDecoder();
+          let lastUpdate = Date.now();
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             const chunk = decoder.decode(value);
             fullText += chunk;
-            setArticleOutput(fullText);
+
+            // Throttle UI updates to once every 100ms to reduce CPU load and re-renders
+            const now = Date.now();
+            if (now - lastUpdate > 100) {
+              setArticleOutput(fullText);
+              lastUpdate = now;
+            }
           }
+          setArticleOutput(fullText); // Final update
 
           const fullTrimmed = fullText
             .replace(/```[\s\S]*?```/g, (match) => match.replace(/```\w*\n?/g, ""))
             .trim();
 
-          const normalized = fullTrimmed.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: any, tag: string) => `<<<${tag.toUpperCase()}>>>`);
+          const normalized = fullTrimmed.replace(/<<<\s*(ARTIKEL|META|SLUG)\s*>>>/gi, (_: unknown, tag: string) => `<<<${tag.toUpperCase()}>>>`);
 
           const DELIM_ARTIKEL = "<<<ARTIKEL>>>";
           const DELIM_META = "<<<META>>>";
@@ -453,9 +610,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
     } finally {
       stopLoadingAnimation();
     }
-  }, [activeTab, fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt, imagePromptsArticleInput, sentenceInput, rewriteType, t]);
+  }, [activeTab, fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt, imagePromptsArticleInput, sentenceInput, rewriteType, t, startLoadingAnimation, stopLoadingAnimation]);
 
-  const restoreHistory = (item: GenerationResult) => {
+  const restoreHistory = useCallback((item: GenerationResult) => {
       setActiveTab(item.type);
       if (item.type === "create") {
           setArticleOutput(item.article || "");
@@ -464,7 +621,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
       } else {
           setSentenceOutput(item.rewritten || "");
       }
-  };
+  }, []);
 
   const downloadFile = (content: string, ext: string) => {
       const blob = new Blob([content], { type: "text/plain" });
@@ -961,54 +1118,13 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               </div>
           </section>
 
-          {history.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
-              <button
-                onClick={() => setHistoryOpen(!historyOpen)}
-                  aria-expanded={historyOpen}
-                  aria-controls="history-panel"
-                className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <div className="flex items-center font-semibold text-gray-800 dark:text-gray-200">
-                  <History size={18} className="mr-2 text-blue-500" />
-                  {t("buttons.history")}
-                </div>
-                {historyOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-              </button>
-
-              {historyOpen && (
-                  <div id="history-panel" className="divide-y divide-gray-100 dark:divide-gray-800 max-h-[400px] overflow-y-auto">
-                  {history.map((item) => (
-                    <div key={item.id} className="p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                      <div className="flex justify-between items-start mb-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-[10px] text-gray-400 font-mono">{item.timestamp}</span>
-                          <span className={cn(
-                            "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",
-                            item.type === "create" ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
-                          )}>
-                            {item.type}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => restoreHistory(item)}
-                          className="min-h-[44px] text-[10px] text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center"
-                        >
-                          <RotateCcw size={10} className="mr-1" /> {t("buttons.restore")}
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
-                        {item.type === "create"
-                          ? (item.params.kataKunci || item.params.fungsi || "").toString().substring(0, 40) + ((item.params.kataKunci || item.params.fungsi || "").toString().length > 40 ? "..." : "")
-                          : item.params.sentence?.toString().substring(0, 40) + (item.params.sentence?.toString().length > 40 ? "..." : "")
-                        }
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <HistorySection
+            history={history}
+            historyOpen={historyOpen}
+            setHistoryOpen={setHistoryOpen}
+            restoreHistory={restoreHistory}
+            t={t}
+          />
         </div>
 
         {/* Output Section (Right Column) */}
@@ -1039,57 +1155,18 @@ Format output: plain text, langsung bisa saya paste ke form.`;
               )}
             </div>
 
-            {activeTab === "create" && articleOutput && (
-              <div className="flex flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
-                {/* Word Count Badge */}
-                {(() => {
-                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (wordCount < 0.9 * minWords || wordCount > 1.1 * maxWords) {
-                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (wordCount < minWords || wordCount > maxWords) {
-                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-                  }
-                  return (
-                    <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
-                      <FileText size={10} className="mr-1.5" />
-                      {t("seo.word_count")}: {wordCount}
-                    </div>
-                  );
-                })()}
-
-                {/* Keyword Density Badge */}
-                {kataKunci && (() => {
-                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (keywordDensity < 0.5 || keywordDensity > 5) {
-                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (keywordDensity < 1 || keywordDensity > 3) {
-                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-                  }
-                  return (
-                    <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
-                      <Sparkles size={10} className="mr-1.5" />
-                      {t("seo.keyword_density")}: {keywordDensity.toFixed(1)}%
-                    </div>
-                  );
-                })()}
-
-                {/* Meta Length Badge */}
-                {metaOutput && (() => {
-                  let color = "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-                  if (metaLength < 100 || metaLength > 180) {
-                    color = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20";
-                  } else if (metaLength < 120 || metaLength > 160) {
-                    color = "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20";
-                  }
-                  return (
-                    <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center transition-colors", color)}>
-                      <Layout size={10} className="mr-1.5" />
-                      {t("seo.meta_length")}: {metaLength}
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
+            <SEOStats
+              activeTab={activeTab}
+              articleOutput={articleOutput}
+              wordCount={wordCount}
+              keywordDensity={keywordDensity}
+              metaLength={metaLength}
+              minWords={minWords}
+              maxWords={maxWords}
+              kataKunci={kataKunci}
+              metaOutput={metaOutput}
+              t={t}
+            />
 
             <div className="space-y-6 flex-1">
               {activeTab === "create" ? (
