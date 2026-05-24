@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, AlertCircle, RotateCcw } from "lucide-react";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -56,13 +53,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors p-4 ${inter.className}`}>
-      <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700">
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] transition-colors p-4">
+      <div className="max-w-md w-full space-y-8 bg-[#111111] p-8 rounded-sm border border-[#2a2a2a] border-l-2 border-l-[#cc2200]">
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            潮际好麦 <span className="text-blue-600 dark:text-blue-400">AIT 写作</span>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            <span className="font-['Noto_Serif_SC']">潮际好麦</span> <span className="font-['JetBrains_Mono'] text-[#cc2200]">AIT 写作</span>
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-[10px] text-[#888888] uppercase tracking-widest">
             Please sign in to your account
           </p>
         </div>
@@ -70,19 +67,19 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+              <label htmlFor="username" className="block text-[10px] font-bold text-[#888888] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
                 Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={18} className="text-gray-400" />
+                  <User size={18} className="text-[#555555]" />
                 </div>
                 <input
                   id="username"
                   name="username"
                   type="text"
                   required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl placeholder-gray-400 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[#2a2a2a] rounded-sm placeholder-[#555555] text-white bg-[#1a1a1a] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
                   placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -91,19 +88,19 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+              <label htmlFor="password" className="block text-[10px] font-bold text-[#888888] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-gray-400" />
+                  <Lock size={18} className="text-[#555555]" />
                 </div>
                 <input
                   id="password"
                   name="password"
                   type="password"
                   required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl placeholder-gray-400 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[#2a2a2a] rounded-sm placeholder-[#555555] text-white bg-[#1a1a1a] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -113,7 +110,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="flex items-center space-x-2 text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-900/30">
+            <div className="flex items-center space-x-2 text-[#ff6b6b] text-sm bg-[#1a0000] p-3 rounded-sm border border-[#cc2200]">
               <AlertCircle size={16} />
               <span>{error}</span>
             </div>
@@ -123,10 +120,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#cc2200] hover:bg-[#991a00] focus:outline-none focus:ring-1 focus:ring-[#cc2200] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_20px_#cc220033]"
             >
               {loading ? (
-                <RotateCcw size={18} className="animate-spin" />
+                <RotateCcw size={18} className="animate-spin text-white" />
               ) : (
                 "Sign In"
               )}
@@ -134,8 +131,10 @@ export default function LoginPage() {
           </div>
         </form>
 
+        <hr className="border-[#2a2a2a]" />
+
         <div className="pt-4 text-center">
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">
+          <p className="text-[10px] text-[#555555] uppercase tracking-widest font-['JetBrains_Mono']">
             © 2026 潮际好麦 AIT
           </p>
         </div>
