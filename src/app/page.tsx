@@ -298,6 +298,7 @@ export default function Home() {
  setTimeout(() => {
  setTheme(resolved);
  document.documentElement.classList.toggle('dark', resolved === 'dark');
+        document.documentElement.classList.toggle('light', resolved === 'light');
  }, 0);
  }, []);
 
@@ -316,7 +317,7 @@ export default function Home() {
     localStorage.setItem("theme", next);
     document.documentElement.classList.toggle("dark", next === "dark");
     document.documentElement.classList.toggle("light", next === "light");
-  };;
+  };
 
  const changeLanguage = (l: string) => {
  i18n.changeLanguage(l);
@@ -696,7 +697,12 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  <div
  className="h-full bg-[#cc2200] transition-all duration-1000 ease-out"
  style={{ width: `${progress}%` }}
- />
+ /><motion.div
+        className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+        animate={{ x: ["-80px", "100vw"] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+      />
+
  </div>
  )}
 
@@ -738,18 +744,29 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
   ))}
 </nav>
 
- <div className="flex bg-[#1a1a1a] rounded-sm p-1">
- {["zh", "en", "id"].map((l) => (
- <button
- key={l}
- onClick={() => changeLanguage(l)}
- aria-pressed={lang === l}
- className={cn( "px-3 py-1 rounded-md text-xs font-medium uppercase transition-all", lang === l ? "bg-[#cc2200] text-white " : "bg-[#1a1a1a] text-[#888888]")}
- >
- {l}
- </button>
- ))}
- </div>
+ <div className="flex bg-[#1a1a1a] rounded-sm p-1 relative">
+              {["zh", "en", "id"].map((l) => (
+                <button
+                  key={l}
+                  onClick={() => changeLanguage(l)}
+                  aria-pressed={lang === l}
+                  className={cn(
+                    "relative px-3 py-1 rounded-md text-xs font-medium uppercase transition-colors z-10",
+                    lang === l ? "text-white" : "text-[#888888] hover:text-[#f0f0f0]"
+                  )}
+                >
+                  {lang === l && (
+                    <motion.div
+                      layoutId="lang-indicator"
+                      className="absolute inset-0 bg-[#cc2200] rounded-md"
+                      style={{ zIndex: -1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                    />
+                  )}
+                  {l}
+                </button>
+              ))}
+            </div>
 
  <button
  onClick={toggleTheme}
@@ -1215,9 +1232,8 @@ Format output: plain text, langsung bisa saya paste ke form.`;
  <h3 className="text-sm font-semibold text-[#888888]">{t("output.article")}</h3>
  <button onClick={() => copyToClipboard(articleOutput, "article")} aria-label="Copy article" className="text-[#555555] hover:text-[#cc2200] font-['JetBrains_Mono'] transition-colors">{copiedKey === "article" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}</button>
  </div>
- <div className="w-full border border-[#2a2a2a] rounded-sm p-4 text-sm bg-[#0a0a0a] min-h-[400px] whitespace-pre-wrap text-[#f0f0f0] transition-colors">
- {articleOutput || <span className="text-[#555555] italic">{t("output.rewritten_placeholder")}</span>}
- </div>
+ <AnimatePresence mode="wait"><motion.div key={articleOutput ? "content" : "empty"} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full border border-[#2a2a2a] rounded-sm p-4 text-sm bg-[#0a0a0a] min-h-[400px] whitespace-pre-wrap text-[#f0f0f0] transition-colors">
+ {articleOutput || <span className="text-[#555555] italic">{t("output.rewritten_placeholder")}</span>}</motion.div></AnimatePresence>
  </div>
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
