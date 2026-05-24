@@ -61,12 +61,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] transition-colors p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] transition-colors p-4">
       <motion.div
         initial={{ opacity: 0, y: 32, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 bg-[#111111] p-8 rounded-sm border border-[#2a2a2a] border-l-2 border-l-[#cc2200]"
+        className="max-w-md w-full space-y-8 bg-[var(--color-surface)] p-8 rounded-sm border border-[var(--color-border)] border-l-2 border-l-[#cc2200]"
       >
         <div className="text-center">
           <motion.div
@@ -78,7 +78,7 @@ export default function LoginPage() {
             <motion.span variants={FADE_UP} className="font-['Noto_Serif_SC']">潮际好麦</motion.span>
             <motion.span variants={FADE_UP} className="font-['JetBrains_Mono'] text-[#cc2200]"> AIT 写作</motion.span>
           </motion.div>
-          <p className="mt-2 text-[10px] text-[#888888] uppercase tracking-widest">
+          <p className="mt-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest">
             Please sign in to your account
           </p>
         </div>
@@ -86,19 +86,19 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <motion.div variants={STAGGER_CONTAINER} initial="initial" animate="animate" className="space-y-4">
             <motion.div variants={FADE_UP}>
-              <label htmlFor="username" className="block text-[10px] font-bold text-[#888888] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
+              <label htmlFor="username" className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
                 Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={18} className="text-[#555555]" />
+                  <User size={18} className="text-[var(--color-text-dim)]" />
                 </div>
                 <input
                   id="username"
                   name="username"
                   type="text"
                   required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[#2a2a2a] rounded-sm placeholder-[#555555] text-white bg-[#1a1a1a] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[var(--color-border)] rounded-sm placeholder-[var(--color-text-dim)] text-white bg-[var(--color-surface-2)] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
                   placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -107,19 +107,19 @@ export default function LoginPage() {
             </motion.div>
 
             <motion.div variants={FADE_UP}>
-              <label htmlFor="password" className="block text-[10px] font-bold text-[#888888] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
+              <label htmlFor="password" className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-[#555555]" />
+                  <Lock size={18} className="text-[var(--color-text-dim)]" />
                 </div>
                 <input
                   id="password"
                   name="password"
                   type="password"
                   required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[#2a2a2a] rounded-sm placeholder-[#555555] text-white bg-[#1a1a1a] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[var(--color-border)] rounded-sm placeholder-[var(--color-text-dim)] text-white bg-[var(--color-surface-2)] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -161,10 +161,10 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <hr className="border-[#2a2a2a]" />
+        <hr className="border-[var(--color-border)]" />
 
         <div className="pt-4 text-center">
-          <p className="text-[10px] text-[#555555] uppercase tracking-widest font-['JetBrains_Mono']">
+          <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">
             © 2026 潮际好麦 AIT
           </p>
         </div>

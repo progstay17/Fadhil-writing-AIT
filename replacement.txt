@@ -1,0 +1,6 @@
+                />
+              </div>
+            </div>
+          </>
+        ) : activeTab === "image_prompts" ? (
+          <div className="space-y-4">
