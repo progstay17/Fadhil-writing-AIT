@@ -49,6 +49,8 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
+    "history": "Riwayat",
+    "restore": "Pulihkan",
     "advanced_options": "Opsi Lanjutan",
     "sample_review": "📊 Review",
     "sample_feature": "🆕 Fitur Baru",
@@ -78,7 +80,13 @@
     "generating": "Sedang menghasilkan...",
     "fixing": "Sedang memperbaiki...",
     "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
-    "copied": "Berhasil disalin!"
+    "copied": "Berhasil disalin!",
+    "cleared": "Berhasil dihapus!",
+    "loading_writing": "Menulis artikel...",
+    "loading_seo": "Mengoptimalkan SEO...",
+    "loading_meta": "Menghasilkan meta...",
+    "loading_brand": "Memeriksa brand brief...",
+    "loading_finishing": "Menyelesaikan..."
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {
