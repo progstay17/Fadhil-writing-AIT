@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
 import {
@@ -25,6 +26,31 @@ import {
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+
+
+const FADE_UP = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+  transition: { duration: 0.35, ease: easeOut }
+};
+
+const FADE_IN = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.25 }
+};
+
+const STAGGER_CONTAINER = {
+  animate: { transition: { staggerChildren: 0.07 } }
+};
+
+const SLIDE_RIGHT = {
+  initial: { opacity: 0, x: -12 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.3, ease: easeOut }
+};
 
 function cn(...inputs: ClassValue[]) {
  return twMerge(clsx(inputs));
@@ -56,7 +82,7 @@ const HistorySection = memo(({
 }) => {
  if (history.length === 0) return null;
  return (
- <div className="bg-[#111111] rounded-sm border border-[#2a2a2a] overflow-hidden transition-colors duration-300">
+ <motion.div whileHover={{ borderColor: "var(--color-border-2)" }} transition={{ duration: 0.2 }} className="bg-[#111111] rounded-sm border border-[#2a2a2a] overflow-hidden transition-colors duration-300">
  <button
  onClick={() => setHistoryOpen(!historyOpen)}
  aria-expanded={historyOpen}
@@ -76,7 +102,7 @@ const HistorySection = memo(({
  <div className="flex justify-between items-start mb-1">
  <div className="flex items-center space-x-2">
  <span className="text-[10px] text-[#555555] font-mono">{item.timestamp}</span>
- <span className={cn(  "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",  item.type === "create" ? "bg-[#001a00] text-[#44cc44]" : "bg-[#1a0800] text-[#cc6600]"   )}>
+ <span className={cn( "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase", item.type === "create" ? "bg-[#001a00] text-[#44cc44]" : "bg-[#1a0800] text-[#cc6600]"  )}>
  {item.type}
  </span>
  </div>
@@ -97,7 +123,7 @@ const HistorySection = memo(({
  ))}
  </div>
  )}
- </div>
+ </motion.div>
  );
 });
 HistorySection.displayName = "HistorySection";
@@ -285,11 +311,12 @@ export default function Home() {
  };
 
  const toggleTheme = () => {
- const next = theme === 'light' ? 'dark' : 'light';
- setTheme(next);
- document.documentElement.classList.toggle('dark', next === 'dark');
- localStorage.setItem('theme', next);
- };
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    localStorage.setItem("theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+    document.documentElement.classList.toggle("light", next === "light");
+  };;
 
  const changeLanguage = (l: string) => {
  i18n.changeLanguage(l);
@@ -674,43 +701,42 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  )}
 
  {/* Header */}
- <header className="bg-[#111111] border-b border-[#2a2a2a] sticky top-0 z-10 transition-colors duration-300">
+ <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: easeOut }} className="bg-[#111111] border-b border-[#2a2a2a] sticky top-0 z-10 transition-colors duration-300">
  <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
  <div className="flex items-center space-x-2">
- <pre className="text-[8px] leading-[1] font-bold text-[#cc2200] font-['JetBrains_Mono']">
- {`    _    ___ _____
+ <motion.pre initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[8px] leading-[1] font-bold text-[#cc2200] font-['JetBrains_Mono']">
+            {`    _    ___ _____
    /   |_ _|_   _|
   / _   | |  | |
  / ___  | |  | |
 /_/   ____| |_|  `}
- </pre>
+          </motion.pre>
  <h1 className="text-xl font-bold ml-2 hidden sm:block text-[#f0f0f0]"><span className="font-['Noto_Serif_SC']">{t("title")}</span> <span className="font-['JetBrains_Mono'] text-[#cc2200]">AIT 写作</span></h1>
  </div>
 
  <div className="flex items-center space-x-4">
- <nav className="hidden md:flex space-x-1 bg-[#1a1a1a] p-1 rounded-sm">
- <button
- onClick={() => setActiveTab("create")}
- className={cn(  "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",  activeTab === "create" ? "bg-[#cc2200] text-white " : "bg-[#111111] text-[#888888] hover:text-[#f0f0f0]")}
- >
- <PlusCircle size={16} className="mr-2" />
- {t("tabs.create")}
- </button>
- <button
- onClick={() => setActiveTab("fix")}
- className={cn(  "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",  activeTab === "fix" ? "bg-[#cc2200] text-white " : "bg-[#111111] text-[#888888] hover:text-[#f0f0f0]")}
- >
- <Edit3 size={16} className="mr-2" />
- {t("tabs.fix")}
- </button>
- <button
- onClick={() => setActiveTab("image_prompts")}
- className={cn(  "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center",  activeTab === "image_prompts" ? "bg-[#cc2200] text-white " : "bg-[#111111] text-[#888888] hover:text-[#f0f0f0]")}
- >
- <ImageIcon size={16} className="mr-2" />
- {t("tabs.image_prompts")}
- </button>
- </nav>
+ <nav className="relative hidden md:flex space-x-1 bg-[#1a1a1a] p-1 rounded-sm">
+  {["create", "fix", "image_prompts"].map((tab) => (
+    <button
+      key={tab}
+      onClick={() => setActiveTab(tab)}
+      className={cn(     "relative px-4 py-1.5 rounded-sm text-sm font-medium transition-colors flex items-center z-10",     activeTab === tab ? "text-white" : "text-[#888888] hover:text-[#f0f0f0]"    )}
+    >
+      {activeTab === tab && (
+        <motion.div
+          layoutId="tab-indicator"
+          className="absolute inset-0 bg-[#cc2200] rounded-sm"
+          style={{ zIndex: -1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 35 }}
+        />
+      )}
+      {tab === "create" && <PlusCircle size={16} className="mr-2" />}
+      {tab === "fix" && <Edit3 size={16} className="mr-2" />}
+      {tab === "image_prompts" && <ImageIcon size={16} className="mr-2" />}
+      {t(`tabs.${tab}`)}
+    </button>
+  ))}
+</nav>
 
  <div className="flex bg-[#1a1a1a] rounded-sm p-1">
  {["zh", "en", "id"].map((l) => (
@@ -718,7 +744,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  key={l}
  onClick={() => changeLanguage(l)}
  aria-pressed={lang === l}
- className={cn(  "px-3 py-1 rounded-md text-xs font-medium uppercase transition-all",  lang === l ? "bg-[#cc2200] text-white " : "bg-[#1a1a1a] text-[#888888]")}
+ className={cn( "px-3 py-1 rounded-md text-xs font-medium uppercase transition-all", lang === l ? "bg-[#cc2200] text-white " : "bg-[#1a1a1a] text-[#888888]")}
  >
  {l}
  </button>
@@ -741,11 +767,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  </button>
  </div>
  </div>
- </header>
+ </motion.header>
 
  <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
  {/* Left Column - Input & History */}
- <div className="lg:col-span-5 space-y-6">
+ <div className="lg:col-span-5 space-y-6"><AnimatePresence mode="wait"><motion.div key={activeTab} {...FADE_UP} className="space-y-6">
  <section className="bg-[#111111] rounded-sm border border-[#2a2a2a] p-6 space-y-4 transition-colors duration-300">
  <div className="flex justify-between items-start mb-2">
  <h2 className="font-semibold text-[#f0f0f0] flex items-center mt-1">
@@ -900,10 +926,10 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  role="switch"
  aria-checked={softSelling}
  onClick={() => setSoftSelling(prev => !prev)}
- className={cn(  "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",  softSelling ? "bg-[#cc2200]" : "bg-[#2a2a2a]"  )}
+ className={cn( "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200", softSelling ? "bg-[#cc2200]" : "bg-[#2a2a2a]" )}
  >
  <span
- className={cn(  "inline-block h-4 w-4 transform rounded-full bg-[#1a1a1a] transition-transform duration-200",  softSelling ? "translate-x-6" : "translate-x-1"  )}
+ className={cn( "inline-block h-4 w-4 transform rounded-full bg-[#1a1a1a] transition-transform duration-200", softSelling ? "translate-x-6" : "translate-x-1" )}
  />
  </button>
  </div>
@@ -918,10 +944,10 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  role="switch"
  aria-checked={includeFaq}
  onClick={() => setIncludeFaq(prev => !prev)}
- className={cn(  "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",  includeFaq ? "bg-[#cc2200]" : "bg-[#2a2a2a]"  )}
+ className={cn( "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200", includeFaq ? "bg-[#cc2200]" : "bg-[#2a2a2a]" )}
  >
  <span
- className={cn(  "inline-block h-4 w-4 transform rounded-full bg-[#1a1a1a] transition-transform duration-200",  includeFaq ? "translate-x-6" : "translate-x-1"  )}
+ className={cn( "inline-block h-4 w-4 transform rounded-full bg-[#1a1a1a] transition-transform duration-200", includeFaq ? "translate-x-6" : "translate-x-1" )}
  />
  </button>
  </div>
@@ -936,10 +962,10 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  role="switch"
  aria-checked={groundingEnabled}
  onClick={() => setGroundingEnabled(prev => !prev)}
- className={cn(  "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",  groundingEnabled ? "bg-[#cc2200]" : "bg-[#2a2a2a]"  )}
+ className={cn( "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200", groundingEnabled ? "bg-[#cc2200]" : "bg-[#2a2a2a]" )}
  >
  <span
- className={cn(  "inline-block h-4 w-4 transform rounded-full bg-[#1a1a1a] transition-transform duration-200",  groundingEnabled ? "translate-x-6" : "translate-x-1"  )}
+ className={cn( "inline-block h-4 w-4 transform rounded-full bg-[#1a1a1a] transition-transform duration-200", groundingEnabled ? "translate-x-6" : "translate-x-1" )}
  />
  </button>
  </div>
@@ -1083,12 +1109,12 @@ Format output: plain text, langsung bisa saya paste ke form.`;
  className={cn("p-3 rounded-sm border-2 text-left transition-colors", rewriteType === "yellow" ? "border-yellow-400 bg-[#1a1500]" : "border-[#2a2a2a]")}
  >
  <span className="font-bold text-sm block text-[#f0f0f0]">🟡 {t("fields.yellow_label")}</span>
- <span className="text-[10px] text-[#555555]\"></span></button>  <button  onClick={() => setRewriteType("red")}
+ <span className="text-[10px] text-[#555555]">{t("fields.yellow_desc")}</span></button>  <button  onClick={() => setRewriteType("red")}
  aria-pressed={rewriteType === "red"}
  className={cn("p-3 rounded-sm border-2 text-left transition-colors", rewriteType === "red" ? "border-red-400 bg-[#1a0000]" : "border-[#2a2a2a]")}
  >
  <span className="font-bold text-sm block text-[#f0f0f0]">🔴 {t("fields.red_label")}</span>
- <span className="text-[10px] text-[#555555]\"></span></button>  </div>  </div>  )}  </div>   {message && (  <div className="bg-red-50 border border-red-200 p-3 rounded-sm flex items-center text-red-600 text-sm animate-in fade-in slide-in-from-top-1">
+ <span className="text-[10px] text-[#555555]">{t("fields.red_desc")}</span></button>  </div>  </div>  )}  </div>   {message && (  <div className="bg-red-50 border border-red-200 p-3 rounded-sm flex items-center text-red-600 text-sm animate-in fade-in slide-in-from-top-1">
  <AlertCircle size={16} className="mr-2 flex-shrink-0" />
  {message}
  </div>
@@ -1104,13 +1130,34 @@ Format output: plain text, langsung bisa saya paste ke form.`;
  {t("buttons.clear_input")}
  <kbd className="ml-2 text-[10px] bg-black/10 border border-black/20 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}K</kbd>
  </button>
- <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}>
- {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")} <kbd className="ml-2 text-[10px] bg-[#1a1a1a]/20 border border-white/30 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}↵</kbd></>}
- </button>
- </div>
+ <motion.button
+              id="btn-generate"
+              disabled={loading}
+              onClick={handleGenerate}
+              whileHover={{ scale: 1.02, boxShadow: "0 6px 30px #cc220055" }}
+              whileTap={{ scale: 0.96 }}
+              animate={loading ? { boxShadow: ["0 4px 20px #cc220033", "0 4px 30px #cc220077", "0 4px 20px #cc220033"] } : {}}
+              transition={loading ? { duration: 1.2, repeat: Infinity } : { duration: 0.15 }}
+              className={cn(         "flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all",         activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]"        )}
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <RotateCcw size={16} className="animate-spin mr-2" />
+                  {statusText}
+                </span>
+              ) : (
+                <>
+                  <Sparkles size={18} className="mr-2" />
+                  {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}
+                  <kbd className="ml-2 text-[10px] bg-[#1a1a1a]/20 border border-white/30 rounded px-1 font-sans">
+                    {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}↵
+                  </kbd>
+                </>
+              )}
+            </motion.button>
+          </div>
  </section>
-
- <HistorySection
+ </motion.div></AnimatePresence><HistorySection
  history={history}
  historyOpen={historyOpen}
  setHistoryOpen={setHistoryOpen}
@@ -1121,7 +1168,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
 
  {/* Output Section (Right Column) */}
  <div className="lg:col-span-7 space-y-6">
- <section className="bg-[#111111] rounded-sm border border-[#2a2a2a] p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300">
+ <motion.section whileHover={{ borderColor: "var(--color-border-2)" }} transition={{ duration: 0.2 }} className="bg-[#111111] rounded-sm border border-[#2a2a2a] p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300">
  <div className="flex justify-between items-center">
  <h2 className="font-semibold text-[#f0f0f0] flex items-center">
  <FileText size={18} className="mr-2 text-green-500" />
@@ -1217,7 +1264,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
  </div>
  ))
  ) : (
- <div className="flex flex-col items-center justify-center py-20 text-[#555555]\"><ImageIcon size={48} className="mb-4 opacity-20" />
+ <div className="flex flex-col items-center justify-center py-20 text-[#555555]"> <ImageIcon size={48} className="mb-4 opacity-20" />
  <p className="text-sm italic">{t("output.rewritten_placeholder")}</p>
  </div>
  )}
@@ -1234,7 +1281,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
  </div>
  )}
  </div>
- </section>
+ </motion.section>
  </div>
  </div>
 
@@ -1253,21 +1300,21 @@ Format output: plain text, langsung bisa saya paste ke form.`;
  <span className="text-sm font-medium text-[#f0f0f0]">{toast.message}</span></div>  )}   {/* Mobile Tab Bar */}  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#111111] border-t border-[#2a2a2a] flex justify-around items-center p-2">
  <button
  onClick={() => setActiveTab("create")}
- className={cn(  "flex flex-col items-center p-2 rounded-sm transition-colors",  activeTab === "create" ? "bg-[#1a0000] text-[#cc2200]" : "text-[#555555]")}
+ className={cn( "flex flex-col items-center p-2 rounded-sm transition-colors", activeTab === "create" ? "bg-[#1a0000] text-[#cc2200]" : "text-[#555555]")}
  >
  <PlusCircle size={20} />
  <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">Create</span>
  </button>
  <button
  onClick={() => setActiveTab("fix")}
- className={cn(  "flex flex-col items-center p-2 rounded-sm transition-colors",  activeTab === "fix" ? "bg-[#1a0000] text-[#cc2200]" : "text-[#555555]")}
+ className={cn( "flex flex-col items-center p-2 rounded-sm transition-colors", activeTab === "fix" ? "bg-[#1a0000] text-[#cc2200]" : "text-[#555555]")}
  >
  <Edit3 size={20} />
  <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">Fix</span>
  </button>
  <button
  onClick={() => setActiveTab("image_prompts")}
- className={cn(  "flex flex-col items-center p-2 rounded-sm transition-colors",  activeTab === "image_prompts" ? "bg-[#1a0000] text-[#cc2200]" : "text-[#555555]")}
+ className={cn( "flex flex-col items-center p-2 rounded-sm transition-colors", activeTab === "image_prompts" ? "bg-[#1a0000] text-[#cc2200]" : "text-[#555555]")}
  >
  <ImageIcon size={20} />
  <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">Images</span>

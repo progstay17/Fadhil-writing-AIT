@@ -26,11 +26,28 @@
   --font-ui:           'Plus Jakarta Sans', sans-serif;
 }
 
+/* Light mode overrides — applied when <html class="light"> */
+.light {
+  --color-bg:          #f5f0eb;   /* warm ivory paper */
+  --color-surface:     #ffffff;   /* card surface */
+  --color-surface-2:   #ede8e1;   /* input bg, warm gray */
+  --color-border:      #d4cdc5;   /* warm border */
+  --color-border-2:    #c0b8b0;   /* visible border */
+  --color-text:        #1a1a1a;   /* near-black ink */
+  --color-text-muted:  #6b6460;   /* warm muted */
+  --color-text-dim:    #a09890;   /* placeholder */
+  --color-accent:      #cc2200;   /* same red — brand constant */
+  --color-accent-dim:  #991a00;
+  --color-accent-glow: #cc220022;
+  --color-white:       #ffffff;
+}
+
 @layer base {
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-ui);
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
 
   * {
@@ -42,12 +59,17 @@
     color: var(--color-text);
     border: 1px solid var(--color-border-2);
     font-family: var(--font-ui);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.4s ease;
   }
 
   input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px var(--color-accent-glow);
+  }
+
+  button {
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   ::-webkit-scrollbar {

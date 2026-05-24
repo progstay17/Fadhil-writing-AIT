@@ -3,6 +3,18 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, AlertCircle, RotateCcw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const FADE_UP = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+  transition: { duration: 0.35 }
+};
+
+const STAGGER_CONTAINER = {
+  animate: { transition: { staggerChildren: 0.07 } }
+};
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,16 +24,12 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Apply theme on mount
     const stored = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (stored === "dark" || (!stored && prefersDark)) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    const theme = stored === "dark" || (!stored && prefersDark) ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle("light", theme === "light");
 
-    // Check if already logged in
     fetch("/api/auth/me")
       .then(res => { if (res.ok) router.push("/"); });
   }, [router]);
@@ -54,19 +62,30 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] transition-colors p-4">
-      <div className="max-w-md w-full space-y-8 bg-[#111111] p-8 rounded-sm border border-[#2a2a2a] border-l-2 border-l-[#cc2200]">
+      <motion.div
+        initial={{ opacity: 0, y: 32, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full space-y-8 bg-[#111111] p-8 rounded-sm border border-[#2a2a2a] border-l-2 border-l-[#cc2200]"
+      >
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            <span className="font-['Noto_Serif_SC']">潮际好麦</span> <span className="font-['JetBrains_Mono'] text-[#cc2200]">AIT 写作</span>
-          </h1>
+          <motion.div
+            variants={STAGGER_CONTAINER}
+            initial="initial"
+            animate="animate"
+            className="text-3xl font-extrabold text-white tracking-tight"
+          >
+            <motion.span variants={FADE_UP} className="font-['Noto_Serif_SC']">潮际好麦</motion.span>
+            <motion.span variants={FADE_UP} className="font-['JetBrains_Mono'] text-[#cc2200]"> AIT 写作</motion.span>
+          </motion.div>
           <p className="mt-2 text-[10px] text-[#888888] uppercase tracking-widest">
             Please sign in to your account
           </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="space-y-4">
-            <div>
+          <motion.div variants={STAGGER_CONTAINER} initial="initial" animate="animate" className="space-y-4">
+            <motion.div variants={FADE_UP}>
               <label htmlFor="username" className="block text-[10px] font-bold text-[#888888] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
                 Username
               </label>
@@ -85,9 +104,9 @@ export default function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={FADE_UP}>
               <label htmlFor="password" className="block text-[10px] font-bold text-[#888888] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
                 Password
               </label>
@@ -106,20 +125,31 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          {error && (
-            <div className="flex items-center space-x-2 text-[#ff6b6b] text-sm bg-[#1a0000] p-3 rounded-sm border border-[#cc2200]">
-              <AlertCircle size={16} />
-              <span>{error}</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, height: 0, y: -8 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="flex items-center space-x-2 text-[#ff6b6b] text-sm bg-[#1a0000] p-3 rounded-sm border border-[#cc2200] overflow-hidden"
+              >
+                <AlertCircle size={16} className="flex-shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div>
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#cc2200] hover:bg-[#991a00] focus:outline-none focus:ring-1 focus:ring-[#cc2200] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_20px_#cc220033]"
             >
               {loading ? (
@@ -127,7 +157,7 @@ export default function LoginPage() {
               ) : (
                 "Sign In"
               )}
-            </button>
+            </motion.button>
           </div>
         </form>
 
@@ -138,7 +168,7 @@ export default function LoginPage() {
             © 2026 潮际好麦 AIT
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
