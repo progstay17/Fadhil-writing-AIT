@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
 import {
@@ -185,6 +185,77 @@ const SEOStats = memo(({
 });
 SEOStats.displayName = "SEOStats";
 
+const ProgressBar = memo(({ loading }: { loading: boolean }) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => setProgress(100), 0);
+      return;
+    }
+
+    setTimeout(() => setProgress(0), 0);
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) return prev;
+        const inc = Math.random() * 10;
+        return Math.min(prev + inc, 98);
+      });
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  if (!loading) return null;
+
+  return (
+    <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800 z-50 overflow-hidden">
+      <div
+        className="h-full bg-blue-600 transition-all duration-1000 ease-out"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  );
+});
+ProgressBar.displayName = "ProgressBar";
+
+const LoadingStatus = memo(({ loading, t }: { loading: boolean; t: TFunction }) => {
+  const [statusText, setStatusText] = useState("");
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const texts = [
+      t("messages.loading_writing"),
+      t("messages.loading_seo"),
+      t("messages.loading_meta"),
+      t("messages.loading_brand"),
+      t("messages.loading_finishing")
+    ];
+    let textIdx = 0;
+    setTimeout(() => setStatusText(texts[0]), 0);
+
+    const interval = setInterval(() => {
+      textIdx = (textIdx + 1) % texts.length;
+      setStatusText(texts[textIdx]);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [loading, t]);
+
+  if (!loading) return null;
+
+  return (
+    <span className="flex items-center">
+      <RotateCcw size={16} className="animate-spin mr-2" />
+      {statusText}
+    </span>
+  );
+});
+LoadingStatus.displayName = "LoadingStatus";
+
 export default function Home() {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
@@ -226,25 +297,27 @@ export default function Home() {
 
   // UI States
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState("");
   const [message, setMessage] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+  // Use deferred value for the streaming article content to prevent heavy SEO calculations
+  // from blocking the main thread during high-frequency updates.
+  const deferredArticleOutput = useDeferredValue(articleOutput);
+
   // Memoized SEO Calculations
   const wordCount = useMemo(() => {
-    if (!articleOutput) return 0;
-    return articleOutput.trim().split(/\s+/).length;
-  }, [articleOutput]);
+    if (!deferredArticleOutput) return 0;
+    return deferredArticleOutput.trim().split(/\s+/).length;
+  }, [deferredArticleOutput]);
 
   const keywordDensity = useMemo(() => {
-    if (!articleOutput || !kataKunci) return 0;
+    if (!deferredArticleOutput || !kataKunci) return 0;
     const words = wordCount || 1;
     const kw = kataKunci.toLowerCase();
-    const contentText = articleOutput.toLowerCase();
+    const contentText = deferredArticleOutput.toLowerCase();
     let count = 0;
     let pos = contentText.indexOf(kw);
     while (pos !== -1) {
@@ -252,15 +325,12 @@ export default function Home() {
       pos = contentText.indexOf(kw, pos + 1);
     }
     return (count / words) * 100;
-  }, [kataKunci, wordCount, articleOutput]);
+  }, [kataKunci, wordCount, deferredArticleOutput]);
 
   const metaLength = useMemo(() => {
     if (!metaOutput) return 0;
     return metaOutput.length;
   }, [metaOutput]);
-
-  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
-  const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
     const stored = localStorage.getItem('theme');
@@ -301,30 +371,11 @@ export default function Home() {
   };
 
   const startLoadingAnimation = useCallback(() => {
-    setProgress(0);
-    const texts = [t("messages.loading_writing"), t("messages.loading_seo"), t("messages.loading_meta"), t("messages.loading_brand"), t("messages.loading_finishing")];
-    let textIdx = 0;
-    setStatusText(texts[0]);
-
-    loadingInterval.current = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 95) return prev;
-        const inc = Math.random() * 10;
-        return Math.min(prev + inc, 98);
-      });
-    }, 1500);
-
-    statusInterval.current = setInterval(() => {
-      textIdx = (textIdx + 1) % texts.length;
-      setStatusText(texts[textIdx]);
-    }, 3000);
-  }, [t]);
+    // Isolated components (ProgressBar, LoadingStatus) manage their own internal timing
+  }, []);
 
   const stopLoadingAnimation = useCallback(() => {
-    if (loadingInterval.current) clearInterval(loadingInterval.current);
-    if (statusInterval.current) clearInterval(statusInterval.current);
-    setProgress(100);
-    setTimeout(() => { setProgress(0); setLoading(false); }, 500);
+    setTimeout(() => { setLoading(false); }, 500);
   }, []);
 
   const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
@@ -668,14 +719,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
   return (
     <main className="min-h-screen bg-white dark:bg-gray-950 pb-20 transition-colors duration-300">
       {/* Progress Bar Header */}
-      {loading && (
-          <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800 z-50 overflow-hidden">
-              <div
-                  className="h-full bg-blue-600 transition-all duration-1000 ease-out"
-                  style={{ width: `${progress}%` }}
-              />
-          </div>
-      )}
+      <ProgressBar loading={loading} />
 
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10 transition-colors duration-300">
@@ -1151,7 +1195,7 @@ Format output: plain text, langsung bisa saya paste ke form.`;
                   <kbd className="ml-2 text-[10px] bg-black/10 dark:bg-white/10 border border-black/20 dark:border-white/20 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}K</kbd>
                 </button>
                 <button id="btn-generate" disabled={loading} onClick={handleGenerate} className={cn("flex-[2] text-white font-semibold py-3 rounded-lg flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-600 hover:bg-blue-700")}>
-                  {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")} <kbd className="ml-2 text-[10px] bg-white/20 border border-white/30 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}↵</kbd></>}
+                  {loading ? <LoadingStatus loading={loading} t={t} /> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")} <kbd className="ml-2 text-[10px] bg-white/20 border border-white/30 rounded px-1 font-sans">{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}↵</kbd></>}
                 </button>
               </div>
           </section>
