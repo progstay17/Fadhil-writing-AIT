@@ -678,11 +678,11 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
  <div className="flex items-center space-x-2">
  <pre className="text-[8px] leading-[1] font-bold text-[#cc2200] font-['JetBrains_Mono']">
- {` _ ___ _____
- / |_ _|_ _|
- / _ | | | |
- / ___ | | | |
-/_/ ____| |_| `}
+ {`    _    ___ _____
+   /   |_ _|_   _|
+  / _   | |  | |
+ / ___  | |  | |
+/_/   ____| |_|  `}
  </pre>
  <h1 className="text-xl font-bold ml-2 hidden sm:block text-[#f0f0f0]"><span className="font-['Noto_Serif_SC']">{t("title")}</span> <span className="font-['JetBrains_Mono'] text-[#cc2200]">AIT 写作</span></h1>
  </div>
