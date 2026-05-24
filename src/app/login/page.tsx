@@ -48,7 +48,7 @@ export default function LoginPage() {
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ export default function LoginPage() {
                   name="username"
                   type="text"
                   required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl placeholder-gray-400 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl placeholder-gray-400 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:border-transparent transition-all sm:text-sm"
                   placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -103,7 +103,7 @@ export default function LoginPage() {
                   name="password"
                   type="password"
                   required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl placeholder-gray-400 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl placeholder-gray-400 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent transition-all sm:text-sm"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
             >
               {loading ? (
                 <RotateCcw size={18} className="animate-spin" />

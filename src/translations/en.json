@@ -49,6 +49,8 @@
     "clear_input": "Clear Input",
     "paste": "Paste",
     "copy": "Copy",
+    "history": "History",
+    "restore": "Restore",
     "advanced_options": "Advanced Options",
     "sample_review": "📊 Review",
     "sample_feature": "🆕 New Feature",
@@ -78,7 +80,13 @@
     "generating": "Generating...",
     "fixing": "Fixing...",
     "refining": "Output doesn't meet requirements, refining...",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "cleared": "Cleared!",
+    "loading_writing": "Writing article...",
+    "loading_seo": "Optimizing SEO...",
+    "loading_meta": "Generating meta...",
+    "loading_brand": "Checking brand brief...",
+    "loading_finishing": "Finishing up..."
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {

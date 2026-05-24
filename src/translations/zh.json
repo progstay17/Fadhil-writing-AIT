@@ -49,6 +49,8 @@
     "clear_input": "清除输入",
     "paste": "粘贴",
     "copy": "复制",
+    "history": "历史记录",
+    "restore": "恢复",
     "advanced_options": "高级选项",
     "sample_review": "📊 测评",
     "sample_feature": "🆕 功能上新",
@@ -78,7 +80,13 @@
     "generating": "正在生成...",
     "fixing": "正在修改...",
     "refining": "输出不符合要求，正在优化...",
-    "copied": "已复制！"
+    "copied": "已复制！",
+    "cleared": "已清除！",
+    "loading_writing": "正在撰写文章...",
+    "loading_seo": "正在优化 SEO...",
+    "loading_meta": "正在生成元描述...",
+    "loading_brand": "正在检查品牌简介...",
+    "loading_finishing": "正在完成..."
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {
