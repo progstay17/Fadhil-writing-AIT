@@ -102,7 +102,7 @@ const HistorySection = memo(({
  <div className="flex justify-between items-start mb-1">
  <div className="flex items-center space-x-2">
  <span className="text-[10px] text-[var(--color-text-dim)] font-mono">{item.timestamp}</span>
- <span className={cn( "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase", item.type === "create" ? "bg-[#001a00] text-[#44cc44]" : "bg-[#1a0800] text-[#cc6600]"  )}>
+ <span className={cn( "text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase", item.type === "create" ? "bg-[#ecfdf5] dark:bg-[#001a00] text-[#059669] dark:text-[#44cc44]" : "bg-[#fff7ed] dark:bg-[#1a0800] text-[#d97706] dark:text-[#cc6600]"  )}>
  {item.type}
  </span>
  </div>
@@ -157,11 +157,11 @@ const SEOStats = memo(({
  <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]">
  {/* Word Count Badge */}
  {(() => {
- let color = "text-[#44cc44] bg-[#001a00]";
+ let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (wordCount < 0.9 * minWords || wordCount > 1.1 * maxWords) {
- color = "text-[#cc4444] bg-[#1a0000]";
+ color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
  } else if (wordCount < minWords || wordCount > maxWords) {
- color = "text-[#ccaa00] bg-[#1a1500]";
+ color = "text-[#d97706] dark:text-[#ccaa00] bg-[#fff7ed] dark:bg-[#1a1500]";
  }
  return (
  <div title={`Target: ${minWords} - ${maxWords} words`} className={cn("px-2.5 py-1 rounded-sm text-[10px] font-bold flex items-center transition-colors", color)}>
@@ -173,11 +173,11 @@ const SEOStats = memo(({
 
  {/* Keyword Density Badge */}
  {kataKunci && (() => {
- let color = "text-[#44cc44] bg-[#001a00]";
+ let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (keywordDensity < 0.5 || keywordDensity > 5) {
- color = "text-[#cc4444] bg-[#1a0000]";
+ color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
  } else if (keywordDensity < 1 || keywordDensity > 3) {
- color = "text-[#ccaa00] bg-[#1a1500]";
+ color = "text-[#d97706] dark:text-[#ccaa00] bg-[#fff7ed] dark:bg-[#1a1500]";
  }
  return (
  <div title="Target: 1% - 3%" className={cn("px-2.5 py-1 rounded-sm text-[10px] font-bold flex items-center transition-colors", color)}>
@@ -189,11 +189,11 @@ const SEOStats = memo(({
 
  {/* Meta Length Badge */}
  {metaOutput && (() => {
- let color = "text-[#44cc44] bg-[#001a00]";
+ let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (metaLength < 100 || metaLength > 180) {
- color = "text-[#cc4444] bg-[#1a0000]";
+ color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
  } else if (metaLength < 120 || metaLength > 160) {
- color = "text-[#ccaa00] bg-[#1a1500]";
+ color = "text-[#d97706] dark:text-[#ccaa00] bg-[#fff7ed] dark:bg-[#1a1500]";
  }
  return (
  <div title="Target: 120 - 160 characters" className={cn("px-2.5 py-1 rounded-sm text-[10px] font-bold flex items-center transition-colors", color)}>
@@ -798,7 +798,7 @@ return (
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[#1a0000] transition-colors text-[var(--color-text-muted)] hover:text-[#cc2200]"
+              className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors text-[var(--color-text-muted)] hover:text-[#cc2200]"
             >
               <LogOut size={16} />
             </button>
@@ -959,9 +959,16 @@ return (
                       <textarea className="w-full border border-[var(--color-border)] rounded-sm p-4 text-sm h-48 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sentence_placeholder")} value={sentenceInput} onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }} />
                       <div className="grid grid-cols-2 gap-3">
                         {["yellow", "red"].map(type => (
-                          <button key={type} onClick={() => setRewriteType(type as any)} className={cn("p-3 rounded-sm border-2 text-left transition-colors", rewriteType === type ? (type === "yellow" ? "border-yellow-400 bg-[#1a1500]" : "border-red-400 bg-[#1a0000]") : "border-[var(--color-border)]")}>
+                          <button key={type} onClick={() => setRewriteType(type as any)} className={cn(
+                            "p-3 rounded-sm border-2 text-left transition-colors",
+                            rewriteType === type
+                              ? (type === "yellow"
+                                ? "border-[#f59e0b] bg-[#fffbeb] dark:bg-[#1a1500]"
+                                : "border-[#cc2200] bg-[#fff1f0] dark:bg-[#1a0000]")
+                              : "bg-[var(--color-surface)] border-[var(--color-border-2)]"
+                          )}>
                             <span className="font-bold text-sm block text-[var(--color-text)]">{type === "yellow" ? "🟡" : "🔴"} {t(`fields.${type}_label`)}</span>
-                            <span className="text-[10px] text-[var(--color-text-dim)]">{t(`fields.${type}_desc`)}</span>
+                            <span className="text-[10px] text-[var(--color-text-muted)]">{t(`fields.${type}_desc`)}</span>
                           </button>
                         ))}
                       </div>
@@ -971,7 +978,7 @@ return (
 
                 <AnimatePresence>
                   {message && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-[#1a0000] border border-[#cc2200] p-3 rounded-sm flex items-center text-[#cc4444] text-sm overflow-hidden">
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-[#fef2f2] dark:bg-[#1a0000] border border-[#cc2200] p-3 rounded-sm flex items-center text-[#dc2626] dark:text-[#cc4444] text-sm overflow-hidden">
                       <AlertCircle size={16} className="mr-2 flex-shrink-0" /> {message}
                     </motion.div>
                   )}
@@ -1013,7 +1020,7 @@ return (
               </h2>
               {activeTab === "create" && articleOutput && (
                 <div className="flex space-x-2">
-                  <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#1a0000] transition-colors">
+                  <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
                   <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
@@ -1104,7 +1111,7 @@ return (
             transition={{ duration: 0.2, ease: easeOut }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-xl rounded-sm px-4 py-3"
           >
-            {toast.type === "success" ? <Check size={18} className="text-[#44cc44] mr-2" /> : <AlertCircle size={18} className="text-[#cc4444] mr-2" />}
+            {toast.type === "success" ? <Check size={18} className="text-[#059669] dark:text-[#44cc44] mr-2" /> : <AlertCircle size={18} className="text-[#dc2626] dark:text-[#cc4444] mr-2" />}
             <span className="text-sm font-medium text-[var(--color-text)]">{toast.message}</span>
           </motion.div>
         )}
@@ -1117,7 +1124,7 @@ return (
             onClick={() => setActiveTab(tab)}
             className={cn(
               "flex flex-col items-center p-2 rounded-sm transition-colors",
-              activeTab === tab ? "bg-[#1a0000] text-[#cc2200]" : "text-[var(--color-text-dim)]"
+              activeTab === tab ? "bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200]" : "text-[var(--color-text-dim)]"
             )}
           >
             {tab === "create" && <PlusCircle size={20} />}
