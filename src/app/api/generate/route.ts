@@ -22,10 +22,10 @@ function sanitize(text: string | undefined): string {
   return text.replace(/<[^>]*>?/gm, "").trim();
 }
 
-function getErrorMessage(error: any): string {
-  if (error?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
-  if (error?.status === 401) return "Invalid API key.";
-  if (error?.message) return error.message;
+function getErrorMessage(error: unknown): string {
+  const err = error as { status?: number };
+  if (err?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
+  if (err?.status === 401) return "Invalid API key.";
   return "An unexpected error occurred during generation.";
 }
 
