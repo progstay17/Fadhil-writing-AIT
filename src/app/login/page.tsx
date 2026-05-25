@@ -13,7 +13,7 @@ const FADE_UP = {
 };
 
 const STAGGER_CONTAINER = {
-  animate: { transition: { staggerChildren: 0.07 } }
+  animate: { transition: { staggerChildren: 0.1 } }
 };
 
 export default function LoginPage() {
@@ -25,8 +25,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const theme = stored === "dark" || (!stored && prefersDark) ? "dark" : "light";
+    const theme = stored === "light" ? "light" : "dark";
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.classList.toggle("light", theme === "light");
 
@@ -53,7 +52,7 @@ export default function LoginPage() {
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }
-    } catch (_err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -61,112 +60,143 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] transition-colors p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] transition-all duration-1000 p-4 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 manuscript-grid pointer-events-none" />
+
       <motion.div
-        initial={{ opacity: 0, y: 32, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 bg-[var(--color-surface)] p-8 rounded-sm border border-[var(--color-border)] border-l-2 border-l-[#cc2200]"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-4xl w-full flex bg-[var(--color-surface)] shadow-2xl relative z-10 overflow-hidden"
       >
-        <div className="text-center">
-          <motion.div
-            variants={STAGGER_CONTAINER}
-            initial="initial"
-            animate="animate"
-            className="text-3xl font-extrabold text-white tracking-tight"
-          >
-            <motion.span variants={FADE_UP} className="font-['Noto_Serif_SC']">潮际好麦</motion.span>
-            <motion.span variants={FADE_UP} className="font-['JetBrains_Mono'] text-[#cc2200]"> AIT 写作</motion.span>
-          </motion.div>
-          <p className="mt-2 text-[10px] text-[var(--color-text-muted)] uppercase tracking-widest">
-            Please sign in to your account
-          </p>
+        {/* Left Side: Editorial Branding */}
+        <div className="hidden md:flex w-1/3 bg-[var(--color-ink-wash)] border-r border-[var(--color-border)] p-8 flex-col justify-between items-center relative">
+           <div className="vertical-text text-2xl font-['Noto_Serif_SC'] font-black tracking-[0.5em] text-[var(--color-text)] opacity-80 pt-4">
+             潮际好麦 · 智能写作
+           </div>
+
+           <div className="seal w-12 h-12 text-sm leading-tight">
+             潮际<br/>好麦
+           </div>
+
+           <div className="section-label vertical-text opacity-40">
+             SINCE 2026 / EDITION 01
+           </div>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <motion.div variants={STAGGER_CONTAINER} initial="initial" animate="animate" className="space-y-4">
-            <motion.div variants={FADE_UP}>
-              <label htmlFor="username" className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={18} className="text-[var(--color-text-dim)]" />
-                </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[var(--color-border)] rounded-sm placeholder-[var(--color-text-dim)] text-white bg-[var(--color-surface-2)] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </div>
-            </motion.div>
-
-            <motion.div variants={FADE_UP}>
-              <label htmlFor="password" className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 font-['JetBrains_Mono']">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-[var(--color-text-dim)]" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="appearance-none block w-full pl-10 px-3 py-3 border border-[var(--color-border)] rounded-sm placeholder-[var(--color-text-dim)] text-white bg-[var(--color-surface-2)] focus:outline-none focus:border-[#cc2200] focus:ring-1 focus:ring-[#cc2200] transition-all sm:text-sm"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                key="error"
-                initial={{ opacity: 0, height: 0, y: -8 }}
-                animate={{ opacity: 1, height: "auto", y: 0 }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25 }}
-                className="flex items-center space-x-2 text-[#ff6b6b] text-sm bg-[#1a0000] p-3 rounded-sm border border-[#cc2200] overflow-hidden"
-              >
-                <AlertCircle size={16} className="flex-shrink-0" />
-                <span>{error}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div>
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-sm text-white bg-[#cc2200] hover:bg-[#991a00] focus:outline-none focus:ring-1 focus:ring-[#cc2200] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_20px_#cc220033]"
-            >
-              {loading ? (
-                <RotateCcw size={18} className="animate-spin text-white" />
-              ) : (
-                "Sign In"
-              )}
-            </motion.button>
+        {/* Right Side: Form */}
+        <div className="flex-1 p-8 md:p-12 relative">
+          <div className="absolute top-0 right-0 p-4 opacity-10 font-['JetBrains_Mono'] text-[80px] leading-none pointer-events-none select-none">
+            AIT
           </div>
-        </form>
 
-        <hr className="border-[var(--color-border)]" />
+          <div className="mb-12">
+            <motion.div
+              variants={STAGGER_CONTAINER}
+              initial="initial"
+              animate="animate"
+              className="space-y-1"
+            >
+              <motion.div variants={FADE_UP} className="flex items-center space-x-3">
+                <div className="w-8 h-[2px] bg-[var(--color-accent)]" />
+                <span className="section-label">SYSTEM ACCESS</span>
+              </motion.div>
+              <motion.h1 variants={FADE_UP} className="text-4xl font-['Noto_Serif_SC'] font-bold text-[var(--color-text)]">
+                登录 <span className="text-[var(--color-accent)] font-['JetBrains_Mono']">SIGN IN</span>
+              </motion.h1>
+            </motion.div>
+          </div>
 
-        <div className="pt-4 text-center">
-          <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">
-            © 2026 潮际好麦 AIT
-          </p>
+          <form className="space-y-6 relative" onSubmit={handleLogin}>
+            <motion.div variants={STAGGER_CONTAINER} initial="initial" animate="animate" className="space-y-5">
+              <motion.div variants={FADE_UP}>
+                <label htmlFor="username" className="section-label mb-2 block">
+                  USER IDENTIFIER
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
+                    <User size={16} className="text-[var(--color-accent)]" />
+                  </div>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    className="appearance-none block w-full pl-7 py-3 placeholder-[var(--color-text-dim)] transition-all bg-transparent border-b border-[var(--color-border-2)] focus:border-[var(--color-accent)] rounded-none"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div variants={FADE_UP}>
+                <label htmlFor="password" className="section-label mb-2 block">
+                  ACCESS CREDENTIAL
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
+                    <Lock size={16} className="text-[var(--color-accent)]" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    className="appearance-none block w-full pl-7 py-3 placeholder-[var(--color-text-dim)] transition-all bg-transparent border-b border-[var(--color-border-2)] focus:border-[var(--color-accent)] rounded-none"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="flex items-center space-x-2 text-[var(--color-accent)] text-xs font-['JetBrains_Mono'] bg-[var(--color-ink-wash)] p-3 border-l-2 border-[var(--color-accent)]"
+                >
+                  <AlertCircle size={14} className="flex-shrink-0" />
+                  <span>{error.toUpperCase()}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="pt-4">
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ x: 4 }}
+                className="group relative w-full flex items-center justify-between py-4 px-6 bg-[var(--color-text)] text-[var(--color-bg)] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+              >
+                <span className="font-['JetBrains_Mono'] tracking-tighter">AUTHENTICATE_SESSION</span>
+                {loading ? (
+                  <RotateCcw size={20} className="animate-spin" />
+                ) : (
+                  <div className="flex items-center">
+                    <div className="w-12 h-[1px] bg-[var(--color-bg)] opacity-30 mr-4" />
+                    <span className="text-xl">→</span>
+                  </div>
+                )}
+              </motion.button>
+            </div>
+          </form>
+
+          <div className="mt-16 flex justify-between items-end">
+            <div className="section-label opacity-30">
+              EST. 2026
+            </div>
+            <div className="font-['JetBrains_Mono'] text-[10px] text-[var(--color-text-dim)] tracking-widest text-right">
+              CHAOJI HAOMAI<br/>
+              SECURE ACCESS NODE
+            </div>
+          </div>
         </div>
       </motion.div>
     </div>
