@@ -1,89 +1,193 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
+
+/* ─── DARK MODE (default) — ink on night paper ─── */
+:root {
+  --color-bg:           #0f0e0c;
+  --color-bg-texture:   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  --color-surface:      #161412;
+  --color-surface-2:    #1e1b18;
+  --color-border:       #2a2520;
+  --color-border-2:     #3a342d;
+  --color-text:         #e8e0d5;
+  --color-text-muted:   #8a7e72;
+  --color-text-dim:     #5a504a;
+  --color-accent:       #c41e1e;
+  --color-accent-dim:   #9a1818;
+  --color-accent-glow:  #c41e1e1a;
+  --color-ink-wash:     rgba(196, 30, 30, 0.04);
+  --color-rule:         #2a2520;
+  --font-brand:         'Noto Serif SC', serif;
+  --font-mono:          'JetBrains Mono', monospace;
+  --font-ui:            'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── LIGHT MODE — ink on xuan paper ─── */
+.light {
+  --color-bg:           #f7f3ed;
+  --color-surface:      #faf7f2;
+  --color-surface-2:    #ede8e0;
+  --color-border:       #d8d0c4;
+  --color-border-2:     #c4bab0;
+  --color-text:         #1c1a17;
+  --color-text-muted:   #7a6e64;
+  --color-text-dim:     #a89e94;
+  --color-accent:       #c41e1e;
+  --color-accent-dim:   #9a1818;
+  --color-accent-glow:  #c41e1e1a;
+  --color-ink-wash:     rgba(196, 30, 30, 0.03);
+  --color-rule:         #d0c8bc;
+}
 
 ::placeholder {
   opacity: 1;
   color: var(--color-text-dim);
 }
 
-:root {
-  --color-bg:          #0a0a0a;
-  --color-surface:     #111111;
-  --color-surface-2:   #1a1a1a;
-  --color-border:      #2a2a2a;
-  --color-border-2:    #3a3a3a;
-  --color-text:        #f0f0f0;
-  --color-text-muted:  #888888;
-  --color-text-dim:    #555555;
-  --color-accent:      #cc2200;
-  --color-accent-dim:  #991a00;
-  --color-accent-glow: #cc220022;
-  --color-white:       #ffffff;
-  --font-brand:        'Noto Serif SC', serif;
-  --font-mono:         'JetBrains Mono', monospace;
-  --font-ui:           'Plus Jakarta Sans', sans-serif;
-}
-
-/* Light mode overrides — applied when <html class="light"> */
-.light {
-  --color-bg:          #f5f0eb;   /* warm ivory paper */
-  --color-surface:     #ffffff;   /* card surface */
-  --color-surface-2:   #ede8e1;   /* input bg, warm gray */
-  --color-border:      #d4cdc5;   /* warm border */
-  --color-border-2:    #c0b8b0;   /* visible border */
-  --color-text:        #1a1a1a;   /* near-black ink */
-  --color-text-muted:  #6b6460;   /* warm muted */
-  --color-text-dim:    #a09890;   /* placeholder */
-  --color-accent:      #cc2200;   /* same red — brand constant */
-  --color-accent-dim:  #991a00;
-  --color-accent-glow: #cc220022;
-  --color-white:       #ffffff;
-}
-
+/* ─── BASE STYLES ─── */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-bg);
+    background-image: var(--color-bg-texture);
     color: var(--color-text);
     font-family: var(--font-ui);
-    transition: background-color 0.4s ease, color 0.4s ease;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
+  /* Horizontal rules — the "print grid" motif */
+  .ink-rule {
+    border: none;
+    border-top: 1px solid var(--color-rule);
+    opacity: 0.6;
+  }
+
+  .ink-rule-bold {
+    border: none;
+    border-top: 2px solid var(--color-accent);
+    width: 2rem;
+  }
+
+  /* Double border — letterpress frame */
+  .double-border {
+    outline: 1px solid var(--color-border);
+    outline-offset: 3px;
+    border: 1px solid var(--color-border-2);
+  }
+
+  /* Vertical text utility */
+  .vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  /* Seal stamp shape */
+  .seal {
+    font-family: var(--font-brand);
+    font-weight: 700;
+    color: var(--color-accent);
+    border: 2px solid var(--color-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.05em;
+    position: relative;
+  }
+  .seal::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1px solid var(--color-accent);
+    opacity: 0.4;
+  }
+
+  input, textarea, select {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border: none;
+    border-bottom: 1px solid var(--color-border-2);
+    font-family: var(--font-ui);
+    border-radius: 0;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.5s ease;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-bottom-color: var(--color-accent);
+    box-shadow: 0 2px 0 0 var(--color-accent-glow);
+  }
+
+  /* Restore border-radius for select (browser compat) */
+  select {
+    border-radius: 2px;
+    border: 1px solid var(--color-border-2);
+    padding: 0.375rem 0.5rem;
+  }
+  select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-glow);
+  }
+
+  button {
+    transition: background-color 0.15s ease, color 0.15s ease,
+                border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   * {
     border-color: var(--color-border);
   }
 
-  input, textarea, select {
-    background-color: var(--color-surface-2);
-    color: var(--color-text);
-    border: 1px solid var(--color-border-2);
-    font-family: var(--font-ui);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.4s ease;
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track { background: var(--color-surface); }
+  ::-webkit-scrollbar-thumb { background: var(--color-border-2); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+}
+
+/* ─── DECORATIVE PATTERNS ─── */
+@layer components {
+
+  /* Faint grid watermark for output areas — 方格稿纸 reference */
+  .manuscript-grid {
+    background-image:
+      linear-gradient(var(--color-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -1px -1px;
+    opacity: 0.15;
   }
 
-  input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-glow);
+  /* Section label style — uppercase JetBrains Mono caption */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
   }
 
-  button {
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  /* Red accent left-border for active/featured sections */
+  .ink-bookmark {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 0.75rem;
   }
 
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+  /* Tab active — thick bottom stroke */
+  .tab-active-bar {
+    position: relative;
   }
-  ::-webkit-scrollbar-track {
-    background: var(--color-surface);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-border-2);
-    border-radius: 2px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
+  .tab-active-bar::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
     background: var(--color-accent);
   }
 }
