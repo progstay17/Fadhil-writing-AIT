@@ -1,17 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 ::placeholder {
   opacity: 1;
+  color: var(--color-text-dim);
+}
+
+:root {
+  --color-bg:          #0a0a0a;
+  --color-surface:     #111111;
+  --color-surface-2:   #1a1a1a;
+  --color-border:      #2a2a2a;
+  --color-border-2:    #3a3a3a;
+  --color-text:        #f0f0f0;
+  --color-text-muted:  #888888;
+  --color-text-dim:    #555555;
+  --color-accent:      #cc2200;
+  --color-accent-dim:  #991a00;
+  --color-accent-glow: #cc220022;
+  --color-white:       #ffffff;
+  --font-brand:        'Noto Serif SC', serif;
+  --font-mono:         'JetBrains Mono', monospace;
+  --font-ui:           'Plus Jakarta Sans', sans-serif;
+}
+
+/* Light mode overrides — applied when <html class="light"> */
+.light {
+  --color-bg:          #f5f0eb;   /* warm ivory paper */
+  --color-surface:     #ffffff;   /* card surface */
+  --color-surface-2:   #ede8e1;   /* input bg, warm gray */
+  --color-border:      #d4cdc5;   /* warm border */
+  --color-border-2:    #c0b8b0;   /* visible border */
+  --color-text:        #1a1a1a;   /* near-black ink */
+  --color-text-muted:  #6b6460;   /* warm muted */
+  --color-text-dim:    #a09890;   /* placeholder */
+  --color-accent:      #cc2200;   /* same red — brand constant */
+  --color-accent-dim:  #991a00;
+  --color-accent-glow: #cc220022;
+  --color-white:       #ffffff;
 }
 
 @layer base {
   body {
-    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
-}
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+  * {
+    border-color: var(--color-border);
+  }
+
+  input, textarea, select {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-2);
+    font-family: var(--font-ui);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.4s ease;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+  }
+
+  button {
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-2);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+  }
 }
