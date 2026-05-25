@@ -959,16 +959,24 @@ return (
                       <textarea className="w-full border border-[var(--color-border)] rounded-sm p-4 text-sm h-48 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sentence_placeholder")} value={sentenceInput} onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }} />
                       <div className="grid grid-cols-2 gap-3">
                         {["yellow", "red"].map(type => (
-                          <button key={type} onClick={() => setRewriteType(type as any)} className={cn(
-                            "p-3 rounded-sm border-2 text-left transition-colors",
-                            rewriteType === type
-                              ? (type === "yellow"
-                                ? "border-[#f59e0b] bg-[#fffbeb] dark:bg-[#1a1500]"
-                                : "border-[#cc2200] bg-[#fff1f0] dark:bg-[#1a0000]")
-                              : "bg-[var(--color-surface)] border-[var(--color-border-2)]"
-                          )}>
-                            <span className="font-bold text-sm block text-[var(--color-text)]">{type === "yellow" ? "🟡" : "🔴"} {t(`fields.${type}_label`)}</span>
-                            <span className="text-[10px] text-[var(--color-text-muted)]">{t(`fields.${type}_desc`)}</span>
+                          <button
+                            key={type}
+                            onClick={() => setRewriteType(type as any)}
+                            className={cn(
+                              "p-3 rounded-sm border-2 text-left transition-colors",
+                              rewriteType === type
+                                ? (type === "yellow"
+                                  ? "border-[#f59e0b] bg-[#fffbeb] dark:bg-[#1a1500]"
+                                  : "border-[#cc2200] bg-[#fff1f0] dark:bg-[#1a0000]")
+                                : "bg-[var(--color-surface)] border-[var(--color-border-2)]"
+                            )}
+                          >
+                            <span className="font-bold text-sm block text-[var(--color-text)]">
+                              {type === "yellow" ? "🟡" : "🔴"} {t(`fields.${type}_label`)}
+                            </span>
+                            <span className="text-[10px] text-[var(--color-text)] opacity-70">
+                              {t(`fields.${type}_desc`)}
+                            </span>
                           </button>
                         ))}
                       </div>
