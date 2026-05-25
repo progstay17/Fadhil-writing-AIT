@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -66,6 +66,94 @@ interface GenerationResult {
  rewritten?: string;
  params: Record<string, string | number>;
 }
+
+const ProgressBar = memo(({ loading }: { loading: boolean }) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (loading) {
+      setTimeout(() => setProgress(0), 0);
+      interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 95) return prev;
+          const inc = Math.random() * 10;
+          return Math.min(prev + inc, 98);
+        });
+      }, 1500);
+    } else {
+      setTimeout(() => setProgress(100), 0);
+      const timer = setTimeout(() => setProgress(0), 500);
+      return () => clearTimeout(timer);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [loading]);
+
+  if (!loading && progress === 0) return null;
+
+  return (
+    <AnimatePresence>
+      {(loading || progress > 0) && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-surface-2)] z-50 overflow-hidden"
+        >
+      <motion.div
+        className="h-full bg-[#cc2200]"
+        style={{ width: `${progress}%` }}
+        transition={{ duration: 0.8, ease: easeOut }}
+      />
+          <motion.div
+            className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            animate={{ x: ["-80px", "100vw"] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+});
+ProgressBar.displayName = "ProgressBar";
+
+const LoadingStatus = memo(({ loading, t }: { loading: boolean; t: TFunction }) => {
+  const [statusText, setStatusText] = useState("");
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (loading) {
+      const texts = [
+        t("messages.loading_writing"),
+        t("messages.loading_seo"),
+        t("messages.loading_meta"),
+        t("messages.loading_brand"),
+        t("messages.loading_finishing")
+      ];
+      let textIdx = 0;
+      setTimeout(() => setStatusText(texts[0]), 0);
+      interval = setInterval(() => {
+        textIdx = (textIdx + 1) % texts.length;
+        setStatusText(texts[textIdx]);
+      }, 3000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [loading, t]);
+
+  if (!loading) return null;
+
+  return (
+    <span className="flex items-center">
+      <RotateCcw size={16} className="animate-spin mr-2" />
+      {statusText}
+    </span>
+  );
+});
+LoadingStatus.displayName = "LoadingStatus";
 
 const HistorySection = memo(({
  history,
@@ -248,8 +336,6 @@ export default function Home() {
 
  // UI States
  const [loading, setLoading] = useState(false);
- const [progress, setProgress] = useState(0);
- const [statusText, setStatusText] = useState("");
  const [message, setMessage] = useState("");
  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
  const [historyOpen, setHistoryOpen] = useState(false);
@@ -257,32 +343,28 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ return deferredArticleOutput.trim().split(/\s+/).length;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !kataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
+ // Optimize by using case-insensitive regex instead of lower-casing the entire text
+ const escapedKw = kataKunci.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+ const regex = new RegExp(escapedKw, 'gi');
+ const matches = deferredArticleOutput.match(regex);
+ const count = matches ? matches.length : 0;
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [kataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
  return metaOutput.length;
  }, [metaOutput]);
-
- const loadingInterval = useRef<NodeJS.Timeout | null>(null);
- const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
  useEffect(() => {
  const stored = localStorage.getItem('theme');
@@ -323,33 +405,6 @@ export default function Home() {
  i18n.changeLanguage(l);
  setLang(l);
  };
-
- const startLoadingAnimation = useCallback(() => {
- setProgress(0);
- const texts = [t("messages.loading_writing"), t("messages.loading_seo"), t("messages.loading_meta"), t("messages.loading_brand"), t("messages.loading_finishing")];
- let textIdx = 0;
- setStatusText(texts[0]);
-
- loadingInterval.current = setInterval(() => {
- setProgress(prev => {
- if (prev >= 95) return prev;
- const inc = Math.random() * 10;
- return Math.min(prev + inc, 98);
- });
- }, 1500);
-
- statusInterval.current = setInterval(() => {
- textIdx = (textIdx + 1) % texts.length;
- setStatusText(texts[textIdx]);
- }, 3000);
- }, [t]);
-
- const stopLoadingAnimation = useCallback(() => {
- if (loadingInterval.current) clearInterval(loadingInterval.current);
- if (statusInterval.current) clearInterval(statusInterval.current);
- setProgress(100);
- setTimeout(() => { setProgress(0); setLoading(false); }, 500);
- }, []);
 
  const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
  setToast({ message: msg, type });
@@ -495,7 +550,6 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
  setLoading(true);
  setMessage("");
- startLoadingAnimation();
 
  try {
  let body;
@@ -632,9 +686,9 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  } catch (err: unknown) {
  setMessage(err instanceof Error ? err.message : "Error generating content.");
  } finally {
- stopLoadingAnimation();
+ setLoading(false);
  }
- }, [activeTab, fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt, imagePromptsArticleInput, sentenceInput, rewriteType, t, startLoadingAnimation, stopLoadingAnimation]);
+ }, [activeTab, fungsi, kataKunci, lokasi, artikelContoh, selectedStyle, softSelling, includeFaq, groundingEnabled, kompetitor, contentLang, model, minWords, maxWords, konteks, sudutPandang, negativePrompt, imagePromptsArticleInput, sentenceInput, rewriteType]);
 
  const restoreHistory = useCallback((item: GenerationResult) => {
  setActiveTab(item.type);
@@ -692,27 +746,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
 return (
     <main className="min-h-screen bg-[var(--color-bg)] pb-20 transition-colors duration-300">
-      <AnimatePresence>
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-surface-2)] z-50 overflow-hidden"
-          >
-            <motion.div
-              className="h-full bg-[#cc2200]"
-              style={{ width: `${progress}%` }}
-              transition={{ duration: 0.8, ease: easeOut }}
-            />
-            <motion.div
-              className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              animate={{ x: ["-80px", "100vw"] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ProgressBar loading={loading} />
 
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -1005,7 +1039,7 @@ return (
                     onClick={handleGenerate}
                     className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}
                   >
-                    {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
+                    {loading ? <LoadingStatus loading={loading} t={t} /> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
                   </motion.button>
                 </div>
               </motion.section>
