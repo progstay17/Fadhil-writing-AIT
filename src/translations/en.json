@@ -41,7 +41,8 @@
     "competitor_label": "Competitors (Optional)",
     "competitor_placeholder": "e.g. Canva, Adobe Express, Pixlr — paste research results here...",
     "negative_label": "Negative Prompt",
-    "negative_placeholder": "Example: Don't put Chaoji Haomai in 2nd place, don't mention Canva, don't discuss video features"
+    "negative_placeholder": "Example: Don't put Chaoji Haomai in 2nd place, don't mention Canva, don't discuss video features",
+    "style_freestyle": "✍️ Freestyle"
   },
   "buttons": {
     "generate": "Generate",
@@ -54,7 +55,9 @@
     "sample_feature": "🆕 New Feature",
     "sample_solution": "💡 Solution",
     "sample_comparison": "🔀 Comparison",
-    "generate_image_prompts": "Generate Image Prompts"
+    "generate_image_prompts": "Generate Image Prompts",
+    "copy_research_prompt": "Research Prompt",
+    "copied": "Copied!"
   },
   "output": {
     "article": "Full Article",

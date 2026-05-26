@@ -41,7 +41,8 @@
     "competitor_label": "竞争对手（可选）",
     "competitor_placeholder": "例如：Canva、Adobe Express、Pixlr — 在此粘贴调研结果...",
     "negative_label": "负面提示词 (Negative Prompt)",
-    "negative_placeholder": "例如：不要将潮际好麦放在第2位，不要提到Canva，不要讨论视频功能"
+    "negative_placeholder": "例如：不要将潮际好麦放在第2位，不要提到Canva，不要讨论视频功能",
+    "style_freestyle": "✍️ 自由风格"
   },
   "buttons": {
     "generate": "生成",
@@ -54,7 +55,9 @@
     "sample_feature": "🆕 功能上新",
     "sample_solution": "💡 解决方案",
     "sample_comparison": "🔀 对比",
-    "generate_image_prompts": "生成图片提示词"
+    "generate_image_prompts": "生成图片提示词",
+    "copy_research_prompt": "研究提示词",
+    "copied": "已复制!"
   },
   "output": {
     "article": "完整文章",
