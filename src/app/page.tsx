@@ -737,7 +737,7 @@ return (
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono']",
+                    "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
                     activeTab === tab ? "text-[var(--color-accent)] tab-active-bar" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   )}
                 >
@@ -755,7 +755,7 @@ return (
                   key={l}
                   onClick={() => changeLanguage(l)}
                   className={cn(
-                    "relative px-3 py-1 rounded-md text-xs font-medium uppercase transition-colors z-10",
+                    "relative px-3 py-1 rounded-md text-xs font-medium uppercase transition-colors z-10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
                     lang === l ? "text-white" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   )}
                 >
@@ -774,13 +774,15 @@ return (
 
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text-muted)]"
+              aria-label="Toggle theme"
+              className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
             >
               {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors text-[var(--color-text-muted)] hover:text-[#cc2200]"
+              aria-label="Logout"
+              className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors text-[var(--color-text-muted)] hover:text-[#cc2200] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
             >
               <LogOut size={16} />
             </button>
@@ -885,7 +887,13 @@ return (
                           { id: "toggle-grounding", state: groundingEnabled, setter: setGroundingEnabled, label: "Grounding" }
                         ].map(tgl => (
                           <div key={tgl.id} className="flex items-center space-x-3">
-                            <button type="button" role="switch" aria-checked={tgl.state} onClick={() => tgl.setter(!tgl.state)} className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors", tgl.state ? "bg-[#cc2200]" : "bg-[var(--color-border)]")}>
+                            <button
+                              type="button"
+                              role="switch"
+                              aria-checked={tgl.state}
+                              onClick={() => tgl.setter(!tgl.state)}
+                              className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", tgl.state ? "bg-[#cc2200]" : "bg-[var(--color-border)]")}
+                            >
                               <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", tgl.state ? "translate-x-6" : "translate-x-1")} />
                             </button>
                             <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{tgl.label}</label>
@@ -893,13 +901,24 @@ return (
                         ))}
                       </motion.div>
                       <motion.div variants={FADE_UP} className="border-t border-[var(--color-border)] pt-4">
-                        <button onClick={() => setAdvancedOpen(!advancedOpen)} className="w-full flex items-center justify-between p-3 bg-[var(--color-surface-2)]/50 hover:bg-[var(--color-surface-2)] rounded-sm transition-colors">
+                        <button
+                          onClick={() => setAdvancedOpen(!advancedOpen)}
+                          aria-expanded={advancedOpen}
+                          aria-controls="advanced-options-panel"
+                          className="w-full flex items-center justify-between p-3 bg-[var(--color-surface-2)]/50 hover:bg-[var(--color-surface-2)] rounded-sm transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                        >
                           <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase flex items-center"><Cpu size={14} className="mr-2" /> Advanced Options</span>
                           {advancedOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                         </button>
                         <AnimatePresence>
                           {advancedOpen && (
-                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-4 pt-4 overflow-hidden">
+                            <motion.div
+                              id="advanced-options-panel"
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="space-y-4 pt-4 overflow-hidden"
+                            >
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.competitor_label")}</label>
@@ -975,7 +994,10 @@ return (
                 </AnimatePresence>
 
                 <div className="flex gap-3">
-                  <button onClick={handleClear} className="flex-1 border border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold py-3 rounded-sm flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-all">
+                  <button
+                    onClick={handleClear}
+                    className="flex-1 border border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold py-3 rounded-sm flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
                     <Trash2 size={18} className="mr-2" /> {t("buttons.clear_input")}
                   </button>
                   <motion.button
@@ -985,7 +1007,7 @@ return (
                     transition={loading ? { duration: 1.2, repeat: Infinity } : { duration: 0.15 }}
                     disabled={loading}
                     onClick={handleGenerate}
-                    className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}
+                    className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}
                   >
                     {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
                   </motion.button>
@@ -1028,7 +1050,15 @@ return (
                     <div className="relative group">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-sm font-semibold text-[var(--color-text-muted)]">{t("output.article")}</h3>
-                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => copyToClipboard(articleOutput, "article")} className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono']">{copiedKey === "article" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}</motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => copyToClipboard(articleOutput, "article")}
+                          aria-label={t("buttons.copy")}
+                          className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                        >
+                          {copiedKey === "article" ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                        </motion.button>
                       </div>
                       <div className="w-full border border-[var(--color-border)] rounded-none p-6 text-sm bg-[var(--color-bg)] manuscript-grid min-h-[400px] whitespace-pre-wrap text-[var(--color-text)] leading-relaxed">
                         {articleOutput || <span className="text-[var(--color-text-dim)] italic">{t("output.rewritten_placeholder")}</span>}
@@ -1038,14 +1068,30 @@ return (
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="text-xs font-semibold text-[var(--color-text-muted)]">{t("output.meta")}</h3>
-                          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => copyToClipboard(metaOutput, "meta")} className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono']">{copiedKey === "meta" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => copyToClipboard(metaOutput, "meta")}
+                            aria-label={t("buttons.copy")}
+                            className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                          >
+                            {copiedKey === "meta" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+                          </motion.button>
                         </div>
                         <div className="w-full border border-[var(--color-border)] rounded-none p-4 text-xs bg-[var(--color-bg)] text-[var(--color-text)] min-h-[60px]">{metaOutput}</div>
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <h3 className="text-xs font-semibold text-[var(--color-text-muted)]">{t("output.slug")}</h3>
-                          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => copyToClipboard(slugOutput, "slug")} className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono']">{copiedKey === "slug" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}</motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => copyToClipboard(slugOutput, "slug")}
+                            aria-label={t("buttons.copy")}
+                            className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                          >
+                            {copiedKey === "slug" ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+                          </motion.button>
                         </div>
                         <div className="w-full border border-[var(--color-border)] rounded-none p-4 text-xs bg-[var(--color-bg)] font-['JetBrains_Mono'] text-[var(--color-accent)] min-h-[60px] flex items-center">{slugOutput}</div>
                       </div>
@@ -1058,7 +1104,15 @@ return (
                         <div key={idx} className="bg-[var(--color-surface-2)] rounded-sm border border-[var(--color-border)] p-4 space-y-3">
                           <div className="flex justify-between items-center">
                             <span className="text-[10px] font-bold text-[var(--color-text-dim)] uppercase tracking-wider flex items-center"><ImageIcon size={12} className="mr-1 text-[#cc2200]" /> {item.reference}</span>
-                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => copyToClipboard(item.prompt, `prompt-${idx}`)} className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono']">{copiedKey === `prompt-${idx}` ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}</motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => copyToClipboard(item.prompt, `prompt-${idx}`)}
+                              aria-label={t("buttons.copy")}
+                              className="text-[var(--color-text-dim)] hover:text-[#cc2200] font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                            >
+                              {copiedKey === `prompt-${idx}` ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                            </motion.button>
                           </div>
                           <textarea readOnly className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-sm p-3 text-sm h-32 text-[var(--color-text-muted)] outline-none resize-none" value={item.prompt} />
                         </div>
@@ -1074,7 +1128,15 @@ return (
                   <motion.div key="fix-output" {...FADE_IN} className="relative group flex-1 flex flex-col">
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-sm font-semibold text-[var(--color-text-muted)]">{t("output.rewritten_label")}</h3>
-                      <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => copyToClipboard(sentenceOutput, "fix")} className="text-[var(--color-text-dim)] hover:text-orange-600 transition-colors">{copiedKey === "fix" ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}</motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => copyToClipboard(sentenceOutput, "fix")}
+                        aria-label={t("buttons.copy")}
+                        className="text-[var(--color-text-dim)] hover:text-orange-600 transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                      >
+                        {copiedKey === "fix" ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
+                      </motion.button>
                     </div>
                     <div className="w-full border border-[var(--color-border)] rounded-sm p-6 text-lg font-medium bg-[var(--color-surface-2)] flex-1 min-h-[400px] leading-relaxed text-[var(--color-text)]">
                       {sentenceOutput || <span className="text-[var(--color-text-dim)] italic">{t("output.rewritten_placeholder")}</span>}
