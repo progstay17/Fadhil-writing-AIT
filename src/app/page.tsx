@@ -863,6 +863,7 @@ return (
                             <option value="feature">{t("styles.feature")}</option>
                             <option value="solution">{t("styles.solution")}</option>
                             <option value="comparison">{t("styles.comparison")}</option>
+                            <option value="freestyle">{t("fields.style_freestyle")}</option>
                           </select>
                         </div>
                       </motion.div>
@@ -921,7 +922,22 @@ return (
                             >
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.competitor_label")}</label>
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.competitor_label")}</label>
+                                    <motion.button
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      type="button"
+                                      onClick={() => {
+                                        const prompt = `Lakukan riset kompetitor untuk produk dengan fungsi: "${fungsi}". Kata kunci utama: "${kataKunci}". Cari minimal 3-5 kompetitor utama, analisis keunggulan dan kelemahan masing-masing, lalu sajikan dalam format singkat yang bisa langsung digunakan sebagai referensi penulisan artikel.`;
+                                        copyToClipboard(prompt, "research_prompt");
+                                      }}
+                                      className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-accent)] hover:opacity-70 transition-opacity font-['JetBrains_Mono'] uppercase tracking-wider"
+                                    >
+                                      {copiedKey === "research_prompt" ? <Check size={11} className="text-green-500" /> : <Copy size={11} />}
+                                      <span>{copiedKey === "research_prompt" ? t("buttons.copied") : t("buttons.copy_research_prompt")}</span>
+                                    </motion.button>
+                                  </div>
                                   <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.competitor_placeholder")} value={kompetitor} onChange={(e) => setKompetitor(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">

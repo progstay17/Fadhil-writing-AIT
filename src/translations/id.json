@@ -41,7 +41,8 @@
     "competitor_label": "Kompetitor (Opsional)",
     "competitor_placeholder": "contoh: Canva, Adobe Express, Pixlr — tempel hasil riset di sini...",
     "negative_label": "Negative Prompt",
-    "negative_placeholder": "Contoh: Jangan taruh Chaoji Haomai di urutan 2, jangan sebut Canva, jangan bahas fitur video"
+    "negative_placeholder": "Contoh: Jangan taruh Chaoji Haomai di urutan 2, jangan sebut Canva, jangan bahas fitur video",
+    "style_freestyle": "✍️ Freestyle"
   },
   "buttons": {
     "generate": "Generate",
@@ -54,7 +55,9 @@
     "sample_feature": "🆕 Fitur Baru",
     "sample_solution": "💡 Solusi",
     "sample_comparison": "🔀 Perbandingan",
-    "generate_image_prompts": "Hasilkan Prompt Gambar"
+    "generate_image_prompts": "Hasilkan Prompt Gambar",
+    "copy_research_prompt": "Prompt Riset",
+    "copied": "Tersalin!"
   },
   "output": {
     "article": "Artikel Lengkap",
