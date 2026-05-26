@@ -22,10 +22,10 @@ function sanitize(text: string | undefined): string {
   return text.replace(/<[^>]*>?/gm, "").trim();
 }
 
-function getErrorMessage(error: any): string {
-  if (error?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
-  if (error?.status === 401) return "Invalid API key.";
-  if (error?.message) return error.message;
+function getErrorMessage(error: unknown): string {
+  const err = error as { status?: number; message?: string };
+  if (err?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
+  if (err?.status === 401) return "Invalid API key.";
   return "An unexpected error occurred during generation.";
 }
 
@@ -415,7 +415,7 @@ export async function POST(req: NextRequest) {
         generationConfig: {
           maxOutputTokens: 4096,
         },
-        tools: body.groundingEnabled ? [{ googleSearch: {} } as any] : undefined,
+        tools: body.groundingEnabled ? ([{ googleSearch: {} }] as unknown as { googleSearch: object }[]) : undefined,
       });
 
       if (body.type === "image_prompts") {
@@ -505,13 +505,14 @@ export async function POST(req: NextRequest) {
     let result;
     try {
       result = await generateWithKey(key1);
-    } catch (error: any) {
-      const status = error?.status;
+    } catch (error: unknown) {
+      const err = error as { status?: number };
+      const status = err?.status;
       if ((status === 429 || status === 401) && key2) {
         console.log(`Key1 failed with ${status}, retrying with Key2 for user ${username}`);
         try {
           result = await generateWithKey(key2);
-        } catch (retryError: any) {
+        } catch (retryError: unknown) {
           throw retryError;
         }
       } else {
@@ -521,7 +522,7 @@ export async function POST(req: NextRequest) {
 
 
     if (body.type === "image_prompts") {
-      const response = await (result as any).response;
+      const response = await (result as { response: { text: () => string } }).response;
       const text = response.text();
       const blocks = text.split("<<<IMAGE>>>").filter((b: string) => b.trim() !== "");
       const images = blocks.map((block: string) => {
@@ -533,12 +534,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ images });
     }
 if (body.type === "fix") {
-      const response = await (result as any).response;
+      const response = await (result as { response: { text: () => string } }).response;
       return NextResponse.json({ rewritten: response.text().trim() });
     }
 
     if (body.groundingEnabled && (body.type === "create" || !body.type)) {
-      const response = await (result as any).response;
+      const response = await (result as { response: { text: () => string } }).response;
       return NextResponse.json({ article: response.text() });
     }
 
@@ -546,12 +547,12 @@ if (body.type === "fix") {
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            if ("stream" in (result as any)) {
-              for await (const chunk of (result as any).stream) {
+            if (result && typeof result === "object" && "stream" in result) {
+              for await (const chunk of (result as { stream: AsyncIterable<{ text: () => string }> }).stream) {
                 controller.enqueue(new TextEncoder().encode(chunk.text()));
               }
             } else {
-              const response = await (result as any).response;
+              const response = await (result as { response: { text: () => string } }).response;
               controller.enqueue(new TextEncoder().encode(response.text()));
             }
             controller.close();
