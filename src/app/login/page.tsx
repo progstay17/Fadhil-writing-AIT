@@ -173,7 +173,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={loading}
                 whileHover={{ x: 4 }}
-                className="group relative w-full flex items-center justify-between py-4 px-6 bg-[var(--color-text)] text-[var(--color-bg)] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                className="group relative w-full flex items-center justify-between py-4 px-6 bg-[var(--color-text)] text-[var(--color-bg)] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
               >
                 <span className="font-['JetBrains_Mono'] tracking-tighter">AUTHENTICATE_SESSION</span>
                 {loading ? (
