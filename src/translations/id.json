@@ -81,7 +81,13 @@
     "generating": "Sedang menghasilkan...",
     "fixing": "Sedang memperbaiki...",
     "refining": "Output tidak memenuhi syarat, sedang diperbaiki...",
-    "copied": "Berhasil disalin!"
+    "copied": "Berhasil disalin!",
+    "cleared": "Input dibersihkan",
+    "loading_writing": "Menulis konten...",
+    "loading_seo": "Optimasi SEO...",
+    "loading_meta": "Membuat meta data...",
+    "loading_brand": "Menerapkan panduan brand...",
+    "loading_finishing": "Sentuhan akhir..."
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {

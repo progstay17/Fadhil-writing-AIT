@@ -81,7 +81,13 @@
     "generating": "正在生成...",
     "fixing": "正在修改...",
     "refining": "输出不符合要求，正在优化...",
-    "copied": "已复制！"
+    "copied": "已复制！",
+    "cleared": "输入已清除",
+    "loading_writing": "正在编写内容...",
+    "loading_seo": "正在优化 SEO...",
+    "loading_meta": "正在生成元数据...",
+    "loading_brand": "正在应用品牌指南...",
+    "loading_finishing": "正在完成最后润色..."
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {
