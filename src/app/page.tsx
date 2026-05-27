@@ -380,6 +380,8 @@ export default function Home() {
  const text = await navigator.clipboard.readText();
  if (activeTab === "create") {
  setArtikelContoh(text);
+ } else if (activeTab === "image_prompts") {
+ setImagePromptsArticleInput(text);
  } else {
  setSentenceInput(text);
  }
@@ -947,7 +949,10 @@ return (
                               </div>
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center mb-1">
-                                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.sample")}</label>
+                                  <div className="flex items-center space-x-2">
+                                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.sample")}</label>
+                                    <button onClick={handlePaste} className="text-[10px] text-[#cc2200] font-bold flex items-center hover:underline uppercase tracking-wider"><Clipboard size={10} className="mr-1" /> {t("buttons.paste")}</button>
+                                  </div>
                                   <div className="flex flex-wrap gap-2">
                                     <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_review")}</button>
                                     <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_feature")}</button>
@@ -964,7 +969,10 @@ return (
                     </>
                   ) : activeTab === "image_prompts" ? (
                     <motion.div variants={FADE_UP} className="space-y-4">
-                      <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block">Article Content</label>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">{t("image_prompts.article_content")}</label>
+                        <button onClick={handlePaste} className="text-[10px] text-[#cc2200] font-bold flex items-center hover:underline uppercase tracking-wider"><Clipboard size={10} className="mr-1" /> {t("buttons.paste")}</button>
+                      </div>
                       <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-64 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("image_prompts.article_placeholder")} value={imagePromptsArticleInput} onChange={(e) => setImagePromptsArticleInput(e.target.value)} />
                     </motion.div>
                   ) : (
@@ -1051,8 +1059,8 @@ return (
                   <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button onClick={() => downloadFile(articleOutput, "txt")} aria-label="Download TXT" className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"><Download size={16} /></button>
+                  <button onClick={() => downloadFile(articleOutput, "md")} aria-label="Download Markdown" className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none">MD</button>
                 </div>
               )}
             </div>
@@ -1198,7 +1206,7 @@ return (
             {tab === "create" && <PlusCircle size={20} />}
             {tab === "fix" && <Edit3 size={20} />}
             {tab === "image_prompts" && <ImageIcon size={20} />}
-            <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{tab}</span>
+            <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{t(`tabs.${tab}`)}</span>
           </button>
         ))}
       </nav>

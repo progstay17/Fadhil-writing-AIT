@@ -12,10 +12,7 @@
     "location": "Location (Optional)",
     "konteks": "Context & Additional Data",
     "konteks_placeholder": "Example: June-July wedding season, 70% of sellers fail at DIY photography, Korean fashion trend viral on TikTok...",
-    "pov_label": "Point of View",
-    "pov_tester": "🧑 First-person tester (I tested...)",
-    "pov_analyst": "📊 Third-party analyst (based on data...)",
-    "pov_journalist": "📰 Journalistic/informative (according to research...)",
+    "pov": "Point of View",
     "sample": "ARTIKEL_CONTOH (Optional)",
     "functions_placeholder": "Enter product functions...",
     "keywords_placeholder": "Enter keywords or title...",
@@ -32,17 +29,24 @@
     "model_label": "Model:",
     "min_words": "Min Words",
     "max_words": "Max Words",
-    "style_label": "Article Style",
-    "style_review": "📊 Review / Listicle",
-    "style_announcement": "🆕 New Feature / Announcement",
-    "style_solution": "💡 Problem / Solution",
-    "style_comparison": "🔀 Comparison / Ranking",
-    "style_other": "✏️ Free / Custom",
+    "style": "Article Style",
     "competitor_label": "Competitors (Optional)",
     "competitor_placeholder": "e.g. Canva, Adobe Express, Pixlr — paste research results here...",
     "negative_label": "Negative Prompt",
     "negative_placeholder": "Example: Don't put Chaoji Haomai in 2nd place, don't mention Canva, don't discuss video features",
     "style_freestyle": "✍️ Freestyle"
+  },
+  "pov": {
+    "tester": "🧑 First-person tester (I tested...)",
+    "analyst": "📊 Third-party analyst (based on data...)",
+    "journalist": "📰 Journalistic/informative (according to research...)"
+  },
+  "styles": {
+    "review": "📊 Review / Listicle",
+    "feature": "🆕 New Feature / Announcement",
+    "solution": "💡 Problem / Solution",
+    "comparison": "🔀 Comparison / Ranking",
+    "freestyle": "✍️ Freestyle"
   },
   "buttons": {
     "generate": "Generate",
@@ -86,6 +90,7 @@
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {
     "article_placeholder": "Paste article here to generate image prompts...",
-    "title": "Image Prompts Generation"
+    "title": "Image Prompts Generation",
+    "article_content": "Article Content"
   }
 }
