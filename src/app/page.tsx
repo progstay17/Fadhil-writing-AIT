@@ -731,10 +731,14 @@ return (
           </div>
 
           <div className="flex items-center space-x-4">
-            <nav className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
+            <nav role="tablist" className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
               {["create", "fix", "image_prompts"].map((tab) => (
                 <button
                   key={tab}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls={`${tab}-panel-input ${tab}-panel-output`}
+                  id={`${tab}-tab-desktop`}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
                     "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
@@ -793,7 +797,14 @@ return (
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-6">
           <AnimatePresence mode="wait">
-            <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
+            <motion.div
+              key={activeTab}
+              role="tabpanel"
+              id={`${activeTab}-panel-input`}
+              aria-labelledby={`${activeTab}-tab-desktop ${activeTab}-tab-mobile`}
+              {...FADE_UP}
+              className="space-y-6"
+            >
               <motion.section
                 whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
                 transition={{ duration: 0.2 }}
@@ -1062,7 +1073,14 @@ return (
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
                 {activeTab === "create" ? (
-                  <motion.div key="create-output" {...FADE_IN} className="space-y-6">
+                  <motion.div
+                    key="create-output"
+                    role="tabpanel"
+                    id="create-panel-output"
+                    aria-labelledby="create-tab-desktop create-tab-mobile"
+                    {...FADE_IN}
+                    className="space-y-6"
+                  >
                     <div className="relative group">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-sm font-semibold text-[var(--color-text-muted)]">{t("output.article")}</h3>
@@ -1114,7 +1132,14 @@ return (
                     </div>
                   </motion.div>
                 ) : activeTab === "image_prompts" ? (
-                  <motion.div key="image-output" {...FADE_IN} className="space-y-6">
+                  <motion.div
+                    key="image-output"
+                    role="tabpanel"
+                    id="image_prompts-panel-output"
+                    aria-labelledby="image_prompts-tab-desktop image_prompts-tab-mobile"
+                    {...FADE_IN}
+                    className="space-y-6"
+                  >
                     {imagePromptsOutput.length > 0 ? (
                       imagePromptsOutput.map((item, idx) => (
                         <div key={idx} className="bg-[var(--color-surface-2)] rounded-sm border border-[var(--color-border)] p-4 space-y-3">
@@ -1141,7 +1166,14 @@ return (
                     )}
                   </motion.div>
                 ) : (
-                  <motion.div key="fix-output" {...FADE_IN} className="relative group flex-1 flex flex-col">
+                  <motion.div
+                    key="fix-output"
+                    role="tabpanel"
+                    id="fix-panel-output"
+                    aria-labelledby="fix-tab-desktop fix-tab-mobile"
+                    {...FADE_IN}
+                    className="relative group flex-1 flex flex-col"
+                  >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-sm font-semibold text-[var(--color-text-muted)]">{t("output.rewritten_label")}</h3>
                       <motion.button
@@ -1185,10 +1217,14 @@ return (
         )}
       </AnimatePresence>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
+      <nav role="tablist" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
         {["create", "fix", "image_prompts"].map((tab) => (
           <button
             key={tab}
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls={`${tab}-panel-input ${tab}-panel-output`}
+            id={`${tab}-tab-mobile`}
             onClick={() => setActiveTab(tab)}
             className={cn(
               "flex flex-col items-center p-2 rounded-sm transition-colors",
