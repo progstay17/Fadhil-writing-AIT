@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -252,24 +252,30 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+  if (!deferredArticleOutput) return 0;
+  // Using match(/\S+/g) is more efficient and accurate than split()
+  // as it returns 0 for empty strings and avoids unnecessary array creation from whitespaces.
+  return (deferredArticleOutput.match(/\S+/g) || []).length;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
- const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+  if (!deferredArticleOutput || !deferredKataKunci) return 0;
+  const words = wordCount || 1;
+  // Use regex for case-insensitive matching to avoid redundant toLowerCase() conversions
+  // and manual index-based loops, improving performance during high-frequency updates.
+  try {
+   const kw = deferredKataKunci.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape regex special chars
+   const matches = deferredArticleOutput.match(new RegExp(kw, "gi"));
+   return ((matches?.length || 0) / words) * 100;
+  } catch (e) {
+   console.error("Keyword density regex error:", e);
+   return 0;
+  }
+ }, [deferredKataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
