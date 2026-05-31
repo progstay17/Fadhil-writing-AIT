@@ -55,6 +55,8 @@
     "sample_feature": "🆕 New Feature",
     "sample_solution": "💡 Solution",
     "sample_comparison": "🔀 Comparison",
+    "download": "Download TXT",
+    "download_md": "Download Markdown",
     "generate_image_prompts": "Generate Image Prompts",
     "copy_research_prompt": "Research Prompt",
     "copied": "Copied!"
