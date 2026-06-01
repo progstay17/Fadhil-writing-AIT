@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+ const [showScrollTop, setShowScrollTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -297,8 +298,13 @@ export default function Home() {
  }, 0);
  }, []);
 
-
-
+ useEffect(() => {
+   const handleScroll = () => {
+     setShowScrollTop(window.scrollY > 300);
+   };
+   window.addEventListener("scroll", handleScroll);
+   return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
 
 
  const handleLogout = async () => {
@@ -317,6 +323,10 @@ export default function Home() {
  const changeLanguage = (l: string) => {
  i18n.changeLanguage(l);
  setLang(l);
+ };
+
+ const scrollToTop = () => {
+   window.scrollTo({ top: 0, behavior: "smooth" });
  };
 
  const startLoadingAnimation = useCallback(() => {
@@ -1202,6 +1212,24 @@ return (
           </button>
         ))}
       </nav>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-24 right-6 z-40 p-3 rounded-full bg-[var(--color-accent)] text-white shadow-lg focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none md:bottom-8"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
