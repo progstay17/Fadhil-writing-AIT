@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -125,28 +125,28 @@ HistorySection.displayName = "HistorySection";
 
 const SEOStats = memo(({
  activeTab,
- articleOutput,
+ hasArticleOutput,
  wordCount,
  keywordDensity,
  metaLength,
  minWords,
  maxWords,
  kataKunci,
- metaOutput,
+ hasMetaOutput,
  t
 }: {
  activeTab: string;
- articleOutput: string;
+ hasArticleOutput: boolean;
  wordCount: number;
  keywordDensity: number;
  metaLength: number;
  minWords: number;
  maxWords: number;
  kataKunci: string;
- metaOutput: string;
+ hasMetaOutput: boolean;
  t: TFunction;
 }) => {
- if (activeTab !== "create" || !articleOutput) return null;
+ if (activeTab !== "create" || !hasArticleOutput) return null;
 
  return (
  <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -183,7 +183,7 @@ const SEOStats = memo(({
  })()}
 
  {/* Meta Length Badge */}
- {metaOutput && (() => {
+ {hasMetaOutput && (() => {
  let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (metaLength < 100 || metaLength > 180) {
  color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
@@ -252,29 +252,38 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ // Using match(/\S+/g) is more accurate than split(/\s+/) as it returns 0 for empty strings
+ // and handles multiple whitespace variations more efficiently.
+ return (deferredArticleOutput.match(/\S+/g) || []).length;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !kataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
+ const kw = kataKunci.trim();
+ if (!kw) return 0;
+
+ // Use regex with global/case-insensitive flags for O(n) keyword counting
+ // instead of manual indexOf loop, which improves readability and performance.
+ try {
+   const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+   const matches = deferredArticleOutput.match(regex);
+   const count = matches ? matches.length : 0;
+   return (count / words) * 100;
+ } catch {
+   return 0;
  }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [kataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ if (!deferredMetaOutput) return 0;
+ return deferredMetaOutput.length;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -660,6 +669,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  handleGenerateRef.current = handleGenerate;
  handleClearRef.current = handleClear;
  }, [handleGenerate, handleClear]);
+
+ // Clear intervals on unmount to prevent memory leaks
+ useEffect(() => {
+   return () => {
+     if (loadingInterval.current) clearInterval(loadingInterval.current);
+     if (statusInterval.current) clearInterval(statusInterval.current);
+   };
+ }, []);
 
  useEffect(() => {
  const handleKeyDown = (e: KeyboardEvent) => {
@@ -1057,7 +1074,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} hasArticleOutput={!!articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} hasMetaOutput={!!metaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
@@ -1165,7 +1182,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
