@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -252,16 +252,20 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ // ⚡ Bolt Optimization: Use deferred value for heavy SEO calculations to keep the UI responsive during high-frequency streaming updates
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ // Optimized word count using match(/\S+/g) for better performance and accuracy on empty strings
+ return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !kataKunci) return 0;
  const words = wordCount || 1;
  const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
+ const contentText = deferredArticleOutput.toLowerCase();
  let count = 0;
  let pos = contentText.indexOf(kw);
  while (pos !== -1) {
@@ -269,7 +273,7 @@ export default function Home() {
  pos = contentText.indexOf(kw, pos + 1);
  }
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [kataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
