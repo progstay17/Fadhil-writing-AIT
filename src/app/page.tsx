@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -251,17 +251,23 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+ // ⚡ Bolt Optimization: Use deferred values to decouple heavy SEO calculations
+ // from the high-frequency streaming UI updates, preventing main-thread jank.
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+  // ⚡ Bolt Optimization: Using match(/\S+/g) is more accurate and efficient than split()
+  return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !deferredKataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
+ const kw = deferredKataKunci.toLowerCase();
+ const contentText = deferredArticleOutput.toLowerCase();
  let count = 0;
  let pos = contentText.indexOf(kw);
  while (pos !== -1) {
@@ -269,15 +275,22 @@ export default function Home() {
  pos = contentText.indexOf(kw, pos + 1);
  }
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [deferredKataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ return deferredMetaOutput?.length || 0;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
+
+ // ⚡ Bolt Optimization: Ensure intervals are cleared on unmount to prevent memory leaks.
+ useEffect(() => {
+  return () => {
+   if (loadingInterval.current) clearInterval(loadingInterval.current);
+   if (statusInterval.current) clearInterval(statusInterval.current);
+  };
+ }, []);
 
  useEffect(() => {
  const stored = localStorage.getItem('theme');
