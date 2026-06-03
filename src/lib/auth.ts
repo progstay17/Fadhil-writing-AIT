@@ -9,7 +9,10 @@ export async function verifyToken(token: string): Promise<string | null> {
     }
     const secret = new TextEncoder().encode(secretStr);
     const { payload } = await jwtVerify(token, secret);
-    return payload.username as string;
+    if (typeof payload.username !== "string") {
+      return null;
+    }
+    return payload.username;
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
