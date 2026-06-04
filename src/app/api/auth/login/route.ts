@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
     }
 
     const secretStr = process.env.JWT_SECRET;
-    if (!secretStr) {
-      console.error("JWT_SECRET is not defined");
+    if (!secretStr || secretStr.length < 32) {
+      console.error("JWT_SECRET is not defined or too short (min 32 characters)");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
