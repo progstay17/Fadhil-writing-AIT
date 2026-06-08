@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -226,7 +226,9 @@ export default function Home() {
  const [negativePrompt, setNegativePrompt] = useState("");
  const [artikelContoh, setArtikelContoh] = useState("");
  const [articleOutput, setArticleOutput] = useState("");
+ const deferredArticle = useDeferredValue(articleOutput);
  const [metaOutput, setMetaOutput] = useState("");
+ const deferredMeta = useDeferredValue(metaOutput);
  const [slugOutput, setSlugOutput] = useState("");
 
  // Image Prompts States
@@ -252,29 +254,27 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ // ⚡ Bolt Optimization: Use deferred values to decouple heavy calculations from the main UI thread during streaming
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticle) return 0;
+ // ⚡ Bolt Optimization: Use match(/\S+/g) for better accuracy and performance
+ return deferredArticle.match(/\S+/g)?.length || 0;
+ }, [deferredArticle]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticle || !kataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
+ // ⚡ Bolt Optimization: Use global case-insensitive regex for faster counting than repeated indexOf
+ const kw = kataKunci.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ const matches = deferredArticle.match(new RegExp(kw, "gi"));
+ const count = matches ? matches.length : 0;
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [kataKunci, wordCount, deferredArticle]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ if (!deferredMeta) return 0;
+ return deferredMeta.length;
+ }, [deferredMeta]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -295,6 +295,11 @@ export default function Home() {
  document.documentElement.classList.toggle('dark', resolved === 'dark');
         document.documentElement.classList.toggle('light', resolved === 'light');
  }, 0);
+
+ return () => {
+ if (loadingInterval.current) clearInterval(loadingInterval.current);
+ if (statusInterval.current) clearInterval(statusInterval.current);
+ };
  }, []);
 
 
@@ -719,7 +724,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-accent)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -1057,7 +1062,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} articleOutput={deferredArticle} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={deferredMeta} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
@@ -1165,7 +1170,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)] text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
