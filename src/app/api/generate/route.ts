@@ -3,6 +3,8 @@ import { GoogleGenerativeAI, Tool } from "@google/generative-ai";
 import { verifyToken } from "@/lib/auth";
 import { BRAND_BRIEF } from "@/lib/brandBrief";
 
+const encoder = new TextEncoder();
+
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
@@ -554,11 +556,12 @@ if (body.type === "fix") {
           try {
             if (result && typeof result === "object" && "stream" in result) {
               for await (const chunk of (result as { stream: AsyncIterable<{ text: () => string }> }).stream) {
-                controller.enqueue(new TextEncoder().encode(chunk.text()));
+                // ⚡ Bolt Optimization: Reuse a single TextEncoder instance
+                controller.enqueue(encoder.encode(chunk.text()));
               }
             } else {
               const response = await (result as { response: { text: () => string } }).response;
-              controller.enqueue(new TextEncoder().encode(response.text()));
+              controller.enqueue(encoder.encode(response.text()));
             }
             controller.close();
           } catch (e) {
