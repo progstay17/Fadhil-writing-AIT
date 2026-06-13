@@ -719,7 +719,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-text)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -731,10 +731,14 @@ return (
           </div>
 
           <div className="flex items-center space-x-4">
-            <nav className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
+            <nav role="tablist" className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
               {["create", "fix", "image_prompts"].map((tab) => (
                 <button
                   key={tab}
+                  id={`${tab}-tab-desktop`}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls="main-content-panel"
                   onClick={() => setActiveTab(tab)}
                   className={cn(
                     "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
@@ -791,7 +795,12 @@ return (
       </motion.header>
 
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-5 space-y-6">
+        <div
+          role="tabpanel"
+          id="main-content-panel"
+          aria-labelledby={`${activeTab}-tab-desktop ${activeTab}-tab-mobile`}
+          className="lg:col-span-5 space-y-6"
+        >
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
               <motion.section
@@ -1165,7 +1174,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
@@ -1185,10 +1194,14 @@ return (
         )}
       </AnimatePresence>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
+      <nav role="tablist" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
         {["create", "fix", "image_prompts"].map((tab) => (
           <button
             key={tab}
+            id={`${tab}-tab-mobile`}
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls="main-content-panel"
             onClick={() => setActiveTab(tab)}
             className={cn(
               "flex flex-col items-center p-2 rounded-sm transition-colors",
