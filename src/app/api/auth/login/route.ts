@@ -1,5 +1,6 @@
 import { SignJWT } from "jose";
 import { NextRequest, NextResponse } from "next/server";
+import { isValidUsername } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,6 +8,11 @@ export async function POST(req: NextRequest) {
 
     if (!username || !password) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
+    }
+
+    // Security: Validate username to prevent environment variable injection
+    if (!isValidUsername(username)) {
+      return NextResponse.json({ error: "Invalid username format" }, { status: 400 });
     }
 
     const envPassword = process.env[`USER_${username.toUpperCase()}_PASSWORD`];
