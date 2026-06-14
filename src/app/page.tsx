@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -251,17 +251,24 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
- // Memoized SEO Calculations
+ // ⚡ Bolt Optimization: Use deferred values for heavy SEO calculations
+ // This prevents long-running string processing from blocking the main thread
+ // during high-frequency updates like LLM streaming.
+ const deferredArticle = useDeferredValue(articleOutput);
+ const deferredMeta = useDeferredValue(metaOutput);
+ const deferredKeywords = useDeferredValue(kataKunci);
+
+ // Memoized SEO Calculations using deferred values
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticle) return 0;
+ return deferredArticle.trim().split(/\s+/).length;
+ }, [deferredArticle]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticle || !deferredKeywords) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
+ const kw = deferredKeywords.toLowerCase();
+ const contentText = deferredArticle.toLowerCase();
  let count = 0;
  let pos = contentText.indexOf(kw);
  while (pos !== -1) {
@@ -269,12 +276,12 @@ export default function Home() {
  pos = contentText.indexOf(kw, pos + 1);
  }
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [deferredKeywords, wordCount, deferredArticle]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ if (!deferredMeta) return 0;
+ return deferredMeta.length;
+ }, [deferredMeta]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -1057,7 +1064,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} articleOutput={deferredArticle} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={deferredKeywords} metaOutput={deferredMeta} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
