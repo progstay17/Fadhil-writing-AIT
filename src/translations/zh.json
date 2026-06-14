@@ -12,10 +12,18 @@
     "location": "地点 / Lokasi (可选)",
     "konteks": "背景与补充数据 (Context & Data)",
     "konteks_placeholder": "例如：6-7月婚礼季，70%的卖家自拍失败，TikTok上火爆的韩国时尚趋势...",
+    "pov": "视角 (Point of View)",
+    "style": "文章样式",
     "pov_label": "视角 (Point of View)",
     "pov_tester": "🧑 第一人称测试者 (我测试过...)",
     "pov_analyst": "📊 第三方分析师 (基于数据...)",
     "pov_journalist": "📰 新闻/资讯风格 (根据研究...)",
+    "style_label": "文章样式",
+    "style_review": "📊 测评 / 列表",
+    "style_announcement": "🆕 功能上新 / 公告",
+    "style_solution": "💡 解决方案",
+    "style_comparison": "🔀 对比 / 排名",
+    "style_other": "✏️ Free / Custom",
     "sample": "ARTIKEL_CONTOH (可选)",
     "functions_placeholder": "输入产品功能...",
     "keywords_placeholder": "输入关键词或标题...",
@@ -32,12 +40,6 @@
     "model_label": "模型:",
     "min_words": "最小字数",
     "max_words": "最大字数",
-    "style_label": "文章样式",
-    "style_review": "📊 测评 / 列表",
-    "style_announcement": "🆕 功能上新 / 公告",
-    "style_solution": "💡 解决方案",
-    "style_comparison": "🔀 对比 / 排名",
-    "style_other": "✏️ Free / Custom",
     "competitor_label": "竞争对手（可选）",
     "competitor_placeholder": "例如：Canva、Adobe Express、Pixlr — 在此粘贴调研结果...",
     "negative_label": "负面提示词 (Negative Prompt)",
@@ -57,7 +59,10 @@
     "sample_comparison": "🔀 对比",
     "generate_image_prompts": "生成图片提示词",
     "copy_research_prompt": "研究提示词",
-    "copied": "已复制!"
+    "copied": "已复制!",
+    "scroll_to_top": "回到顶部",
+    "download": "下载 TXT",
+    "download_md": "下载 Markdown"
   },
   "output": {
     "article": "完整文章",
@@ -74,6 +79,18 @@
     "word_count": "字数",
     "keyword_density": "关键词密度",
     "meta_length": "元描述长度"
+  },
+  "pov": {
+    "tester": "🧑 第一人称测试者 (我测试过...)",
+    "analyst": "📊 第三方分析师 (基于数据...)",
+    "journalist": "📰 新闻/资讯风格 (根据研究...)"
+  },
+  "styles": {
+    "review": "📊 测评 / 列表",
+    "announcement": "🆕 功能上新 / 公告",
+    "solution": "💡 解决方案",
+    "comparison": "🔀 对比 / 排名",
+    "other": "✏️ Free / Custom"
   },
   "messages": {
     "required": "功能和关键词必填！",

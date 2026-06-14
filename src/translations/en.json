@@ -12,10 +12,18 @@
     "location": "Location (Optional)",
     "konteks": "Context & Additional Data",
     "konteks_placeholder": "Example: June-July wedding season, 70% of sellers fail at DIY photography, Korean fashion trend viral on TikTok...",
+    "pov": "Point of View",
+    "style": "Article Style",
     "pov_label": "Point of View",
     "pov_tester": "🧑 First-person tester (I tested...)",
     "pov_analyst": "📊 Third-party analyst (based on data...)",
     "pov_journalist": "📰 Journalistic/informative (according to research...)",
+    "style_label": "Article Style",
+    "style_review": "📊 Review / Listicle",
+    "style_announcement": "🆕 New Feature / Announcement",
+    "style_solution": "💡 Problem / Solution",
+    "style_comparison": "🔀 Comparison / Ranking",
+    "style_other": "✏️ Free / Custom",
     "sample": "ARTIKEL_CONTOH (Optional)",
     "functions_placeholder": "Enter product functions...",
     "keywords_placeholder": "Enter keywords or title...",
@@ -32,12 +40,6 @@
     "model_label": "Model:",
     "min_words": "Min Words",
     "max_words": "Max Words",
-    "style_label": "Article Style",
-    "style_review": "📊 Review / Listicle",
-    "style_announcement": "🆕 New Feature / Announcement",
-    "style_solution": "💡 Problem / Solution",
-    "style_comparison": "🔀 Comparison / Ranking",
-    "style_other": "✏️ Free / Custom",
     "competitor_label": "Competitors (Optional)",
     "competitor_placeholder": "e.g. Canva, Adobe Express, Pixlr — paste research results here...",
     "negative_label": "Negative Prompt",
@@ -57,7 +59,10 @@
     "sample_comparison": "🔀 Comparison",
     "generate_image_prompts": "Generate Image Prompts",
     "copy_research_prompt": "Research Prompt",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "scroll_to_top": "Scroll to Top",
+    "download": "Download TXT",
+    "download_md": "Download Markdown"
   },
   "output": {
     "article": "Full Article",
@@ -74,6 +79,18 @@
     "word_count": "Word Count",
     "keyword_density": "Keyword Density",
     "meta_length": "Meta Length"
+  },
+  "pov": {
+    "tester": "🧑 First-person tester (I tested...)",
+    "analyst": "📊 Third-party analyst (based on data...)",
+    "journalist": "📰 Journalistic/informative (according to research...)"
+  },
+  "styles": {
+    "review": "📊 Review / Listicle",
+    "announcement": "🆕 New Feature / Announcement",
+    "solution": "💡 Problem / Solution",
+    "comparison": "🔀 Comparison / Ranking",
+    "other": "✏️ Free / Custom"
   },
   "messages": {
     "required": "Functions and Keywords are required!",
