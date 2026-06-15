@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -125,7 +125,7 @@ HistorySection.displayName = "HistorySection";
 
 const SEOStats = memo(({
  activeTab,
- articleOutput,
+ hasArticleOutput,
  wordCount,
  keywordDensity,
  metaLength,
@@ -136,7 +136,7 @@ const SEOStats = memo(({
  t
 }: {
  activeTab: string;
- articleOutput: string;
+ hasArticleOutput: boolean;
  wordCount: number;
  keywordDensity: number;
  metaLength: number;
@@ -146,7 +146,7 @@ const SEOStats = memo(({
  metaOutput: string;
  t: TFunction;
 }) => {
- if (activeTab !== "create" || !articleOutput) return null;
+ if (activeTab !== "create" || !hasArticleOutput) return null;
 
  return (
  <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -251,30 +251,45 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+ // ⚡ Bolt Optimization: Use deferred values for heavy SEO calculations to keep the UI responsive during streaming
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ return deferredArticleOutput.trim().split(/\s+/).length;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !deferredKataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
+ const kw = deferredKataKunci.toLowerCase();
+ const contentText = deferredArticleOutput.toLowerCase();
+
+ // ⚡ Bolt Optimization: Use global regex with escaped keyword for faster density calculation
+ try {
+  const escapedKw = deferredKataKunci.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(escapedKw, "gi");
+  const count = (deferredArticleOutput.match(regex) || []).length;
+  return (count / words) * 100;
+ } catch {
+  // Fallback to indexOf if regex fails
+  let count = 0;
+  let pos = contentText.indexOf(kw);
+  while (pos !== -1) {
+  count++;
+  pos = contentText.indexOf(kw, pos + 1);
+  }
+  return (count / words) * 100;
  }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [deferredKataKunci, wordCount]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ if (!deferredMetaOutput) return 0;
+ return deferredMetaOutput.length;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -1057,7 +1072,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} hasArticleOutput={!!deferredArticleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={deferredKataKunci} metaOutput={deferredMetaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
