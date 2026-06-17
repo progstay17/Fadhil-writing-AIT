@@ -1,5 +1,7 @@
 import { jwtVerify } from "jose";
 
+export const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+
 export async function verifyToken(token: string): Promise<string | null> {
   try {
     const secretStr = process.env.JWT_SECRET;
