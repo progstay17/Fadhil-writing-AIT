@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI, Tool } from "@google/generative-ai";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken, isValidUsername } from "@/lib/auth";
 import { BRAND_BRIEF } from "@/lib/brandBrief";
 
 export const runtime = "nodejs";
@@ -399,6 +399,11 @@ export async function POST(req: NextRequest) {
 
     const username = await verifyToken(token);
     if (!username) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+
+    // Security: Validate username format as defense-in-depth before accessing env
+    if (!isValidUsername(username)) {
+      return NextResponse.json({ error: "Invalid username format" }, { status: 400 });
+    }
 
     const key1 = process.env[`USER_${username.toUpperCase()}_KEY1`];
     const key2 = process.env[`USER_${username.toUpperCase()}_KEY2`];

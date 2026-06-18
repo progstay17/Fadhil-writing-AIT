@@ -1,5 +1,9 @@
 import { jwtVerify } from "jose";
 
+export function isValidUsername(username: unknown): username is string {
+  return typeof username === "string" && /^[a-zA-Z0-9_]+$/.test(username);
+}
+
 export async function verifyToken(token: string): Promise<string | null> {
   try {
     const secretStr = process.env.JWT_SECRET;
