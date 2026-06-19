@@ -22,7 +22,8 @@ import {
  RotateCcw, Check,
  Layout,
  Sun,
- Moon, LogOut
+ Moon, LogOut,
+ ArrowUp
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -250,6 +251,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+ const [showScrollToTop, setShowScrollToTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -662,6 +664,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  }, [handleGenerate, handleClear]);
 
  useEffect(() => {
+   const handleScroll = () => {
+     setShowScrollToTop(window.scrollY > 400);
+   };
+   window.addEventListener("scroll", handleScroll);
+   return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
+
+ useEffect(() => {
  const handleKeyDown = (e: KeyboardEvent) => {
  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
  handleGenerateRef.current();
@@ -836,11 +846,11 @@ return (
                   {activeTab === "create" ? (
                     <>
                       <motion.div variants={FADE_UP}>
-                        <label htmlFor="fungsi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.functions")}</label>
+                        <label htmlFor="fungsi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.functions")} <span className="text-red-500">*</span></label>
                         <textarea id="fungsi" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.functions_placeholder")} value={fungsi} onChange={(e) => { setFungsi(e.target.value); setMessage(""); }} />
                       </motion.div>
                       <motion.div variants={FADE_UP}>
-                        <label htmlFor="kataKunci" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.keywords")}</label>
+                        <label htmlFor="kataKunci" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.keywords")} <span className="text-red-500">*</span></label>
                         <textarea id="kataKunci" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.keywords_placeholder")} value={kataKunci} onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }} />
                       </motion.div>
                       <motion.div variants={FADE_UP}>
@@ -1051,8 +1061,22 @@ return (
                   <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "txt")}
+                    aria-label={t("buttons.download")}
+                    title={t("buttons.download")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "md")}
+                    aria-label={t("buttons.download_md")}
+                    title={t("buttons.download_md")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
+                    MD
+                  </button>
                 </div>
               )}
             </div>
@@ -1165,9 +1189,27 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)] text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
+
+      <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-24 right-6 z-50 p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-accent)] shadow-lg hover:bg-[var(--color-surface-2)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ArrowUp size={20} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {toast && (
