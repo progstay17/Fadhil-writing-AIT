@@ -12,7 +12,7 @@
     "location": "Lokasi (Opsional)",
     "konteks": "Konteks & Data Tambahan",
     "konteks_placeholder": "Contoh: Momen wedding season Juni-Juli, data 70% seller gagal foto sendiri, tren fashion Korea viral di TikTok...",
-    "pov_label": "Sudut Pandang",
+    "pov": "Sudut Pandang",
     "pov_tester": "🧑 First-person tester (saya menguji...)",
     "pov_analyst": "📊 Third-party analyst (berdasarkan data...)",
     "pov_journalist": "📰 Jurnalistik/informatif (menurut riset...)",
@@ -32,7 +32,7 @@
     "model_label": "Model:",
     "min_words": "Min Words",
     "max_words": "Max Words",
-    "style_label": "Gaya Artikel",
+    "style": "Gaya Artikel",
     "style_review": "📊 Review / Listicle",
     "style_announcement": "🆕 Fitur Baru / Pengumuman",
     "style_solution": "💡 Masalah / Solusi",
@@ -57,7 +57,9 @@
     "sample_comparison": "🔀 Perbandingan",
     "generate_image_prompts": "Hasilkan Prompt Gambar",
     "copy_research_prompt": "Prompt Riset",
-    "copied": "Tersalin!"
+    "copied": "Tersalin!",
+    "download": "Unduh Artikel (.txt)",
+    "download_md": "Unduh Artikel (.md)"
   },
   "output": {
     "article": "Artikel Lengkap",
@@ -69,6 +71,17 @@
     "generation_output": "Generation Output",
     "word_count": "Word Count",
     "seo_keywords": "SEO Keywords"
+  },
+  "pov": {
+    "analyst": "📊 Analis",
+    "tester": "🧑 Penguji",
+    "journalist": "📰 Jurnalis"
+  },
+  "styles": {
+    "review": "📊 Review",
+    "feature": "🆕 Fitur",
+    "solution": "💡 Solusi",
+    "comparison": "🔀 Perbandingan"
   },
   "seo": {
     "word_count": "Word Count",

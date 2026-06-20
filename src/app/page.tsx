@@ -719,7 +719,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-text)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -836,11 +836,17 @@ return (
                   {activeTab === "create" ? (
                     <>
                       <motion.div variants={FADE_UP}>
-                        <label htmlFor="fungsi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.functions")}</label>
+                        <label htmlFor="fungsi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">
+                          {t("fields.functions")}
+                          <span className="text-[var(--color-accent)] ml-1">*</span>
+                        </label>
                         <textarea id="fungsi" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.functions_placeholder")} value={fungsi} onChange={(e) => { setFungsi(e.target.value); setMessage(""); }} />
                       </motion.div>
                       <motion.div variants={FADE_UP}>
-                        <label htmlFor="kataKunci" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.keywords")}</label>
+                        <label htmlFor="kataKunci" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">
+                          {t("fields.keywords")}
+                          <span className="text-[var(--color-accent)] ml-1">*</span>
+                        </label>
                         <textarea id="kataKunci" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.keywords_placeholder")} value={kataKunci} onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }} />
                       </motion.div>
                       <motion.div variants={FADE_UP}>
@@ -1051,8 +1057,22 @@ return (
                   <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "txt")}
+                    aria-label={t("buttons.download")}
+                    title={t("buttons.download")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "md")}
+                    aria-label={t("buttons.download_md")}
+                    title={t("buttons.download_md")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
+                    MD
+                  </button>
                 </div>
               )}
             </div>
@@ -1165,7 +1185,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)] text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 

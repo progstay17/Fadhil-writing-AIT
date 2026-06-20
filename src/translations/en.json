@@ -12,7 +12,7 @@
     "location": "Location (Optional)",
     "konteks": "Context & Additional Data",
     "konteks_placeholder": "Example: June-July wedding season, 70% of sellers fail at DIY photography, Korean fashion trend viral on TikTok...",
-    "pov_label": "Point of View",
+    "pov": "Point of View",
     "pov_tester": "🧑 First-person tester (I tested...)",
     "pov_analyst": "📊 Third-party analyst (based on data...)",
     "pov_journalist": "📰 Journalistic/informative (according to research...)",
@@ -32,7 +32,7 @@
     "model_label": "Model:",
     "min_words": "Min Words",
     "max_words": "Max Words",
-    "style_label": "Article Style",
+    "style": "Article Style",
     "style_review": "📊 Review / Listicle",
     "style_announcement": "🆕 New Feature / Announcement",
     "style_solution": "💡 Problem / Solution",
@@ -57,7 +57,9 @@
     "sample_comparison": "🔀 Comparison",
     "generate_image_prompts": "Generate Image Prompts",
     "copy_research_prompt": "Research Prompt",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "download": "Download Article (.txt)",
+    "download_md": "Download Article (.md)"
   },
   "output": {
     "article": "Full Article",
@@ -69,6 +71,17 @@
     "generation_output": "Generation Output",
     "word_count": "Word Count",
     "seo_keywords": "SEO Keywords"
+  },
+  "pov": {
+    "analyst": "📊 Analyst",
+    "tester": "🧑 Tester",
+    "journalist": "📰 Journalist"
+  },
+  "styles": {
+    "review": "📊 Review",
+    "feature": "🆕 Feature",
+    "solution": "💡 Solution",
+    "comparison": "🔀 Comparison"
   },
   "seo": {
     "word_count": "Word Count",
