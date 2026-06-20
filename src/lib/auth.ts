@@ -1,5 +1,15 @@
 import { jwtVerify } from "jose";
 
+/**
+ * Validates that a username contains only alphanumeric characters and underscores.
+ * This prevents unexpected property access when using the username to look up
+ * environment variables (e.g., process.env[`USER_${username.toUpperCase()}_PASSWORD`]).
+ */
+export function isValidUsername(username: unknown): username is string {
+  if (typeof username !== "string") return false;
+  return /^[a-zA-Z0-9_]+$/.test(username);
+}
+
 export async function verifyToken(token: string): Promise<string | null> {
   try {
     const secretStr = process.env.JWT_SECRET;
