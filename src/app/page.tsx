@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+ const [showScrollToTop, setShowScrollToTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -296,6 +297,18 @@ export default function Home() {
         document.documentElement.classList.toggle('light', resolved === 'light');
  }, 0);
  }, []);
+
+ useEffect(() => {
+   const handleScroll = () => {
+     setShowScrollToTop(window.scrollY > 400);
+   };
+   window.addEventListener("scroll", handleScroll);
+   return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
+
+ const scrollToTop = () => {
+   window.scrollTo({ top: 0, behavior: "smooth" });
+ };
 
 
 
@@ -1202,6 +1215,24 @@ return (
           </button>
         ))}
       </nav>
+
+      <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            whileHover={{ scale: 1.1, backgroundColor: "var(--color-accent)", color: "#ffffff" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-20 md:bottom-8 right-6 z-50 p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg text-[var(--color-accent)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
