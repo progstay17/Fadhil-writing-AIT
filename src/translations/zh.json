@@ -57,7 +57,12 @@
     "sample_comparison": "🔀 对比",
     "generate_image_prompts": "生成图片提示词",
     "copy_research_prompt": "研究提示词",
-    "copied": "已复制!"
+    "copied": "已复制!",
+    "download": "下载 .txt",
+    "download_md": "下载 .md",
+    "scroll_to_top": "回到顶部",
+    "toggle_theme": "切换主题",
+    "logout": "退出登录"
   },
   "output": {
     "article": "完整文章",
