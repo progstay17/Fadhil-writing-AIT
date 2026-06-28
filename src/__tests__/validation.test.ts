@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { isValidUsername } from '../lib/auth';
 
 function validateArticle(content: string, keyword: string) {
   const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
@@ -25,5 +26,34 @@ describe('Article Validation', () => {
     const text = "Gunakan 潮际好麦 untuk hasil terbaik.";
     const result = validateArticle(text, "test");
     expect(result.hasBrand).toBe(true);
+  });
+});
+
+describe('Username Validation', () => {
+  it('should allow valid usernames', () => {
+    expect(isValidUsername('user123')).toBe(true);
+    expect(isValidUsername('admin_user')).toBe(true);
+    expect(isValidUsername('A')).toBe(true);
+    expect(isValidUsername('a'.repeat(32))).toBe(true);
+  });
+
+  it('should reject invalid characters', () => {
+    expect(isValidUsername('user@123')).toBe(false);
+    expect(isValidUsername('user name')).toBe(false);
+    expect(isValidUsername('user-name')).toBe(false);
+    expect(isValidUsername('user.name')).toBe(false);
+  });
+
+  it('should reject invalid lengths', () => {
+    expect(isValidUsername('')).toBe(false);
+    expect(isValidUsername('a'.repeat(33))).toBe(false);
+  });
+
+  it('should reject blacklisted property names', () => {
+    expect(isValidUsername('__proto__')).toBe(false);
+    expect(isValidUsername('constructor')).toBe(false);
+    expect(isValidUsername('toString')).toBe(false);
+    expect(isValidUsername('hasOwnProperty')).toBe(false);
+    expect(isValidUsername('CONSTRUCTOR')).toBe(false);
   });
 });
