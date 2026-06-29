@@ -247,6 +247,7 @@ export default function Home() {
  const [statusText, setStatusText] = useState("");
  const [message, setMessage] = useState("");
  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+ const [showScrollToTop, setShowScrollToTop] = useState(false);
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -674,6 +675,25 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  window.addEventListener("keydown", handleKeyDown);
  return () => window.removeEventListener("keydown", handleKeyDown);
  }, []);
+
+ useEffect(() => {
+    let ticking = false;
+ const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setShowScrollToTop(window.scrollY > 300);
+          ticking = false;
+        });
+        ticking = true;
+      }
+ };
+ window.addEventListener("scroll", handleScroll);
+ return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
+
+ const scrollToTop = () => {
+ window.scrollTo({ top: 0, behavior: "smooth" });
+ };
 
  const copyToClipboard = (text: string, key?: string) => {
  navigator.clipboard.writeText(text);
@@ -1182,6 +1202,22 @@ return (
             {toast.type === "success" ? <Check size={18} className="text-[#059669] dark:text-[#44cc44] mr-2" /> : <AlertCircle size={18} className="text-[#dc2626] dark:text-[#cc4444] mr-2" />}
             <span className="text-sm font-medium text-[var(--color-text)]">{toast.message}</span>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            onClick={scrollToTop}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-20 md:bottom-10 right-6 z-[60] p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
         )}
       </AnimatePresence>
 
