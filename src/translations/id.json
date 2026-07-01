@@ -57,7 +57,14 @@
     "sample_comparison": "🔀 Perbandingan",
     "generate_image_prompts": "Hasilkan Prompt Gambar",
     "copy_research_prompt": "Prompt Riset",
-    "copied": "Tersalin!"
+    "copied": "Tersalin!",
+    "restore": "Pulihkan",
+    "scroll_to_top": "Kembali ke Atas",
+    "download": "Unduh TXT",
+    "download_md": "Unduh Markdown",
+    "toggle_theme": "Ganti Tema",
+    "logout": "Keluar",
+    "advanced_options": "Opsi Lanjutan"
   },
   "output": {
     "article": "Artikel Lengkap",

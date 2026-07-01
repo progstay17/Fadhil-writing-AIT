@@ -249,6 +249,7 @@ export default function Home() {
  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
@@ -295,6 +296,20 @@ export default function Home() {
  document.documentElement.classList.toggle('dark', resolved === 'dark');
         document.documentElement.classList.toggle('light', resolved === 'light');
  }, 0);
+
+    let scrollTicking = false;
+    const handleScroll = () => {
+      if (!scrollTicking) {
+        window.requestAnimationFrame(() => {
+          setShowScrollToTop(window.scrollY > 300);
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
  }, []);
 
 
@@ -312,6 +327,10 @@ export default function Home() {
     localStorage.setItem("theme", next);
     document.documentElement.classList.toggle("dark", next === "dark");
     document.documentElement.classList.toggle("light", next === "light");
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
  const changeLanguage = (l: string) => {
@@ -774,14 +793,16 @@ return (
 
             <button
               onClick={toggleTheme}
-              aria-label="Toggle theme"
+              aria-label={t("buttons.toggle_theme")}
+              title={t("buttons.toggle_theme")}
               className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
             >
               {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
             </button>
             <button
               onClick={handleLogout}
-              aria-label="Logout"
+              aria-label={t("buttons.logout")}
+              title={t("buttons.logout")}
               className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors text-[var(--color-text-muted)] hover:text-[#cc2200] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
             >
               <LogOut size={16} />
@@ -908,7 +929,7 @@ return (
                           aria-controls="advanced-options-panel"
                           className="w-full flex items-center justify-between p-3 bg-[var(--color-surface-2)]/50 hover:bg-[var(--color-surface-2)] rounded-sm transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
                         >
-                          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase flex items-center"><Cpu size={14} className="mr-2" /> Advanced Options</span>
+                          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase flex items-center"><Cpu size={14} className="mr-2" /> {t("buttons.advanced_options")}</span>
                           {advancedOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                         </button>
                         <AnimatePresence>
@@ -1051,8 +1072,8 @@ return (
                   <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button onClick={() => downloadFile(articleOutput, "txt")} aria-label={t("buttons.download")} title={t("buttons.download")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
+                  <button onClick={() => downloadFile(articleOutput, "md")} aria-label={t("buttons.download_md")} title={t("buttons.download_md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
                 </div>
               )}
             </div>
@@ -1165,11 +1186,26 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
       <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 20 }}
+            whileHover={{ scale: 1.1, backgroundColor: "var(--color-surface-2)" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-20 md:bottom-8 right-6 z-[55] p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg text-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none transition-colors"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
+        )}
         {toast && (
           <motion.div
             key="toast"
