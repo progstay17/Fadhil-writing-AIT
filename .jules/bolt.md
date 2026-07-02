@@ -5,3 +5,7 @@
 ## 2026-05-23 - [Optimized Streaming and Component Memoization]
 **Learning:** High-frequency state updates during LLM streaming (e.g., setArticleOutput on every chunk) can saturate the main thread with React render cycles, making the UI feel sluggish or frozen. Throttling these updates to a reasonable frequency (~10Hz) dramatically improves responsiveness without degrading the user experience. Additionally, in monolithic components, memoizing heavy UI sections (like History or SEO stats) is critical to isolate them from unrelated state changes (like progress bars or input fields).
 **Action:** Always throttle streaming state updates in the reader loop. Use `React.memo` for complex UI blocks in large components and ensure all passed callbacks have stable identities via `useCallback`.
+
+## 2026-07-02 - [Optimized Derived Calculations with useDeferredValue]
+**Learning:** Heavy derived calculations (e.g., SEO word counts, regex-based keyword density) that depend on high-frequency state updates (like LLM streaming article output) can saturate the main thread, leading to noticeable input lag and UI jank. Even with useMemo, the calculation still runs in the same task as the state update.
+**Action:** Use 'useDeferredValue' on the source state and derive memoized values from the deferred one. This allows React to prioritize high-priority rendering (text updates) and defer expensive analysis until the main thread is idle.
