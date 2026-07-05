@@ -57,7 +57,9 @@
     "sample_comparison": "🔀 Perbandingan",
     "generate_image_prompts": "Hasilkan Prompt Gambar",
     "copy_research_prompt": "Prompt Riset",
-    "copied": "Tersalin!"
+    "copied": "Tersalin!",
+    "toggle_theme": "Ganti Tema",
+    "logout": "Logout"
   },
   "output": {
     "article": "Artikel Lengkap",
