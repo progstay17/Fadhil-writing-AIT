@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -77,7 +77,7 @@ const HistorySection = memo(({
 }) => {
  if (history.length === 0) return null;
  return (
- <motion.div whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
+ <motion.div whileHover={{ borderColor: "var(--color-accent)" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
  <button
  onClick={() => setHistoryOpen(!historyOpen)}
  aria-expanded={historyOpen}
@@ -252,29 +252,33 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
+
+ const articleLower = useMemo(() => deferredArticleOutput.toLowerCase(), [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!articleLower || !kataKunci) return 0;
  const words = wordCount || 1;
  const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
  let count = 0;
- let pos = contentText.indexOf(kw);
+ let pos = articleLower.indexOf(kw);
  while (pos !== -1) {
  count++;
- pos = contentText.indexOf(kw, pos + 1);
+ pos = articleLower.indexOf(kw, pos + 1);
  }
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [kataKunci, wordCount, articleLower]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ if (!deferredMetaOutput) return 0;
+ return deferredMetaOutput.length;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -719,7 +723,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-text)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -795,7 +799,7 @@ return (
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
               <motion.section
-                whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+                whileHover={{ borderColor: "var(--color-accent)" }}
                 transition={{ duration: 0.2 }}
                 className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-4 transition-colors duration-300"
               >
@@ -1037,7 +1041,7 @@ return (
 
         <div className="lg:col-span-7 space-y-6">
           <motion.section
-            whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+            whileHover={{ borderColor: "var(--color-accent)" }}
             transition={{ duration: 0.2 }}
             className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300"
           >
@@ -1057,7 +1061,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} articleOutput={deferredArticleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={deferredMetaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
@@ -1165,7 +1169,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
