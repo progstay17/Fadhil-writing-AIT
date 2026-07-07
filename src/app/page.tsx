@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+ const [showScrollTop, setShowScrollTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -295,6 +296,21 @@ export default function Home() {
  document.documentElement.classList.toggle('dark', resolved === 'dark');
         document.documentElement.classList.toggle('light', resolved === 'light');
  }, 0);
+ }, []);
+
+ useEffect(() => {
+   let ticking = false;
+   const handleScroll = () => {
+     if (!ticking) {
+       window.requestAnimationFrame(() => {
+         setShowScrollTop(window.scrollY > 300);
+         ticking = false;
+       });
+       ticking = true;
+     }
+   };
+   window.addEventListener("scroll", handleScroll);
+   return () => window.removeEventListener("scroll", handleScroll);
  }, []);
 
 
@@ -1182,6 +1198,24 @@ return (
             {toast.type === "success" ? <Check size={18} className="text-[#059669] dark:text-[#44cc44] mr-2" /> : <AlertCircle size={18} className="text-[#dc2626] dark:text-[#cc4444] mr-2" />}
             <span className="text-sm font-medium text-[var(--color-text)]">{toast.message}</span>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-24 md:bottom-8 right-6 z-40 p-3 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
         )}
       </AnimatePresence>
 
