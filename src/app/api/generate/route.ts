@@ -398,7 +398,9 @@ export async function POST(req: NextRequest) {
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const username = await verifyToken(token);
-    if (!username) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    if (!username) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
 
     const key1 = process.env[`USER_${username.toUpperCase()}_KEY1`];
     const key2 = process.env[`USER_${username.toUpperCase()}_KEY2`];
