@@ -1,3 +1,9 @@
+<div align="center">
+
+<img src="assets/ghifarion/repo-banner.svg" alt="AIT WRITING — Multilingual AI-assisted product content, built for clarity." width="100%">
+
+</div>
+
 # AIT Writing for 潮际好麦
 
 A multilingual web application for generating product articles with an LLM, with Chinese, English, and Bahasa Indonesia UI. It includes article-generation modes, SEO-oriented validation, preview indicators, and copy tools.
