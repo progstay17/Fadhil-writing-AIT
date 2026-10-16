@@ -5,8 +5,8 @@ export async function POST(req: NextRequest) {
   try {
     const { username, password } = await req.json();
 
-    if (!username || !password) {
-      return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
+    if (typeof username !== "string" || typeof password !== "string" || !username || !password) {
+      return NextResponse.json({ error: "Missing or invalid credentials" }, { status: 400 });
     }
 
     const envPassword = process.env[`USER_${username.toUpperCase()}_PASSWORD`];
@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
     }
 
     const secretStr = process.env.JWT_SECRET;
-    if (!secretStr) {
-      console.error("JWT_SECRET is not defined");
+    if (!secretStr || secretStr.length < 32) {
+      console.error("JWT_SECRET is not defined or too short (min 32 characters)");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
