@@ -57,6 +57,8 @@
     "sample_comparison": "🔀 Comparison",
     "generate_image_prompts": "Generate Image Prompts",
     "copy_research_prompt": "Research Prompt",
+    "download": "Download TXT",
+    "download_md": "Download Markdown",
     "copied": "Copied!"
   },
   "output": {

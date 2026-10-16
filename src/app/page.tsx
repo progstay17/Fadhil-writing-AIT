@@ -1051,8 +1051,22 @@ return (
                   <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "txt")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                    aria-label={t("buttons.download")}
+                    title={t("buttons.download")}
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "md")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                    aria-label={t("buttons.download_md")}
+                    title={t("buttons.download_md")}
+                  >
+                    MD
+                  </button>
                 </div>
               )}
             </div>
