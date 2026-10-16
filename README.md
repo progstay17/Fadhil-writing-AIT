@@ -1,39 +1,65 @@
 # AIT Writing for 潮际好麦
 
-Web app to automatically generate product articles via LLM with tri-lingual UI (ZH / EN / ID).
+A multilingual web application for generating product articles with an LLM, with Chinese, English, and Bahasa Indonesia UI. It includes article-generation modes, SEO-oriented validation, preview indicators, and copy tools.
 
 ## Features
 
-- **Multi-lingual UI**: Support for Chinese, English, and Bahasa Indonesia.
-- **AI-Powered Generation**: Optimized for product articles with SEO constraints.
-- **Validation Rules**: Ensures word count, keyword density, and brand presence.
-- **SEO Preview**: Live indicators for word count and keyword status.
-- **Copy/Paste Tools**: One-click copy for article, meta, and slug.
+- Tri-lingual interface: Chinese, English, and Indonesian.
+- AI-assisted product-article generation using Google Gemini.
+- Validation for word count, keywords, and brand presence.
+- SEO preview indicators.
+- Copy tools for article text, metadata, and slug.
 
-## Tech Stack
+## Tech stack
 
-- **Framework**: Next.js 16 (App Router)
-- **Styling**: Tailwind CSS
-- **AI**: Google Gemini API
-- **I18n**: i18next & react-i18next
+- Next.js App Router, React, and TypeScript
+- Tailwind CSS
+- Google Generative AI SDK
+- i18next / react-i18next
+- Vitest and Testing Library for tests
 
-## Getting Started
+## Requirements
 
-1. Clone the repository.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up environment variables:
-   Copy `.env.example` to `.env.local` and add your `GEMINI_API_KEY`.
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+- Node.js compatible with the installed Next.js version
+- A Gemini API key
+- A strong JWT signing secret (at least 32 characters)
+
+## Local setup
+
+```bash
+npm install
+```
+
+Create a `.env.local` file in the repository root (it is ignored by Git) and set:
+
+```dotenv
+GEMINI_API_KEY=your_gemini_api_key
+JWT_SECRET=replace_with_a_random_secret_at_least_32_characters
+```
+
+Use real values only in your local environment or hosting provider's secret settings. Never commit API keys or JWT secrets.
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000.
+
+## Quality checks
+
+```bash
+npm run lint
+npm run build
+```
+
+Tests are configured with Vitest. Run the project's test command only after one is added to `package.json`; the current scripts expose `dev`, `build`, `start`, and `lint`.
 
 ## Deployment
 
-This app is ready to be deployed on Vercel. Make sure to set the `GEMINI_API_KEY` environment variable in your Vercel project settings.
+Deploy as a Next.js application on a compatible host such as Vercel. Configure `GEMINI_API_KEY` and `JWT_SECRET` in the host's environment-variable settings before serving the app.
 
 ---
-*for AIT from Fadhil Ghifarion 法迪*
+
+Built for AIT by Fadhil Ghifarion 法迪.
