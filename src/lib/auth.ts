@@ -9,7 +9,15 @@ export async function verifyToken(token: string): Promise<string | null> {
     }
     const secret = new TextEncoder().encode(secretStr);
     const { payload } = await jwtVerify(token, secret);
-    return payload.username as string;
+    const username = payload.username as string;
+
+    // Defense in depth: validate username from token
+    if (!username || !/^[a-zA-Z0-9_]+$/.test(username)) {
+      console.error("Invalid username in token");
+      return null;
+    }
+
+    return username;
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
