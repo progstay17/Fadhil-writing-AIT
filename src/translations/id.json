@@ -55,6 +55,8 @@
     "sample_feature": "🆕 Fitur Baru",
     "sample_solution": "💡 Solusi",
     "sample_comparison": "🔀 Perbandingan",
+    "download": "Unduh TXT",
+    "download_md": "Unduh Markdown",
     "generate_image_prompts": "Hasilkan Prompt Gambar",
     "copy_research_prompt": "Prompt Riset",
     "copied": "Tersalin!"
