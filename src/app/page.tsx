@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -251,30 +251,34 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
- // Memoized SEO Calculations
+ // Performance Optimization: Use deferred values for heavy SEO calculations
+ // This prevents high-frequency streaming updates from blocking the main UI thread.
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
+ // Memoized SEO Calculations using deferred values
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+  if (!deferredArticleOutput) return 0;
+  // ⚡ Bolt Optimization: Use match(/\S+/g) for better performance and accuracy than split()
+  return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
- const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+  if (!deferredArticleOutput || !deferredKataKunci) return 0;
+  const words = wordCount || 1;
+  // ⚡ Bolt Optimization: Use a global case-insensitive regex to count keywords
+  // This avoids expensive full-string toLowerCase() allocations.
+  const escapedKw = deferredKataKunci.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const kwRegex = new RegExp(escapedKw, 'gi');
+  const count = (deferredArticleOutput.match(kwRegex) || []).length;
+  return (count / words) * 100;
+ }, [deferredKataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+  if (!deferredMetaOutput) return 0;
+  return deferredMetaOutput.length;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -719,7 +723,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-text)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -1057,7 +1061,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} articleOutput={deferredArticleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={deferredKataKunci} metaOutput={deferredMetaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">

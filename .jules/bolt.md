@@ -5,3 +5,7 @@
 ## 2026-05-23 - [Optimized Streaming and Component Memoization]
 **Learning:** High-frequency state updates during LLM streaming (e.g., setArticleOutput on every chunk) can saturate the main thread with React render cycles, making the UI feel sluggish or frozen. Throttling these updates to a reasonable frequency (~10Hz) dramatically improves responsiveness without degrading the user experience. Additionally, in monolithic components, memoizing heavy UI sections (like History or SEO stats) is critical to isolate them from unrelated state changes (like progress bars or input fields).
 **Action:** Always throttle streaming state updates in the reader loop. Use `React.memo` for complex UI blocks in large components and ensure all passed callbacks have stable identities via `useCallback`.
+
+## 2027-05-24 - [Deferred SEO Computations and Encoder Reuse]
+**Learning:** During LLM streaming, high-frequency article state updates trigger expensive SEO calculations (word count, keyword density) on every frame. Even with memoization, these calculations can cause main-thread stuttering as the article grows large. Additionally, instantiating a new `TextEncoder` for every streaming chunk in the backend adds unnecessary allocation overhead.
+**Action:** Implement `useDeferredValue` for inputs to heavy SEO computations to prioritize UI responsiveness during streaming. Move `TextEncoder` to module scope in API routes to reuse a single instance across all requests and chunks.
