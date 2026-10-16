@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -229,6 +229,10 @@ export default function Home() {
  const [metaOutput, setMetaOutput] = useState("");
  const [slugOutput, setSlugOutput] = useState("");
 
+ // ⚡ Bolt Optimization: Deferring heavy SEO-related state to prevent UI lag during streaming/typing
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+
  // Image Prompts States
  const [imagePromptsArticleInput, setImagePromptsArticleInput] = useState("");
  const [imagePromptsOutput, setImagePromptsOutput] = useState<{ reference: string; prompt: string }[]>([]);
@@ -251,17 +255,18 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
- // Memoized SEO Calculations
+ // ⚡ Bolt Optimization: Use deferred values and optimized regex for SEO calculations
+ // This prevents blocking the main thread during high-frequency streaming updates.
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !deferredKataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
+ const kw = deferredKataKunci.toLowerCase();
+ const contentText = deferredArticleOutput.toLowerCase();
  let count = 0;
  let pos = contentText.indexOf(kw);
  while (pos !== -1) {
@@ -269,7 +274,7 @@ export default function Home() {
  pos = contentText.indexOf(kw, pos + 1);
  }
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [deferredKataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
