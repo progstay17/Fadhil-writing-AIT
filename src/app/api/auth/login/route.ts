@@ -9,6 +9,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
+    // Strict alphanumeric and underscore validation for username to prevent environment variable injection
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+      return NextResponse.json({ error: "Invalid username format" }, { status: 400 });
+    }
+
     const envPassword = process.env[`USER_${username.toUpperCase()}_PASSWORD`];
 
     if (!envPassword || password !== envPassword) {
