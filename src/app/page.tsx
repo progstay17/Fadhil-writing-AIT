@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+ const [showScrollTop, setShowScrollTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -278,6 +279,36 @@ export default function Home() {
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
+
+ useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    let lastScrollTime = 0;
+    const throttledScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollTime >= 100) {
+        handleScroll();
+        lastScrollTime = now;
+      }
+    };
+
+    window.addEventListener("scroll", throttledScroll);
+
+    const timeoutId: NodeJS.Timeout = setTimeout(() => {
+      handleScroll();
+    }, 0);
+
+    return () => {
+      window.removeEventListener("scroll", throttledScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
  useEffect(() => {
  const stored = localStorage.getItem('theme');
@@ -719,7 +750,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-text)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -1051,8 +1082,22 @@ return (
                   <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "txt")}
+                    aria-label={t("buttons.download")}
+                    title={t("buttons.download")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={() => downloadFile(articleOutput, "md")}
+                    aria-label={t("buttons.download_md")}
+                    title={t("buttons.download_md")}
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+                  >
+                    MD
+                  </button>
                 </div>
               )}
             </div>
@@ -1165,7 +1210,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)] text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
@@ -1182,6 +1227,24 @@ return (
             {toast.type === "success" ? <Check size={18} className="text-[#059669] dark:text-[#44cc44] mr-2" /> : <AlertCircle size={18} className="text-[#dc2626] dark:text-[#cc4444] mr-2" />}
             <span className="text-sm font-medium text-[var(--color-text)]">{toast.message}</span>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 10 }}
+            whileHover={{ scale: 1.1, backgroundColor: "var(--color-accent-dim)" }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-24 right-6 z-50 p-3 rounded-full bg-[var(--color-accent)] text-white shadow-lg focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
         )}
       </AnimatePresence>
 
