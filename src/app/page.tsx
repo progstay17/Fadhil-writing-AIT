@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -77,7 +77,7 @@ const HistorySection = memo(({
 }) => {
  if (history.length === 0) return null;
  return (
- <motion.div whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
+ <motion.div whileHover={{ borderColor: "var(--color-accent)" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
  <button
  onClick={() => setHistoryOpen(!historyOpen)}
  aria-expanded={historyOpen}
@@ -241,6 +241,9 @@ export default function Home() {
  // History State
  const [history, setHistory] = useState<GenerationResult[]>([]);
 
+ // Performance Optimization: Use deferred value for heavy SEO calculations during streaming
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+
  // UI States
  const [loading, setLoading] = useState(false);
  const [progress, setProgress] = useState(0);
@@ -252,24 +255,27 @@ export default function Home() {
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
  // Memoized SEO Calculations
+ // Optimized word count using regex to avoid large temporary arrays
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+   if (!deferredArticleOutput) return 0;
+   return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
 
+ // Memoized lowercase article to avoid redundant toLowerCase() calls
+ const articleLower = useMemo(() => deferredArticleOutput.toLowerCase(), [deferredArticleOutput]);
+
+ // Decoupled keyword density calculation from the main render cycle
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
- const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+   if (!articleLower || !kataKunci || wordCount === 0) return 0;
+   const kw = kataKunci.toLowerCase();
+   let count = 0;
+   let pos = articleLower.indexOf(kw);
+   while (pos !== -1) {
+     count++;
+     pos = articleLower.indexOf(kw, pos + 1);
+   }
+   return (count / wordCount) * 100;
+ }, [kataKunci, wordCount, articleLower]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
@@ -795,7 +801,7 @@ return (
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
               <motion.section
-                whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+                whileHover={{ borderColor: "var(--color-accent)" }}
                 transition={{ duration: 0.2 }}
                 className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-4 transition-colors duration-300"
               >
@@ -1037,7 +1043,7 @@ return (
 
         <div className="lg:col-span-7 space-y-6">
           <motion.section
-            whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+            whileHover={{ borderColor: "var(--color-accent)" }}
             transition={{ duration: 0.2 }}
             className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300"
           >
@@ -1057,7 +1063,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} articleOutput={deferredArticleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
