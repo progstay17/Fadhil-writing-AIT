@@ -23,9 +23,10 @@ function sanitize(text: string | undefined): string {
 }
 
 function getErrorMessage(error: unknown): string {
-  if ((error as { status?: number })?.status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
-  if ((error as { status?: number })?.status === 401) return "Invalid API key.";
-  if ((error as { message?: string })?.message) return (error as { message: string }).message;
+  const status = (error as { status?: number })?.status;
+  if (status === 429) return "Rate limit exceeded. Please try again in a few minutes.";
+  if (status === 401) return "Invalid API key.";
+  // Prevent leaking internal SDK error messages to the user.
   return "An unexpected error occurred during generation.";
 }
 
