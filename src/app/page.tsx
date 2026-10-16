@@ -731,10 +731,14 @@ return (
           </div>
 
           <div className="flex items-center space-x-4">
-            <nav className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
+            <nav role="tablist" className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
               {["create", "fix", "image_prompts"].map((tab) => (
                 <button
                   key={tab}
+                  id={`tab-${tab}`}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls="main-content-panel"
                   onClick={() => setActiveTab(tab)}
                   className={cn(
                     "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
@@ -775,6 +779,7 @@ return (
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
+              title={t("buttons.toggle_theme")}
               className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors text-[var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
             >
               {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
@@ -782,6 +787,7 @@ return (
             <button
               onClick={handleLogout}
               aria-label="Logout"
+              title={t("buttons.logout")}
               className="p-2 rounded-sm border border-[var(--color-border)] hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors text-[var(--color-text-muted)] hover:text-[#cc2200] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
             >
               <LogOut size={16} />
@@ -790,7 +796,12 @@ return (
         </div>
       </motion.header>
 
-      <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div
+        id="main-content-panel"
+        role="tabpanel"
+        aria-labelledby={`tab-${activeTab} mobile-tab-${activeTab}`}
+        className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8"
+      >
         <div className="lg:col-span-5 space-y-6">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
@@ -1165,7 +1176,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
@@ -1185,10 +1196,14 @@ return (
         )}
       </AnimatePresence>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
+      <nav role="tablist" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
         {["create", "fix", "image_prompts"].map((tab) => (
           <button
             key={tab}
+            id={`mobile-tab-${tab}`}
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls="main-content-panel"
             onClick={() => setActiveTab(tab)}
             className={cn(
               "flex flex-col items-center p-2 rounded-sm transition-colors",
@@ -1198,7 +1213,7 @@ return (
             {tab === "create" && <PlusCircle size={20} />}
             {tab === "fix" && <Edit3 size={20} />}
             {tab === "image_prompts" && <ImageIcon size={20} />}
-            <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{tab}</span>
+            <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{t(`tabs.${tab}`)}</span>
           </button>
         ))}
       </nav>
