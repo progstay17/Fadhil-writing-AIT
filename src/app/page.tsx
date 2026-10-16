@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -123,30 +123,402 @@ const HistorySection = memo(({
 });
 HistorySection.displayName = "HistorySection";
 
+interface EditorPanelProps {
+  activeTab: string;
+  t: TFunction;
+  contentLang: string;
+  setContentLang: (v: string) => void;
+  model: string;
+  setModel: (v: string) => void;
+  fungsi: string;
+  setFungsi: (v: string) => void;
+  kataKunci: string;
+  setKataKunci: (v: string) => void;
+  konteks: string;
+  setKonteks: (v: string) => void;
+  sudutPandang: string;
+  setSudutPandang: (v: string) => void;
+  selectedStyle: string;
+  setSelectedStyle: (v: string) => void;
+  lokasi: string;
+  setLokasi: (v: string) => void;
+  minWords: number;
+  setMinWords: (v: number) => void;
+  maxWords: number;
+  setMaxWords: (v: number) => void;
+  softSelling: boolean;
+  setSoftSelling: (v: boolean) => void;
+  includeFaq: boolean;
+  setIncludeFaq: (v: boolean) => void;
+  groundingEnabled: boolean;
+  setGroundingEnabled: (v: boolean) => void;
+  advancedOpen: boolean;
+  setAdvancedOpen: (v: boolean) => void;
+  kompetitor: string;
+  setKompetitor: (v: string) => void;
+  negativePrompt: string;
+  setNegativePrompt: (v: string) => void;
+  artikelContoh: string;
+  setArtikelContoh: (v: string) => void;
+  imagePromptsArticleInput: string;
+  setImagePromptsArticleInput: (v: string) => void;
+  sentenceInput: string;
+  setSentenceInput: (v: string) => void;
+  rewriteType: "yellow" | "red";
+  setRewriteType: (v: "yellow" | "red") => void;
+  loading: boolean;
+  statusText: string;
+  message: string;
+  setMessage: (v: string) => void;
+  handleClear: () => void;
+  handleGenerate: () => void;
+  handlePaste: () => void;
+  copyToClipboard: (text: string, key?: string) => void;
+  copiedKey: string | null;
+  useReviewExample: () => void;
+  useFeatureExample: () => void;
+  useSolutionExample: () => void;
+  useComparisonExample: () => void;
+}
+
+const ProgressBar = memo(({ loading }: { loading: boolean }) => {
+  const [progress, setProgress] = useState(0);
+  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (loading) {
+      // Use setTimeout to avoid cascading render lint error
+      setTimeout(() => setProgress(0), 0);
+
+      loadingInterval.current = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 95) return prev;
+          const inc = Math.random() * 10;
+          return Math.min(prev + inc, 98);
+        });
+      }, 1500);
+    } else {
+      if (loadingInterval.current) clearInterval(loadingInterval.current);
+      // Use setTimeout to avoid cascading render lint error
+      setTimeout(() => setProgress(prev => (prev > 0 ? 100 : 0)), 0);
+      const timeout = setTimeout(() => setProgress(0), 500);
+      return () => clearTimeout(timeout);
+    }
+
+    return () => {
+      if (loadingInterval.current) clearInterval(loadingInterval.current);
+    };
+  }, [loading]);
+
+  return (
+    <>
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-surface-2)] z-50 overflow-hidden"
+          >
+            <motion.div
+              className="h-full bg-[#cc2200]"
+              style={{ width: `${progress}%` }}
+              transition={{ duration: 0.8, ease: easeOut }}
+            />
+            <motion.div
+              className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              animate={{ x: ["-80px", "100vw"] }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Expose statusText via a side effect or hidden element if needed by other components,
+          but here we'll just handle the bar. The statusText is used in the button,
+          so we might need to keep statusText in the parent OR move the button logic too.
+          Actually, let's keep statusText in parent for the button, but isolate progress bar re-renders.
+      */}
+    </>
+  );
+});
+ProgressBar.displayName = "ProgressBar";
+
+const EditorPanel = memo(({
+  activeTab, t, contentLang, setContentLang, model, setModel, fungsi, setFungsi,
+  kataKunci, setKataKunci, konteks, setKonteks, sudutPandang, setSudutPandang,
+  selectedStyle, setSelectedStyle, lokasi, setLokasi, minWords, setMinWords,
+  maxWords, setMaxWords, softSelling, setSoftSelling, includeFaq, setIncludeFaq,
+  groundingEnabled, setGroundingEnabled, advancedOpen, setAdvancedOpen,
+  kompetitor, setKompetitor, negativePrompt, setNegativePrompt, artikelContoh, setArtikelContoh,
+  imagePromptsArticleInput, setImagePromptsArticleInput, sentenceInput, setSentenceInput,
+  rewriteType, setRewriteType, loading, statusText, message, setMessage,
+  handleClear, handleGenerate, handlePaste, copyToClipboard, copiedKey,
+  useReviewExample, useFeatureExample, useSolutionExample, useComparisonExample
+}: EditorPanelProps) => {
+  return (
+    <motion.section
+      whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+      transition={{ duration: 0.2 }}
+      className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-4 transition-colors duration-300"
+    >
+      <div className="flex justify-between items-start mb-2">
+        <h2 className="font-semibold text-[var(--color-text)] flex items-center mt-1">
+          {activeTab === "create" ? (
+            <><PlusCircle size={18} className="mr-2 text-[#cc2200]" /> {t("tabs.create")}</>
+          ) : activeTab === "image_prompts" ? (
+            <><ImageIcon size={18} className="mr-2 text-purple-500" /> {t("tabs.image_prompts")}</>
+          ) : (
+            <><Edit3 size={18} className="mr-2 text-orange-500" /> {t("tabs.fix")}</>
+          )}
+        </h2>
+        <div className="flex flex-col items-end space-y-2">
+          <div className="flex items-center space-x-2">
+            <label htmlFor="contentLang" className="text-[10px] text-[var(--color-text-dim)] font-bold uppercase tracking-wider cursor-pointer">{t("fields.content_lang")}</label>
+            <select id="contentLang" value={contentLang} onChange={(e) => setContentLang(e.target.value)} className="text-[10px] border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface-2)] text-[var(--color-text)] font-medium outline-none">
+              <option value="ID">ID</option>
+              <option value="EN">EN</option>
+              <option value="ZH">ZH</option>
+            </select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <label htmlFor="model" className="text-[10px] text-[var(--color-text-dim)] font-bold uppercase tracking-wider cursor-pointer">Model</label>
+            <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className="text-[10px] border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface-2)] text-[var(--color-text)] font-medium outline-none">
+              <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+              <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+              <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+              <option value="gemini-flash-latest">Gemini Flash Latest</option>
+              <option value="gemini-flash-lite-latest">Gemini Flash Lite Latest</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <motion.div variants={STAGGER_CONTAINER} initial="initial" animate="animate" className="space-y-4">
+        {activeTab === "create" ? (
+          <>
+            <motion.div variants={FADE_UP}>
+              <label htmlFor="fungsi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.functions")}</label>
+              <textarea id="fungsi" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.functions_placeholder")} value={fungsi} onChange={(e) => { setFungsi(e.target.value); setMessage(""); }} />
+            </motion.div>
+            <motion.div variants={FADE_UP}>
+              <label htmlFor="kataKunci" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.keywords")}</label>
+              <textarea id="kataKunci" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.keywords_placeholder")} value={kataKunci} onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }} />
+            </motion.div>
+            <motion.div variants={FADE_UP}>
+              <label htmlFor="konteks" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.konteks")}</label>
+              <textarea id="konteks" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.konteks_placeholder")} value={konteks} onChange={(e) => { setKonteks(e.target.value); setMessage(""); }} />
+            </motion.div>
+            <motion.div variants={FADE_UP} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="sudutPandang" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.pov")}</label>
+                <select id="sudutPandang" value={sudutPandang} onChange={(e) => setSudutPandang(e.target.value)} className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none">
+                  <option value="analyst">{t("pov.analyst")}</option>
+                  <option value="tester">{t("pov.tester")}</option>
+                  <option value="journalist">{t("pov.journalist")}</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="selectedStyle" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.style")}</label>
+                <select id="selectedStyle" value={selectedStyle} onChange={(e) => setSelectedStyle(e.target.value)} className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none">
+                  <option value="review">{t("styles.review")}</option>
+                  <option value="feature">{t("styles.feature")}</option>
+                  <option value="solution">{t("styles.solution")}</option>
+                  <option value="comparison">{t("styles.comparison")}</option>
+                  <option value="freestyle">{t("fields.style_freestyle")}</option>
+                </select>
+              </div>
+            </motion.div>
+            <motion.div variants={FADE_UP} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="lokasi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.location")}</label>
+                <input id="lokasi" type="text" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none" placeholder={t("fields.location_placeholder")} value={lokasi} onChange={(e) => setLokasi(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="minWords" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.min_words")}</label>
+                <input id="minWords" type="number" className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none" value={minWords} onChange={(e) => setMinWords(Number(e.target.value))} />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="maxWords" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.max_words")}</label>
+                <input id="maxWords" type="number" className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none" value={maxWords} onChange={(e) => setMaxWords(Number(e.target.value))} />
+              </div>
+            </motion.div>
+            <motion.div variants={FADE_UP} className="flex flex-wrap gap-6 pt-2">
+              {[
+                { id: "toggle-soft-selling", state: softSelling, setter: setSoftSelling, label: "Soft Selling" },
+                { id: "toggle-include-faq", state: includeFaq, setter: setIncludeFaq, label: "FAQ" },
+                { id: "toggle-grounding", state: groundingEnabled, setter: setGroundingEnabled, label: "Grounding" }
+              ].map(tgl => (
+                <div key={tgl.id} className="flex items-center space-x-3">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={tgl.state}
+                    onClick={() => tgl.setter(!tgl.state)}
+                    className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", tgl.state ? "bg-[#cc2200]" : "bg-[var(--color-border)]")}
+                  >
+                    <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", tgl.state ? "translate-x-6" : "translate-x-1")} />
+                  </button>
+                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{tgl.label}</label>
+                </div>
+              ))}
+            </motion.div>
+            <motion.div variants={FADE_UP} className="border-t border-[var(--color-border)] pt-4">
+              <button
+                onClick={() => setAdvancedOpen(!advancedOpen)}
+                aria-expanded={advancedOpen}
+                aria-controls="advanced-options-panel"
+                className="w-full flex items-center justify-between p-3 bg-[var(--color-surface-2)]/50 hover:bg-[var(--color-surface-2)] rounded-sm transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+              >
+                <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase flex items-center"><Cpu size={14} className="mr-2" /> Advanced Options</span>
+                {advancedOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+              <AnimatePresence>
+                {advancedOpen && (
+                  <motion.div
+                    id="advanced-options-panel"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="space-y-4 pt-4 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.competitor_label")}</label>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            type="button"
+                            onClick={() => {
+                              const prompt = `Lakukan riset kompetitor untuk produk dengan fungsi: "${fungsi}". Kata kunci utama: "${kataKunci}". Cari minimal 3-5 kompetitor utama, analisis keunggulan dan kelemahan masing-masing, lalu sajikan dalam format singkat yang bisa langsung digunakan sebagai referensi penulisan artikel.`;
+                              copyToClipboard(prompt, "research_prompt");
+                            }}
+                            className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-accent)] hover:opacity-70 transition-opacity font-['JetBrains_Mono'] uppercase tracking-wider"
+                          >
+                            {copiedKey === "research_prompt" ? <Check size={11} className="text-green-500" /> : <Copy size={11} />}
+                            <span>{copiedKey === "research_prompt" ? t("buttons.copied") : t("buttons.copy_research_prompt")}</span>
+                          </motion.button>
+                        </div>
+                        <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.competitor_placeholder")} value={kompetitor} onChange={(e) => setKompetitor(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.negative_label")}</label>
+                        <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.negative_placeholder")} value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.sample")}</label>
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_review")}</button>
+                          <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_feature")}</button>
+                          <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_solution")}</button>
+                          <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_comparison")}</button>
+                        </div>
+                      </div>
+                      <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-24 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </>
+        ) : activeTab === "image_prompts" ? (
+          <motion.div variants={FADE_UP} className="space-y-4">
+            <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block">Article Content</label>
+            <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-64 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("image_prompts.article_placeholder")} value={imagePromptsArticleInput} onChange={(e) => setImagePromptsArticleInput(e.target.value)} />
+          </motion.div>
+        ) : (
+          <motion.div variants={FADE_UP} className="space-y-4">
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.original_sentence")}</label>
+              <button onClick={handlePaste} className="text-xs text-[#cc2200] font-bold flex items-center hover:underline"><Clipboard size={12} className="mr-1" /> {t("buttons.paste")}</button>
+            </div>
+            <textarea className="w-full border border-[var(--color-border)] rounded-sm p-4 text-sm h-48 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sentence_placeholder")} value={sentenceInput} onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }} />
+            <div className="grid grid-cols-2 gap-3">
+              {["yellow", "red"].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setRewriteType(type as "yellow" | "red")}
+                  className={cn(
+                    "p-3 rounded-sm border-[var(--color-accent)] text-left transition-colors",
+                    rewriteType === type
+                      ? (type === "yellow"
+                        ? "border-[#f59e0b] bg-[#fffbeb] dark:bg-[#1a1500]"
+                        : "border-[#cc2200] bg-[#fff1f0] dark:bg-[#1a0000]")
+                      : "bg-[var(--color-surface)] border-[var(--color-border-2)]"
+                  )}
+                >
+                  <span className="font-bold text-sm block text-[var(--color-text)]">
+                    {type === "yellow" ? "🟡" : "🔴"} {t(`fields.${type}_label`)}
+                  </span>
+                  <span className="text-[10px] text-[var(--color-text)] opacity-70">
+                    {t(`fields.${type}_desc`)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
+
+      <AnimatePresence>
+        {message && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-[#fef2f2] dark:bg-[#1a0000] border border-[#cc2200] p-3 rounded-sm flex items-center text-[#dc2626] dark:text-[#cc4444] text-sm overflow-hidden">
+            <AlertCircle size={16} className="mr-2 flex-shrink-0" /> {message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex gap-3">
+        <button
+          onClick={handleClear}
+          className="flex-1 border border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold py-3 rounded-sm flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+        >
+          <Trash2 size={18} className="mr-2" /> {t("buttons.clear_input")}
+        </button>
+        <motion.button
+          whileHover={{ scale: 1.02, boxShadow: "0 6px 30px #cc220055" }}
+          whileTap={{ scale: 0.96 }}
+          animate={loading ? { boxShadow: ["0 4px 20px #cc220033", "0 4px 30px #cc220077", "0 4px 20px #cc220033"] } : {}}
+          transition={loading ? { duration: 1.2, repeat: Infinity } : { duration: 0.15 }}
+          disabled={loading}
+          onClick={handleGenerate}
+          className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}
+        >
+          {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
+        </motion.button>
+      </div>
+    </motion.section>
+  );
+});
+EditorPanel.displayName = "EditorPanel";
+
 const SEOStats = memo(({
  activeTab,
- articleOutput,
+ hasArticle,
  wordCount,
  keywordDensity,
  metaLength,
  minWords,
  maxWords,
- kataKunci,
- metaOutput,
+ hasKataKunci,
+ hasMeta,
  t
 }: {
  activeTab: string;
- articleOutput: string;
+ hasArticle: boolean;
  wordCount: number;
  keywordDensity: number;
  metaLength: number;
  minWords: number;
  maxWords: number;
- kataKunci: string;
- metaOutput: string;
+ hasKataKunci: boolean;
+ hasMeta: boolean;
  t: TFunction;
 }) => {
- if (activeTab !== "create" || !articleOutput) return null;
+ if (activeTab !== "create" || !hasArticle) return null;
 
  return (
  <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -167,7 +539,7 @@ const SEOStats = memo(({
  })()}
 
  {/* Keyword Density Badge */}
- {kataKunci && (() => {
+ {hasKataKunci && (() => {
  let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (keywordDensity < 0.5 || keywordDensity > 5) {
  color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
@@ -183,7 +555,7 @@ const SEOStats = memo(({
  })()}
 
  {/* Meta Length Badge */}
- {metaOutput && (() => {
+ {hasMeta && (() => {
  let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (metaLength < 100 || metaLength > 180) {
  color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
@@ -243,7 +615,6 @@ export default function Home() {
 
  // UI States
  const [loading, setLoading] = useState(false);
- const [progress, setProgress] = useState(0);
  const [statusText, setStatusText] = useState("");
  const [message, setMessage] = useState("");
  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -251,32 +622,37 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+ // Optimize SEO calculations using deferred values to prevent blocking the high-frequency streaming UI
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ // Use match(/\S+/g) for better performance and to return 0 for empty/whitespace strings
+ const words = deferredArticleOutput.match(/\S+/g);
+ return words ? words.length : 0;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !deferredKataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
+ // Use regex for case-insensitive keyword search to avoid heavy toLowerCase() on large strings
+ try {
+ const escapedKw = deferredKataKunci.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ const regex = new RegExp(escapedKw, "gi");
+ const matches = deferredArticleOutput.match(regex);
+ return matches ? (matches.length / words) * 100 : 0;
+ } catch {
+ return 0;
  }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [deferredKataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
  return metaOutput.length;
  }, [metaOutput]);
 
- const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
  useEffect(() => {
@@ -320,18 +696,9 @@ export default function Home() {
  };
 
  const startLoadingAnimation = useCallback(() => {
- setProgress(0);
  const texts = [t("messages.loading_writing"), t("messages.loading_seo"), t("messages.loading_meta"), t("messages.loading_brand"), t("messages.loading_finishing")];
  let textIdx = 0;
  setStatusText(texts[0]);
-
- loadingInterval.current = setInterval(() => {
- setProgress(prev => {
- if (prev >= 95) return prev;
- const inc = Math.random() * 10;
- return Math.min(prev + inc, 98);
- });
- }, 1500);
 
  statusInterval.current = setInterval(() => {
  textIdx = (textIdx + 1) % texts.length;
@@ -340,10 +707,8 @@ export default function Home() {
  }, [t]);
 
  const stopLoadingAnimation = useCallback(() => {
- if (loadingInterval.current) clearInterval(loadingInterval.current);
  if (statusInterval.current) clearInterval(statusInterval.current);
- setProgress(100);
- setTimeout(() => { setProgress(0); setLoading(false); }, 500);
+ setTimeout(() => { setLoading(false); }, 500);
  }, []);
 
  const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
@@ -687,27 +1052,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
 return (
     <main className="min-h-screen bg-[var(--color-bg)] pb-20 transition-colors duration-300">
-      <AnimatePresence>
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-surface-2)] z-50 overflow-hidden"
-          >
-            <motion.div
-              className="h-full bg-[#cc2200]"
-              style={{ width: `${progress}%` }}
-              transition={{ duration: 0.8, ease: easeOut }}
-            />
-            <motion.div
-              className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              animate={{ x: ["-80px", "100vw"] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ProgressBar loading={loading} />
 
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -794,241 +1139,29 @@ return (
         <div className="lg:col-span-5 space-y-6">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
-              <motion.section
-                whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
-                transition={{ duration: 0.2 }}
-                className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-4 transition-colors duration-300"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="font-semibold text-[var(--color-text)] flex items-center mt-1">
-                    {activeTab === "create" ? (
-                      <><PlusCircle size={18} className="mr-2 text-[#cc2200]" /> {t("tabs.create")}</>
-                    ) : activeTab === "image_prompts" ? (
-                      <><ImageIcon size={18} className="mr-2 text-purple-500" /> {t("tabs.image_prompts")}</>
-                    ) : (
-                      <><Edit3 size={18} className="mr-2 text-orange-500" /> {t("tabs.fix")}</>
-                    )}
-                  </h2>
-                  <div className="flex flex-col items-end space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <label htmlFor="contentLang" className="text-[10px] text-[var(--color-text-dim)] font-bold uppercase tracking-wider cursor-pointer">{t("fields.content_lang")}</label>
-                      <select id="contentLang" value={contentLang} onChange={(e) => setContentLang(e.target.value)} className="text-[10px] border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface-2)] text-[var(--color-text)] font-medium outline-none">
-                        <option value="ID">ID</option>
-                        <option value="EN">EN</option>
-                        <option value="ZH">ZH</option>
-                      </select>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <label htmlFor="model" className="text-[10px] text-[var(--color-text-dim)] font-bold uppercase tracking-wider cursor-pointer">Model</label>
-                      <select id="model" value={model} onChange={(e) => setModel(e.target.value)} className="text-[10px] border border-[var(--color-border)] rounded px-2 py-1 bg-[var(--color-surface-2)] text-[var(--color-text)] font-medium outline-none">
-                        <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
-                        <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
-                        <option value="gemini-flash-latest">Gemini Flash Latest</option>
-                        <option value="gemini-flash-lite-latest">Gemini Flash Lite Latest</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <motion.div variants={STAGGER_CONTAINER} initial="initial" animate="animate" className="space-y-4">
-                  {activeTab === "create" ? (
-                    <>
-                      <motion.div variants={FADE_UP}>
-                        <label htmlFor="fungsi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.functions")}</label>
-                        <textarea id="fungsi" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.functions_placeholder")} value={fungsi} onChange={(e) => { setFungsi(e.target.value); setMessage(""); }} />
-                      </motion.div>
-                      <motion.div variants={FADE_UP}>
-                        <label htmlFor="kataKunci" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.keywords")}</label>
-                        <textarea id="kataKunci" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.keywords_placeholder")} value={kataKunci} onChange={(e) => { setKataKunci(e.target.value); setMessage(""); }} />
-                      </motion.div>
-                      <motion.div variants={FADE_UP}>
-                        <label htmlFor="konteks" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 font-['JetBrains_Mono'] block cursor-pointer">{t("fields.konteks")}</label>
-                        <textarea id="konteks" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-dim)]" placeholder={t("fields.konteks_placeholder")} value={konteks} onChange={(e) => { setKonteks(e.target.value); setMessage(""); }} />
-                      </motion.div>
-                      <motion.div variants={FADE_UP} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label htmlFor="sudutPandang" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.pov")}</label>
-                          <select id="sudutPandang" value={sudutPandang} onChange={(e) => setSudutPandang(e.target.value)} className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none">
-                            <option value="analyst">{t("pov.analyst")}</option>
-                            <option value="tester">{t("pov.tester")}</option>
-                            <option value="journalist">{t("pov.journalist")}</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="selectedStyle" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.style")}</label>
-                          <select id="selectedStyle" value={selectedStyle} onChange={(e) => setSelectedStyle(e.target.value)} className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none">
-                            <option value="review">{t("styles.review")}</option>
-                            <option value="feature">{t("styles.feature")}</option>
-                            <option value="solution">{t("styles.solution")}</option>
-                            <option value="comparison">{t("styles.comparison")}</option>
-                            <option value="freestyle">{t("fields.style_freestyle")}</option>
-                          </select>
-                        </div>
-                      </motion.div>
-                      <motion.div variants={FADE_UP} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <label htmlFor="lokasi" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.location")}</label>
-                          <input id="lokasi" type="text" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none" placeholder={t("fields.location_placeholder")} value={lokasi} onChange={(e) => setLokasi(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="minWords" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.min_words")}</label>
-                          <input id="minWords" type="number" className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none" value={minWords} onChange={(e) => setMinWords(Number(e.target.value))} />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="maxWords" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider font-['JetBrains_Mono']">{t("fields.max_words")}</label>
-                          <input id="maxWords" type="number" className="w-full border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm bg-[var(--color-surface-2)] text-[var(--color-text)] outline-none" value={maxWords} onChange={(e) => setMaxWords(Number(e.target.value))} />
-                        </div>
-                      </motion.div>
-                      <motion.div variants={FADE_UP} className="flex flex-wrap gap-6 pt-2">
-                        {[
-                          { id: "toggle-soft-selling", state: softSelling, setter: setSoftSelling, label: "Soft Selling" },
-                          { id: "toggle-include-faq", state: includeFaq, setter: setIncludeFaq, label: "FAQ" },
-                          { id: "toggle-grounding", state: groundingEnabled, setter: setGroundingEnabled, label: "Grounding" }
-                        ].map(tgl => (
-                          <div key={tgl.id} className="flex items-center space-x-3">
-                            <button
-                              type="button"
-                              role="switch"
-                              aria-checked={tgl.state}
-                              onClick={() => tgl.setter(!tgl.state)}
-                              className={cn("relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", tgl.state ? "bg-[#cc2200]" : "bg-[var(--color-border)]")}
-                            >
-                              <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", tgl.state ? "translate-x-6" : "translate-x-1")} />
-                            </button>
-                            <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{tgl.label}</label>
-                          </div>
-                        ))}
-                      </motion.div>
-                      <motion.div variants={FADE_UP} className="border-t border-[var(--color-border)] pt-4">
-                        <button
-                          onClick={() => setAdvancedOpen(!advancedOpen)}
-                          aria-expanded={advancedOpen}
-                          aria-controls="advanced-options-panel"
-                          className="w-full flex items-center justify-between p-3 bg-[var(--color-surface-2)]/50 hover:bg-[var(--color-surface-2)] rounded-sm transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
-                        >
-                          <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase flex items-center"><Cpu size={14} className="mr-2" /> Advanced Options</span>
-                          {advancedOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                        <AnimatePresence>
-                          {advancedOpen && (
-                            <motion.div
-                              id="advanced-options-panel"
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="space-y-4 pt-4 overflow-hidden"
-                            >
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.competitor_label")}</label>
-                                    <motion.button
-                                      whileHover={{ scale: 1.05 }}
-                                      whileTap={{ scale: 0.95 }}
-                                      type="button"
-                                      onClick={() => {
-                                        const prompt = `Lakukan riset kompetitor untuk produk dengan fungsi: "${fungsi}". Kata kunci utama: "${kataKunci}". Cari minimal 3-5 kompetitor utama, analisis keunggulan dan kelemahan masing-masing, lalu sajikan dalam format singkat yang bisa langsung digunakan sebagai referensi penulisan artikel.`;
-                                        copyToClipboard(prompt, "research_prompt");
-                                      }}
-                                      className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-accent)] hover:opacity-70 transition-opacity font-['JetBrains_Mono'] uppercase tracking-wider"
-                                    >
-                                      {copiedKey === "research_prompt" ? <Check size={11} className="text-green-500" /> : <Copy size={11} />}
-                                      <span>{copiedKey === "research_prompt" ? t("buttons.copied") : t("buttons.copy_research_prompt")}</span>
-                                    </motion.button>
-                                  </div>
-                                  <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.competitor_placeholder")} value={kompetitor} onChange={(e) => setKompetitor(e.target.value)} />
-                                </div>
-                                <div className="space-y-2">
-                                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.negative_label")}</label>
-                                  <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.negative_placeholder")} value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} />
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center mb-1">
-                                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.sample")}</label>
-                                  <div className="flex flex-wrap gap-2">
-                                    <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_review")}</button>
-                                    <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_feature")}</button>
-                                    <button onClick={useSolutionExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_solution")}</button>
-                                    <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_comparison")}</button>
-                                  </div>
-                                </div>
-                                <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-24 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    </>
-                  ) : activeTab === "image_prompts" ? (
-                    <motion.div variants={FADE_UP} className="space-y-4">
-                      <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block">Article Content</label>
-                      <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-64 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("image_prompts.article_placeholder")} value={imagePromptsArticleInput} onChange={(e) => setImagePromptsArticleInput(e.target.value)} />
-                    </motion.div>
-                  ) : (
-                    <motion.div variants={FADE_UP} className="space-y-4">
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.original_sentence")}</label>
-                        <button onClick={handlePaste} className="text-xs text-[#cc2200] font-bold flex items-center hover:underline"><Clipboard size={12} className="mr-1" /> {t("buttons.paste")}</button>
-                      </div>
-                      <textarea className="w-full border border-[var(--color-border)] rounded-sm p-4 text-sm h-48 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sentence_placeholder")} value={sentenceInput} onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }} />
-                      <div className="grid grid-cols-2 gap-3">
-                        {["yellow", "red"].map(type => (
-                          <button
-                            key={type}
-                            onClick={() => setRewriteType(type as "yellow" | "red")}
-                            className={cn(
-                              "p-3 rounded-sm border-[var(--color-accent)] text-left transition-colors",
-                              rewriteType === type
-                                ? (type === "yellow"
-                                  ? "border-[#f59e0b] bg-[#fffbeb] dark:bg-[#1a1500]"
-                                  : "border-[#cc2200] bg-[#fff1f0] dark:bg-[#1a0000]")
-                                : "bg-[var(--color-surface)] border-[var(--color-border-2)]"
-                            )}
-                          >
-                            <span className="font-bold text-sm block text-[var(--color-text)]">
-                              {type === "yellow" ? "🟡" : "🔴"} {t(`fields.${type}_label`)}
-                            </span>
-                            <span className="text-[10px] text-[var(--color-text)] opacity-70">
-                              {t(`fields.${type}_desc`)}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </motion.div>
-
-                <AnimatePresence>
-                  {message && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="bg-[#fef2f2] dark:bg-[#1a0000] border border-[#cc2200] p-3 rounded-sm flex items-center text-[#dc2626] dark:text-[#cc4444] text-sm overflow-hidden">
-                      <AlertCircle size={16} className="mr-2 flex-shrink-0" /> {message}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleClear}
-                    className="flex-1 border border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold py-3 rounded-sm flex items-center justify-center hover:bg-[var(--color-surface-2)] transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
-                  >
-                    <Trash2 size={18} className="mr-2" /> {t("buttons.clear_input")}
-                  </button>
-                  <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: "0 6px 30px #cc220055" }}
-                    whileTap={{ scale: 0.96 }}
-                    animate={loading ? { boxShadow: ["0 4px 20px #cc220033", "0 4px 30px #cc220077", "0 4px 20px #cc220033"] } : {}}
-                    transition={loading ? { duration: 1.2, repeat: Infinity } : { duration: 0.15 }}
-                    disabled={loading}
-                    onClick={handleGenerate}
-                    className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}
-                  >
-                    {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
-                  </motion.button>
-                </div>
-              </motion.section>
+              <EditorPanel
+                activeTab={activeTab} t={t} contentLang={contentLang} setContentLang={setContentLang}
+                model={model} setModel={setModel} fungsi={fungsi} setFungsi={setFungsi}
+                kataKunci={kataKunci} setKataKunci={setKataKunci} konteks={konteks} setKonteks={setKonteks}
+                sudutPandang={sudutPandang} setSudutPandang={setSudutPandang}
+                selectedStyle={selectedStyle} setSelectedStyle={setSelectedStyle}
+                lokasi={lokasi} setLokasi={setLokasi} minWords={minWords} setMinWords={setMinWords}
+                maxWords={maxWords} setMaxWords={setMaxWords} softSelling={softSelling} setSoftSelling={setSoftSelling}
+                includeFaq={includeFaq} setIncludeFaq={setIncludeFaq}
+                groundingEnabled={groundingEnabled} setGroundingEnabled={setGroundingEnabled}
+                advancedOpen={advancedOpen} setAdvancedOpen={setAdvancedOpen}
+                kompetitor={kompetitor} setKompetitor={setKompetitor}
+                negativePrompt={negativePrompt} setNegativePrompt={setNegativePrompt}
+                artikelContoh={artikelContoh} setArtikelContoh={setArtikelContoh}
+                imagePromptsArticleInput={imagePromptsArticleInput} setImagePromptsArticleInput={setImagePromptsArticleInput}
+                sentenceInput={sentenceInput} setSentenceInput={setSentenceInput}
+                rewriteType={rewriteType} setRewriteType={setRewriteType}
+                loading={loading} statusText={statusText} message={message} setMessage={setMessage}
+                handleClear={handleClear} handleGenerate={handleGenerate} handlePaste={handlePaste}
+                copyToClipboard={copyToClipboard} copiedKey={copiedKey}
+                useReviewExample={useReviewExample} useFeatureExample={useFeatureExample}
+                useSolutionExample={useSolutionExample} useComparisonExample={useComparisonExample}
+              />
 
               <HistorySection history={history} historyOpen={historyOpen} setHistoryOpen={setHistoryOpen} restoreHistory={restoreHistory} t={t} />
             </motion.div>
@@ -1057,7 +1190,18 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats
+              activeTab={activeTab}
+              hasArticle={!!articleOutput}
+              wordCount={wordCount}
+              keywordDensity={keywordDensity}
+              metaLength={metaLength}
+              minWords={minWords}
+              maxWords={maxWords}
+              hasKataKunci={!!kataKunci}
+              hasMeta={!!metaOutput}
+              t={t}
+            />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
@@ -1165,7 +1309,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
