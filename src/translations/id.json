@@ -12,10 +12,18 @@
     "location": "Lokasi (Opsional)",
     "konteks": "Konteks & Data Tambahan",
     "konteks_placeholder": "Contoh: Momen wedding season Juni-Juli, data 70% seller gagal foto sendiri, tren fashion Korea viral di TikTok...",
+    "pov": "Sudut Pandang",
+    "style": "Gaya Artikel",
     "pov_label": "Sudut Pandang",
     "pov_tester": "🧑 First-person tester (saya menguji...)",
     "pov_analyst": "📊 Third-party analyst (berdasarkan data...)",
     "pov_journalist": "📰 Jurnalistik/informatif (menurut riset...)",
+    "style_label": "Gaya Artikel",
+    "style_review": "📊 Review / Listicle",
+    "style_announcement": "🆕 Fitur Baru / Pengumuman",
+    "style_solution": "💡 Masalah / Solusi",
+    "style_comparison": "🔀 Perbandingan / Peringkat",
+    "style_other": "✏️ Free / Custom",
     "sample": "ARTIKEL_CONTOH (Opsional)",
     "functions_placeholder": "Masukkan fungsi produk...",
     "keywords_placeholder": "Masukkan kata kunci atau judul...",
@@ -32,12 +40,6 @@
     "model_label": "Model:",
     "min_words": "Min Words",
     "max_words": "Max Words",
-    "style_label": "Gaya Artikel",
-    "style_review": "📊 Review / Listicle",
-    "style_announcement": "🆕 Fitur Baru / Pengumuman",
-    "style_solution": "💡 Masalah / Solusi",
-    "style_comparison": "🔀 Perbandingan / Peringkat",
-    "style_other": "✏️ Free / Custom",
     "competitor_label": "Kompetitor (Opsional)",
     "competitor_placeholder": "contoh: Canva, Adobe Express, Pixlr — tempel hasil riset di sini...",
     "negative_label": "Negative Prompt",
@@ -57,7 +59,10 @@
     "sample_comparison": "🔀 Perbandingan",
     "generate_image_prompts": "Hasilkan Prompt Gambar",
     "copy_research_prompt": "Prompt Riset",
-    "copied": "Tersalin!"
+    "copied": "Tersalin!",
+    "scroll_to_top": "Kembali ke Atas",
+    "download": "Unduh TXT",
+    "download_md": "Unduh Markdown"
   },
   "output": {
     "article": "Artikel Lengkap",
@@ -74,6 +79,18 @@
     "word_count": "Word Count",
     "keyword_density": "Keyword Density",
     "meta_length": "Meta Length"
+  },
+  "pov": {
+    "tester": "🧑 First-person tester (saya menguji...)",
+    "analyst": "📊 Third-party analyst (berdasarkan data...)",
+    "journalist": "📰 Jurnalistik/informatif (menurut riset...)"
+  },
+  "styles": {
+    "review": "📊 Review / Listicle",
+    "announcement": "🆕 Fitur Baru / Pengumuman",
+    "solution": "💡 Masalah / Solusi",
+    "comparison": "🔀 Perbandingan / Peringkat",
+    "other": "✏️ Free / Custom"
   },
   "messages": {
     "required": "Fungsi dan Kata Kunci harus terisi!",
