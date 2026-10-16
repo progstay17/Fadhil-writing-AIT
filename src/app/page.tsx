@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -123,30 +123,110 @@ const HistorySection = memo(({
 });
 HistorySection.displayName = "HistorySection";
 
+const ProgressBar = memo(({ loading }: { loading: boolean }) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => setProgress(0), 0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) return prev;
+        const inc = Math.random() * 10;
+        return Math.min(prev + inc, 98);
+      });
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  return (
+    <AnimatePresence>
+      {loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-surface-2)] z-50 overflow-hidden"
+        >
+          <motion.div
+            className="h-full bg-[#cc2200]"
+            style={{ width: `${progress}%` }}
+            transition={{ duration: 0.8, ease: easeOut }}
+          />
+          <motion.div
+            className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            animate={{ x: ["-80px", "100vw"] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+});
+ProgressBar.displayName = "ProgressBar";
+
+const LoadingStatus = memo(({ loading, t }: { loading: boolean; t: TFunction }) => {
+  const [statusText, setStatusText] = useState("");
+
+  useEffect(() => {
+    if (!loading) return;
+
+    const texts = [
+      t("messages.loading_writing"),
+      t("messages.loading_seo"),
+      t("messages.loading_meta"),
+      t("messages.loading_brand"),
+      t("messages.loading_finishing")
+    ];
+    let textIdx = 0;
+    setTimeout(() => setStatusText(texts[0]), 0);
+
+    const interval = setInterval(() => {
+      textIdx = (textIdx + 1) % texts.length;
+      setStatusText(texts[textIdx]);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [loading, t]);
+
+  if (!loading) return null;
+  return (
+    <span className="flex items-center">
+      <RotateCcw size={16} className="animate-spin mr-2" />
+      {statusText}
+    </span>
+  );
+});
+LoadingStatus.displayName = "LoadingStatus";
+
 const SEOStats = memo(({
  activeTab,
- articleOutput,
+ hasOutput,
  wordCount,
  keywordDensity,
  metaLength,
  minWords,
  maxWords,
  kataKunci,
- metaOutput,
+ hasMeta,
  t
 }: {
  activeTab: string;
- articleOutput: string;
+ hasOutput: boolean;
  wordCount: number;
  keywordDensity: number;
  metaLength: number;
  minWords: number;
  maxWords: number;
  kataKunci: string;
- metaOutput: string;
+ hasMeta: boolean;
  t: TFunction;
 }) => {
- if (activeTab !== "create" || !articleOutput) return null;
+ if (activeTab !== "create" || !hasOutput) return null;
 
  return (
  <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -183,7 +263,7 @@ const SEOStats = memo(({
  })()}
 
  {/* Meta Length Badge */}
- {metaOutput && (() => {
+ {hasMeta && (() => {
  let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (metaLength < 100 || metaLength > 180) {
  color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
@@ -243,41 +323,41 @@ export default function Home() {
 
  // UI States
  const [loading, setLoading] = useState(false);
- const [progress, setProgress] = useState(0);
- const [statusText, setStatusText] = useState("");
  const [message, setMessage] = useState("");
  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
- // Memoized SEO Calculations
+ // Memoized SEO Calculations using Deferred Values
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredKataKunci = useDeferredValue(kataKunci);
+
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ return deferredArticleOutput.match(/\S+/g)?.length || 0;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !deferredKataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
+ const kw = deferredKataKunci.trim();
+ if (!kw) return 0;
+
+ try {
+   // Use case-insensitive regex for faster lookup and to avoid double toLowerCase()
+   const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+   const matches = deferredArticleOutput.match(regex);
+   return ((matches?.length || 0) / words) * 100;
+ } catch {
+   return 0;
  }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [deferredKataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
  if (!metaOutput) return 0;
  return metaOutput.length;
  }, [metaOutput]);
-
- const loadingInterval = useRef<NodeJS.Timeout | null>(null);
- const statusInterval = useRef<NodeJS.Timeout | null>(null);
 
  useEffect(() => {
  const stored = localStorage.getItem('theme');
@@ -320,30 +400,11 @@ export default function Home() {
  };
 
  const startLoadingAnimation = useCallback(() => {
- setProgress(0);
- const texts = [t("messages.loading_writing"), t("messages.loading_seo"), t("messages.loading_meta"), t("messages.loading_brand"), t("messages.loading_finishing")];
- let textIdx = 0;
- setStatusText(texts[0]);
-
- loadingInterval.current = setInterval(() => {
- setProgress(prev => {
- if (prev >= 95) return prev;
- const inc = Math.random() * 10;
- return Math.min(prev + inc, 98);
- });
- }, 1500);
-
- statusInterval.current = setInterval(() => {
- textIdx = (textIdx + 1) % texts.length;
- setStatusText(texts[textIdx]);
- }, 3000);
- }, [t]);
+   // Loading logic is now encapsulated in ProgressBar and LoadingStatus components
+ }, []);
 
  const stopLoadingAnimation = useCallback(() => {
- if (loadingInterval.current) clearInterval(loadingInterval.current);
- if (statusInterval.current) clearInterval(statusInterval.current);
- setProgress(100);
- setTimeout(() => { setProgress(0); setLoading(false); }, 500);
+   setLoading(false);
  }, []);
 
  const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
@@ -687,27 +748,7 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
 
 return (
     <main className="min-h-screen bg-[var(--color-bg)] pb-20 transition-colors duration-300">
-      <AnimatePresence>
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed top-0 left-0 w-full h-[2px] bg-[var(--color-surface-2)] z-50 overflow-hidden"
-          >
-            <motion.div
-              className="h-full bg-[#cc2200]"
-              style={{ width: `${progress}%` }}
-              transition={{ duration: 0.8, ease: easeOut }}
-            />
-            <motion.div
-              className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              animate={{ x: ["-80px", "100vw"] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ProgressBar loading={loading} />
 
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -1025,7 +1066,7 @@ return (
                     onClick={handleGenerate}
                     className={cn("flex-[2] text-white font-semibold py-3 rounded-sm flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none", activeTab === "fix" ? "bg-orange-500 hover:bg-orange-600" : "bg-[#cc2200] hover:bg-[#991a00]")}
                   >
-                    {loading ? <span className="flex items-center"><RotateCcw size={16} className="animate-spin mr-2" /> {statusText}</span> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
+                    {loading ? <LoadingStatus loading={loading} t={t} /> : <><Sparkles size={18} className="mr-2" /> {activeTab === "create" ? t("buttons.generate") : activeTab === "image_prompts" ? t("buttons.generate_image_prompts") : t("buttons.fix_now")}</>}
                   </motion.button>
                 </div>
               </motion.section>
@@ -1057,7 +1098,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} hasOutput={!!articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={deferredKataKunci} hasMeta={!!metaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
