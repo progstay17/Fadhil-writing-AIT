@@ -81,7 +81,13 @@
     "generating": "Generating...",
     "fixing": "Fixing...",
     "refining": "Output doesn't meet requirements, refining...",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "cleared": "Inputs cleared",
+    "loading_writing": "Writing content...",
+    "loading_seo": "Optimizing SEO...",
+    "loading_meta": "Generating meta data...",
+    "loading_brand": "Applying brand brief...",
+    "loading_finishing": "Finishing touches..."
   },
   "footer": "for AIT from Fadhil Ghifarion 法迪",
   "image_prompts": {
