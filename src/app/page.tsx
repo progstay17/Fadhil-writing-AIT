@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -671,9 +672,31 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  handleClearRef.current();
  }
  };
- window.addEventListener("keydown", handleKeyDown);
- return () => window.removeEventListener("keydown", handleKeyDown);
+
+  let lastScrollTime = 0;
+  const handleScroll = () => {
+   const now = Date.now();
+   if (now - lastScrollTime < 100) return;
+   lastScrollTime = now;
+   setShowScrollTop(window.scrollY > 300);
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+  window.addEventListener("scroll", handleScroll);
+
+  // Initial check
+  const timer = setTimeout(() => setShowScrollTop(window.scrollY > 300), 0);
+
+  return () => {
+   window.removeEventListener("keydown", handleKeyDown);
+   window.removeEventListener("scroll", handleScroll);
+   clearTimeout(timer);
+  };
  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
  const copyToClipboard = (text: string, key?: string) => {
  navigator.clipboard.writeText(text);
@@ -1165,7 +1188,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)] text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
@@ -1202,6 +1225,24 @@ return (
           </button>
         ))}
       </nav>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-20 right-6 z-[45] p-3 rounded-full bg-[var(--color-accent)] text-white shadow-lg hover:shadow-[var(--color-accent-glow)] transition-all md:bottom-10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
