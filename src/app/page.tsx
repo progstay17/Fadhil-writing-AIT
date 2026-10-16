@@ -77,7 +77,7 @@ const HistorySection = memo(({
 }) => {
  if (history.length === 0) return null;
  return (
- <motion.div whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
+ <motion.div whileHover={{ borderColor: "var(--color-accent)" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
  <button
  onClick={() => setHistoryOpen(!historyOpen)}
  aria-expanded={historyOpen}
@@ -731,10 +731,14 @@ return (
           </div>
 
           <div className="flex items-center space-x-4">
-            <nav className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
+            <nav role="tablist" className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
               {["create", "fix", "image_prompts"].map((tab) => (
                 <button
                   key={tab}
+                  id={`${tab}-tab-desktop`}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls={`${tab}-panel`}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
                     "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
@@ -793,9 +797,16 @@ return (
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-6">
           <AnimatePresence mode="wait">
-            <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
+            <motion.div
+              key={activeTab}
+              id={`${activeTab}-panel`}
+              role="tabpanel"
+              aria-labelledby={`${activeTab}-tab-desktop ${activeTab}-tab-mobile`}
+              {...FADE_UP}
+              className="space-y-6"
+            >
               <motion.section
-                whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+                whileHover={{ borderColor: "var(--color-accent)" }}
                 transition={{ duration: 0.2 }}
                 className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-4 transition-colors duration-300"
               >
@@ -923,7 +934,7 @@ return (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <div className="flex items-center justify-between">
-                                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.competitor_label")}</label>
+                                    <label htmlFor="kompetitor" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider cursor-pointer">{t("fields.competitor_label")}</label>
                                     <motion.button
                                       whileHover={{ scale: 1.05 }}
                                       whileTap={{ scale: 0.95 }}
@@ -938,16 +949,16 @@ return (
                                       <span>{copiedKey === "research_prompt" ? t("buttons.copied") : t("buttons.copy_research_prompt")}</span>
                                     </motion.button>
                                   </div>
-                                  <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.competitor_placeholder")} value={kompetitor} onChange={(e) => setKompetitor(e.target.value)} />
+                                  <textarea id="kompetitor" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none" placeholder={t("fields.competitor_placeholder")} value={kompetitor} onChange={(e) => setKompetitor(e.target.value)} />
                                 </div>
                                 <div className="space-y-2">
-                                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.negative_label")}</label>
-                                  <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.negative_placeholder")} value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} />
+                                  <label htmlFor="negativePrompt" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider cursor-pointer">{t("fields.negative_label")}</label>
+                                  <textarea id="negativePrompt" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-20 bg-[var(--color-surface-2)] text-[var(--color-text)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none" placeholder={t("fields.negative_placeholder")} value={negativePrompt} onChange={(e) => setNegativePrompt(e.target.value)} />
                                 </div>
                               </div>
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center mb-1">
-                                  <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.sample")}</label>
+                                  <label htmlFor="artikelContoh" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider cursor-pointer">{t("fields.sample")}</label>
                                   <div className="flex flex-wrap gap-2">
                                     <button onClick={useReviewExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_review")}</button>
                                     <button onClick={useFeatureExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_feature")}</button>
@@ -955,7 +966,7 @@ return (
                                     <button onClick={useComparisonExample} className="text-[10px] px-2 py-1 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface-2)] transition-colors">{t("buttons.sample_comparison")}</button>
                                   </div>
                                 </div>
-                                <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-24 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
+                                <textarea id="artikelContoh" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-24 bg-[var(--color-surface-2)] text-[var(--color-text)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none" placeholder={t("fields.sample_placeholder")} value={artikelContoh} onChange={(e) => setArtikelContoh(e.target.value)} />
                               </div>
                             </motion.div>
                           )}
@@ -964,16 +975,16 @@ return (
                     </>
                   ) : activeTab === "image_prompts" ? (
                     <motion.div variants={FADE_UP} className="space-y-4">
-                      <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block">Article Content</label>
-                      <textarea className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-64 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("image_prompts.article_placeholder")} value={imagePromptsArticleInput} onChange={(e) => setImagePromptsArticleInput(e.target.value)} />
+                      <label htmlFor="imagePromptsArticleInput" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block cursor-pointer">Article Content</label>
+                      <textarea id="imagePromptsArticleInput" className="w-full border border-[var(--color-border)] rounded-sm p-3 text-sm h-64 bg-[var(--color-surface-2)] text-[var(--color-text)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none" placeholder={t("image_prompts.article_placeholder")} value={imagePromptsArticleInput} onChange={(e) => setImagePromptsArticleInput(e.target.value)} />
                     </motion.div>
                   ) : (
                     <motion.div variants={FADE_UP} className="space-y-4">
                       <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{t("fields.original_sentence")}</label>
+                        <label htmlFor="sentenceInput" className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider cursor-pointer">{t("fields.original_sentence")}</label>
                         <button onClick={handlePaste} className="text-xs text-[#cc2200] font-bold flex items-center hover:underline"><Clipboard size={12} className="mr-1" /> {t("buttons.paste")}</button>
                       </div>
-                      <textarea className="w-full border border-[var(--color-border)] rounded-sm p-4 text-sm h-48 bg-[var(--color-surface-2)] text-[var(--color-text)]" placeholder={t("fields.sentence_placeholder")} value={sentenceInput} onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }} />
+                      <textarea id="sentenceInput" className="w-full border border-[var(--color-border)] rounded-sm p-4 text-sm h-48 bg-[var(--color-surface-2)] text-[var(--color-text)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none" placeholder={t("fields.sentence_placeholder")} value={sentenceInput} onChange={(e) => { setSentenceInput(e.target.value); setMessage(""); }} />
                       <div className="grid grid-cols-2 gap-3">
                         {["yellow", "red"].map(type => (
                           <button
@@ -1037,7 +1048,7 @@ return (
 
         <div className="lg:col-span-7 space-y-6">
           <motion.section
-            whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+            whileHover={{ borderColor: "var(--color-accent)" }}
             transition={{ duration: 0.2 }}
             className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300"
           >
@@ -1165,7 +1176,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
@@ -1185,10 +1196,14 @@ return (
         )}
       </AnimatePresence>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
+      <nav role="tablist" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
         {["create", "fix", "image_prompts"].map((tab) => (
           <button
             key={tab}
+            id={`${tab}-tab-mobile`}
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls={`${tab}-panel`}
             onClick={() => setActiveTab(tab)}
             className={cn(
               "flex flex-col items-center p-2 rounded-sm transition-colors",
