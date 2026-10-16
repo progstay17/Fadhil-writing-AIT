@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -662,6 +663,14 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  }, [handleGenerate, handleClear]);
 
  useEffect(() => {
+  const handleScroll = () => {
+   setShowScrollTop(window.scrollY > 400);
+  };
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+ }, []);
+
+ useEffect(() => {
  const handleKeyDown = (e: KeyboardEvent) => {
  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
  handleGenerateRef.current();
@@ -719,7 +728,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+            <h1 className="text-xl font-black tracking-tighter text-[var(--color-accent)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -1048,11 +1057,11 @@ return (
               </h2>
               {activeTab === "create" && articleOutput && (
                 <div className="flex space-x-2">
-                  <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors">
+                  <button onClick={() => { setImagePromptsArticleInput(articleOutput); setActiveTab("image_prompts"); setImagePromptsOutput([]); }} className="px-3 py-1.5 bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200] rounded-sm text-xs font-bold flex items-center hover:bg-[#fff1f0] dark:hover:bg-[#1a0000] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none">
                     <ImageIcon size={14} className="mr-1" /> {t("buttons.generate_image_prompts")}
                   </button>
-                  <button onClick={() => downloadFile(articleOutput, "txt")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)]"><Download size={16} /></button>
-                  <button onClick={() => downloadFile(articleOutput, "md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs">MD</button>
+                  <button onClick={() => downloadFile(articleOutput, "txt")} aria-label={t("buttons.download")} title={t("buttons.download")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"><Download size={16} /></button>
+                  <button onClick={() => downloadFile(articleOutput, "md")} aria-label={t("buttons.download_md")} title={t("buttons.download_md")} className="p-1.5 hover:bg-[var(--color-surface-2)] rounded text-[var(--color-text-dim)] font-bold text-xs focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none">MD</button>
                 </div>
               )}
             </div>
@@ -1165,7 +1174,7 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center text-[var(--color-accent)] pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
 
@@ -1185,20 +1194,36 @@ return (
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-20 md:bottom-8 right-6 z-[55] p-3 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl rounded-full text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none"
+          >
+            <ChevronUp size={20} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
         {["create", "fix", "image_prompts"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "flex flex-col items-center p-2 rounded-sm transition-colors",
+              "flex flex-col items-center p-2 rounded-sm transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
               activeTab === tab ? "bg-[#fff1f0] dark:bg-[#1a0000] text-[#cc2200]" : "text-[var(--color-text-dim)]"
             )}
           >
             {tab === "create" && <PlusCircle size={20} />}
             {tab === "fix" && <Edit3 size={20} />}
             {tab === "image_prompts" && <ImageIcon size={20} />}
-            <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{tab}</span>
+            <span className="text-[10px] font-bold mt-1 uppercase tracking-tighter">{t(`tabs.${tab}`)}</span>
           </button>
         ))}
       </nav>
