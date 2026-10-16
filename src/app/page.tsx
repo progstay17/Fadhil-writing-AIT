@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -125,28 +125,28 @@ HistorySection.displayName = "HistorySection";
 
 const SEOStats = memo(({
  activeTab,
- articleOutput,
+ hasArticleOutput,
  wordCount,
  keywordDensity,
  metaLength,
  minWords,
  maxWords,
  kataKunci,
- metaOutput,
+ hasMetaOutput,
  t
 }: {
  activeTab: string;
- articleOutput: string;
+ hasArticleOutput: boolean;
  wordCount: number;
  keywordDensity: number;
  metaLength: number;
  minWords: number;
  maxWords: number;
  kataKunci: string;
- metaOutput: string;
+ hasMetaOutput: boolean;
  t: TFunction;
 }) => {
- if (activeTab !== "create" || !articleOutput) return null;
+ if (activeTab !== "create" || !hasArticleOutput) return null;
 
  return (
  <div className="flex flex-wrap gap-2 pb-2 border-b border-[var(--color-border)]">
@@ -183,7 +183,7 @@ const SEOStats = memo(({
  })()}
 
  {/* Meta Length Badge */}
- {metaOutput && (() => {
+ {hasMetaOutput && (() => {
  let color = "text-[#059669] dark:text-[#44cc44] bg-[#ecfdf5] dark:bg-[#001a00]";
  if (metaLength < 100 || metaLength > 180) {
  color = "text-[#dc2626] dark:text-[#cc4444] bg-[#fef2f2] dark:bg-[#1a0000]";
@@ -241,6 +241,10 @@ export default function Home() {
  // History State
  const [history, setHistory] = useState<GenerationResult[]>([]);
 
+ // ⚡ Bolt Optimization: Use deferred values for heavy SEO calculations to avoid blocking the main UI thread during streaming
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
  // UI States
  const [loading, setLoading] = useState(false);
  const [progress, setProgress] = useState(0);
@@ -253,28 +257,27 @@ export default function Home() {
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+ if (!deferredArticleOutput) return 0;
+ return deferredArticleOutput.trim().split(/\s+/).filter(w => w.length > 0).length;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
+ if (!deferredArticleOutput || !kataKunci) return 0;
  const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
+
+ // ⚡ Bolt Optimization: Use global regex for faster keyword density calculation
+ const escapedKw = kataKunci.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ const regex = new RegExp(escapedKw, "gi");
+ const matches = deferredArticleOutput.match(regex);
+ const count = matches ? matches.length : 0;
+
  return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+ }, [kataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+ if (!deferredMetaOutput) return 0;
+ return deferredMetaOutput.length;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
@@ -1057,7 +1060,7 @@ return (
               )}
             </div>
 
-            <SEOStats activeTab={activeTab} articleOutput={articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} metaOutput={metaOutput} t={t} />
+            <SEOStats activeTab={activeTab} hasArticleOutput={!!articleOutput} wordCount={wordCount} keywordDensity={keywordDensity} metaLength={metaLength} minWords={minWords} maxWords={maxWords} kataKunci={kataKunci} hasMetaOutput={!!metaOutput} t={t} />
 
             <div className="space-y-6 flex-1">
               <AnimatePresence mode="wait">
