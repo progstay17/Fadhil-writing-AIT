@@ -57,7 +57,10 @@
     "sample_comparison": "🔀 Comparison",
     "generate_image_prompts": "Generate Image Prompts",
     "copy_research_prompt": "Research Prompt",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "download": "Download Article (.txt)",
+    "download_md": "Download Article (.md)",
+    "scroll_to_top": "Scroll to Top"
   },
   "output": {
     "article": "Full Article",
