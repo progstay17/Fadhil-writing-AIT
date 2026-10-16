@@ -57,7 +57,14 @@
     "sample_comparison": "🔀 Comparison",
     "generate_image_prompts": "Generate Image Prompts",
     "copy_research_prompt": "Research Prompt",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "restore": "Restore",
+    "scroll_to_top": "Scroll to Top",
+    "download": "Download TXT",
+    "download_md": "Download Markdown",
+    "toggle_theme": "Toggle Theme",
+    "logout": "Logout",
+    "advanced_options": "Advanced Options"
   },
   "output": {
     "article": "Full Article",
