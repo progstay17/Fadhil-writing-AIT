@@ -9,6 +9,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
+    // Security: Validate username to prevent environment variable injection
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return NextResponse.json({ error: "Invalid username format" }, { status: 400 });
+    }
+
     const envPassword = process.env[`USER_${username.toUpperCase()}_PASSWORD`];
 
     if (!envPassword || password !== envPassword) {
@@ -16,8 +21,8 @@ export async function POST(req: NextRequest) {
     }
 
     const secretStr = process.env.JWT_SECRET;
-    if (!secretStr) {
-      console.error("JWT_SECRET is not defined");
+    if (!secretStr || secretStr.length < 32) {
+      console.error("JWT_SECRET is not defined or too short (min 32 characters)");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
