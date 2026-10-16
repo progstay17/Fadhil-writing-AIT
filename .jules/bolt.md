@@ -5,3 +5,7 @@
 ## 2026-05-23 - [Optimized Streaming and Component Memoization]
 **Learning:** High-frequency state updates during LLM streaming (e.g., setArticleOutput on every chunk) can saturate the main thread with React render cycles, making the UI feel sluggish or frozen. Throttling these updates to a reasonable frequency (~10Hz) dramatically improves responsiveness without degrading the user experience. Additionally, in monolithic components, memoizing heavy UI sections (like History or SEO stats) is critical to isolate them from unrelated state changes (like progress bars or input fields).
 **Action:** Always throttle streaming state updates in the reader loop. Use `React.memo` for complex UI blocks in large components and ensure all passed callbacks have stable identities via `useCallback`.
+
+## 2026-07-07 - [Optimized SEO Derived State]
+**Learning:** Decoupling expensive derived calculations (SEO word counts, keyword density) from high-frequency text streams via 'useDeferredValue' significantly improves UI responsiveness during LLM streaming. Additionally, using regex '.match(/\S+/g)' for word counting is more performant and handles edge cases (like empty strings) better than 'split()'.
+**Action:** Always defer heavy calculations that depend on fast-changing, large text states. Use optimized regex for string-based metrics.
