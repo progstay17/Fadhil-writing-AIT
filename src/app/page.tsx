@@ -77,7 +77,7 @@ const HistorySection = memo(({
 }) => {
  if (history.length === 0) return null;
  return (
- <motion.div whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
+ <motion.div whileHover={{ borderColor: "var(--color-accent)" }} transition={{ duration: 0.2 }} className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] overflow-hidden transition-colors duration-300">
  <button
  onClick={() => setHistoryOpen(!historyOpen)}
  aria-expanded={historyOpen}
@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+ const [showScrollToTop, setShowScrollToTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -278,6 +279,21 @@ export default function Home() {
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
+
+ useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setShowScrollToTop(window.scrollY > 300);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
  useEffect(() => {
  const stored = localStorage.getItem('theme');
@@ -719,7 +735,7 @@ return (
           <div className="flex items-center">
             <div className="seal w-10 h-10 mr-4 text-[10px] leading-tight select-none">潮际<br/>好麦</div>
             <div className="flex flex-col">
-              <h1 className="text-[var(--color-accent)]xl font-black tracking-tighter text-[var(--color-text)] leading-none">
+              <h1 className="text-xl font-black tracking-tighter text-[var(--color-text)] leading-none">
                 <span className="font-['Noto_Serif_SC'] uppercase">{t("title")}</span>
               </h1>
               <span className="font-['JetBrains_Mono'] text-[var(--color-accent)] text-[10px] font-bold tracking-widest mt-1">AIT_ENGINE v2.0</span>
@@ -731,10 +747,14 @@ return (
           </div>
 
           <div className="flex items-center space-x-4">
-            <nav className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
+            <nav role="tablist" className="relative hidden md:flex space-x-8 px-4 border-b border-[var(--color-border)]">
               {["create", "fix", "image_prompts"].map((tab) => (
                 <button
                   key={tab}
+                  id={`${tab}-tab-desktop`}
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls="main-content-panel"
                   onClick={() => setActiveTab(tab)}
                   className={cn(
                     "relative px-0 py-4 text-xs font-bold transition-colors flex items-center uppercase tracking-widest font-['JetBrains_Mono'] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] outline-none",
@@ -791,11 +811,11 @@ return (
       </motion.header>
 
       <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-5 space-y-6">
+        <div id="main-content-panel" role="tabpanel" aria-labelledby={`${activeTab}-tab-desktop ${activeTab}-tab-mobile`} className="lg:col-span-5 space-y-6">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} {...FADE_UP} className="space-y-6">
               <motion.section
-                whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+                whileHover={{ borderColor: "var(--color-accent)" }}
                 transition={{ duration: 0.2 }}
                 className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-4 transition-colors duration-300"
               >
@@ -1037,7 +1057,7 @@ return (
 
         <div className="lg:col-span-7 space-y-6">
           <motion.section
-            whileHover={{ borderColor: "var(--color-border-[var(--color-accent)])" }}
+            whileHover={{ borderColor: "var(--color-accent)" }}
             transition={{ duration: 0.2 }}
             className="bg-[var(--color-surface)] rounded-sm border border-[var(--color-border)] p-6 space-y-6 min-h-[600px] flex flex-col transition-colors duration-300"
           >
@@ -1165,9 +1185,27 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
+
+      <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="fixed bottom-24 right-6 z-40 p-3 bg-[var(--color-surface)] border border-[var(--color-border)] shadow-lg rounded-full text-[var(--color-accent)] hover:bg-[var(--color-surface-2)] transition-colors md:bottom-8"
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+          >
+            <ChevronUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {toast && (
@@ -1185,10 +1223,14 @@ return (
         )}
       </AnimatePresence>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
+      <nav role="tablist" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-surface)] border-t border-[var(--color-border)] flex justify-around items-center p-2">
         {["create", "fix", "image_prompts"].map((tab) => (
           <button
             key={tab}
+            id={`${tab}-tab-mobile`}
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls="main-content-panel"
             onClick={() => setActiveTab(tab)}
             className={cn(
               "flex flex-col items-center p-2 rounded-sm transition-colors",
