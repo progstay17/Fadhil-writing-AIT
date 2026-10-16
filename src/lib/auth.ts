@@ -1,10 +1,11 @@
 import { jwtVerify } from "jose";
+import { isValidJwtSecret } from "./validation";
 
 export async function verifyToken(token: string): Promise<string | null> {
   try {
     const secretStr = process.env.JWT_SECRET;
-    if (!secretStr || secretStr.length < 32) {
-      console.error("JWT_SECRET is not defined or too short (min 32 characters)");
+    if (!isValidJwtSecret(secretStr)) {
+      console.error("JWT_SECRET is not defined or insecure");
       return null;
     }
     const secret = new TextEncoder().encode(secretStr);

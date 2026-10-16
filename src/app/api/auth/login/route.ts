@@ -1,5 +1,6 @@
 import { SignJWT } from "jose";
 import { NextRequest, NextResponse } from "next/server";
+import { isValidUsername, isValidJwtSecret } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +10,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
+    // Security check: validate username format to prevent injection via environment variable lookup
+    if (!isValidUsername(username)) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
     const envPassword = process.env[`USER_${username.toUpperCase()}_PASSWORD`];
 
     if (!envPassword || password !== envPassword) {
@@ -16,8 +22,8 @@ export async function POST(req: NextRequest) {
     }
 
     const secretStr = process.env.JWT_SECRET;
-    if (!secretStr) {
-      console.error("JWT_SECRET is not defined");
+    if (!isValidJwtSecret(secretStr)) {
+      console.error("JWT_SECRET is not defined or insecure");
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
