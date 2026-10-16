@@ -250,6 +250,7 @@ export default function Home() {
  const [historyOpen, setHistoryOpen] = useState(false);
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
  // Memoized SEO Calculations
  const wordCount = useMemo(() => {
@@ -671,8 +672,27 @@ Q:服装多 SKU 怎么快速出图? A:潮际好麦支持多色多码批量生成
  handleClearRef.current();
  }
  };
+
+ let scrollTimeout: NodeJS.Timeout;
+ const handleScroll = () => {
+  if (!scrollTimeout) {
+   scrollTimeout = setTimeout(() => {
+    setShowScrollTop(window.scrollY > 300);
+    scrollTimeout = null as unknown as NodeJS.Timeout;
+   }, 100);
+  }
+ };
+
+ // Initial check
+ handleScroll();
+
  window.addEventListener("keydown", handleKeyDown);
- return () => window.removeEventListener("keydown", handleKeyDown);
+ window.addEventListener("scroll", handleScroll);
+ return () => {
+  window.removeEventListener("keydown", handleKeyDown);
+  window.removeEventListener("scroll", handleScroll);
+  if (scrollTimeout) clearTimeout(scrollTimeout);
+ };
  }, []);
 
  const copyToClipboard = (text: string, key?: string) => {
@@ -1165,9 +1185,27 @@ return (
         </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)]enter pb-8">
+      <footer className="max-w-5xl mx-auto px-4 mt-12 text-[var(--color-accent)] text-center pb-8">
         <p className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-widest font-['JetBrains_Mono']">{t("footer")}</p>
       </footer>
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label={t("buttons.scroll_to_top")}
+            title={t("buttons.scroll_to_top")}
+            className="fixed bottom-24 md:bottom-8 right-6 z-[45] p-3 rounded-full bg-[var(--color-accent)] text-white shadow-lg hover:shadow-xl transition-shadow focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 outline-none"
+          >
+            <ChevronUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {toast && (
