@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo, useDeferredValue } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { type TFunction } from "i18next";
@@ -229,6 +229,10 @@ export default function Home() {
  const [metaOutput, setMetaOutput] = useState("");
  const [slugOutput, setSlugOutput] = useState("");
 
+ // Defer SEO-heavy state updates to prioritize smooth text streaming
+ const deferredArticleOutput = useDeferredValue(articleOutput);
+ const deferredMetaOutput = useDeferredValue(metaOutput);
+
  // Image Prompts States
  const [imagePromptsArticleInput, setImagePromptsArticleInput] = useState("");
  const [imagePromptsOutput, setImagePromptsOutput] = useState<{ reference: string; prompt: string }[]>([]);
@@ -251,30 +255,31 @@ export default function Home() {
  const [advancedOpen, setAdvancedOpen] = useState(false);
  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
- // Memoized SEO Calculations
+ // Memoized SEO Calculations - using deferred values to avoid blocking the main thread during streaming
  const wordCount = useMemo(() => {
- if (!articleOutput) return 0;
- return articleOutput.trim().split(/\s+/).length;
- }, [articleOutput]);
+   if (!deferredArticleOutput) return 0;
+   // split(/\s+/) can be slow on very large articles; deferred execution helps
+   return deferredArticleOutput.trim().split(/\s+/).filter(w => w.length > 0).length;
+ }, [deferredArticleOutput]);
 
  const keywordDensity = useMemo(() => {
- if (!articleOutput || !kataKunci) return 0;
- const words = wordCount || 1;
- const kw = kataKunci.toLowerCase();
- const contentText = articleOutput.toLowerCase();
- let count = 0;
- let pos = contentText.indexOf(kw);
- while (pos !== -1) {
- count++;
- pos = contentText.indexOf(kw, pos + 1);
- }
- return (count / words) * 100;
- }, [kataKunci, wordCount, articleOutput]);
+   if (!deferredArticleOutput || !kataKunci) return 0;
+   const words = wordCount || 1;
+   const kw = kataKunci.toLowerCase();
+   const contentText = deferredArticleOutput.toLowerCase();
+   let count = 0;
+   let pos = contentText.indexOf(kw);
+   while (pos !== -1) {
+     count++;
+     pos = contentText.indexOf(kw, pos + 1);
+   }
+   return (count / words) * 100;
+ }, [kataKunci, wordCount, deferredArticleOutput]);
 
  const metaLength = useMemo(() => {
- if (!metaOutput) return 0;
- return metaOutput.length;
- }, [metaOutput]);
+   if (!deferredMetaOutput) return 0;
+   return deferredMetaOutput.length;
+ }, [deferredMetaOutput]);
 
  const loadingInterval = useRef<NodeJS.Timeout | null>(null);
  const statusInterval = useRef<NodeJS.Timeout | null>(null);
