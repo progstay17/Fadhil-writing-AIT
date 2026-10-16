@@ -6,7 +6,19 @@
 
 # AIT Writing for 潮际好麦
 
-A multilingual web application for generating product articles with an LLM, with Chinese, English, and Bahasa Indonesia UI. It includes article-generation modes, SEO-oriented validation, preview indicators, and copy tools.
+Multilingual AI-assisted product-article writing in Chinese, English, and Bahasa Indonesia, with SEO-oriented validation and copy-ready metadata.
+
+> **Ghifarion** · Engineering Intelligence. Building Legacy.
+
+## On this page
+
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Local setup](#local-setup)
+- [Quality checks](#quality-checks)
+- [Deployment](#deployment)
+
+---
 
 ## Features
 
