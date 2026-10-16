@@ -400,6 +400,11 @@ export async function POST(req: NextRequest) {
     const username = await verifyToken(token);
     if (!username) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
+    // Security: Validate username from token to prevent unexpected property access on process.env
+    if (typeof username !== "string" || !/^[a-zA-Z0-9_]+$/.test(username)) {
+      return NextResponse.json({ error: "Invalid username in token" }, { status: 403 });
+    }
+
     const key1 = process.env[`USER_${username.toUpperCase()}_KEY1`];
     const key2 = process.env[`USER_${username.toUpperCase()}_KEY2`];
 
